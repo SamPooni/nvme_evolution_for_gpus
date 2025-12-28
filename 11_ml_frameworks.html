@@ -253,7 +253,7 @@
 
         <!-- DeepSpeed Deep Dive -->
         <section class="section">
-            <h2 class="section-title">š€ DeepSpeed Storage Deep Dive</h2>
+            <h2 class="section-title">DeepSpeed Storage Deep Dive</h2>
             
             <div class="info-box critical">
                 <strong>🚨 Why DeepSpeed Matters:</strong> If you're training models over 10B parameters, 
@@ -261,33 +261,46 @@
                 stages fundamentally change how storage is accessed. Understanding this is essential.
             </div>
 
-            <h3 class="subsection-title">ZeRO Stages and Storage Impact</h3>
+                        <h3 class="subsection-title">ZeRO Stages and Storage Impact</h3>
             
-            <div class="architecture-diagram">
-<span style="color: var(--accent-cyan);">DeepSpeed ZeRO Memory Hierarchy</span>
-
-+ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
--                          Model Training State                           -
-+ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - �¤
--                                                                         -
--   Parameters (P)     Gradients (G)      Optimizer State (OS)           -
--   + -  -  -  -  -  -  -  -  -  -  -  -  - |   + -  -  -  -  -  -  -  -  -  -  -  -  - |    + -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |         -
--   - ~4B per 1B  -   - ~4B per 1B  -    - ~12B per 1B params  -         -
--   - params      -   - params      -    - (Adam: m, v, master)-         -
--   - -  -  -  -  -  -  -  -  -  -  -  -  - |   - -  -  -  -  -  -  -  -  -  -  -  -  - |    - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |         -
--                                                                         -
--   70B Model Example:                                                    -
--   P = 280 GB        G = 280 GB         OS = 840 GB                     -
--                                         Total: ~1.4 TB per GPU!        -
-- -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
-
-<span style="color: var(--accent-yellow);">ZeRO Stages:</span>
-
-ZeRO-1: Partition OS across GPUs        &rarr; OS per GPU: 840/N GB
-ZeRO-2: Partition OS + G across GPUs    &rarr; (OS+G) per GPU: 1120/N GB  
-ZeRO-3: Partition OS + G + P across GPUs &rarr; Total per GPU: 1400/N GB
-
-<span style="color: var(--accent-red);">ZeRO-Offload/Infinity:</span> When GPU memory exhausted &rarr; Offload to NVMe
+            <div class="arch-diagram">
+                <div class="arch-title">DeepSpeed ZeRO Memory Hierarchy</div>
+                <svg viewBox="0 0 800 300" style="width: 100%; max-width: 800px; margin: 20px auto; display: block; background: #0a0a12; border-radius: 8px;">
+                    <!-- Title -->
+                    <text x="400" y="25" fill="#00d4ff" font-size="13" font-weight="bold" text-anchor="middle" font-family="sans-serif">Model Training State</text>
+                    
+                    <!-- Main container -->
+                    <rect x="20" y="35" width="760" height="150" rx="8" fill="#1a1a28" stroke="#3b82f6" stroke-width="2"/>
+                    
+                    <!-- Parameters box -->
+                    <rect x="40" y="55" width="200" height="80" rx="6" fill="#0a0a12" stroke="#00ff88" stroke-width="2"/>
+                    <text x="140" y="80" fill="#00ff88" font-size="11" font-weight="bold" text-anchor="middle" font-family="sans-serif">Parameters (P)</text>
+                    <text x="140" y="100" fill="#888" font-size="9" text-anchor="middle" font-family="sans-serif">~4B per 1B params</text>
+                    <text x="140" y="120" fill="#fbbf24" font-size="10" text-anchor="middle" font-family="sans-serif">70B Model: 280 GB</text>
+                    
+                    <!-- Gradients box -->
+                    <rect x="280" y="55" width="200" height="80" rx="6" fill="#0a0a12" stroke="#a855f7" stroke-width="2"/>
+                    <text x="380" y="80" fill="#a855f7" font-size="11" font-weight="bold" text-anchor="middle" font-family="sans-serif">Gradients (G)</text>
+                    <text x="380" y="100" fill="#888" font-size="9" text-anchor="middle" font-family="sans-serif">~4B per 1B params</text>
+                    <text x="380" y="120" fill="#fbbf24" font-size="10" text-anchor="middle" font-family="sans-serif">70B Model: 280 GB</text>
+                    
+                    <!-- Optimizer State box -->
+                    <rect x="520" y="55" width="240" height="80" rx="6" fill="#0a0a12" stroke="#ef4444" stroke-width="2"/>
+                    <text x="640" y="80" fill="#ef4444" font-size="11" font-weight="bold" text-anchor="middle" font-family="sans-serif">Optimizer State (OS)</text>
+                    <text x="640" y="100" fill="#888" font-size="9" text-anchor="middle" font-family="sans-serif">~12B per 1B (Adam: m,v,master)</text>
+                    <text x="640" y="120" fill="#fbbf24" font-size="10" text-anchor="middle" font-family="sans-serif">70B Model: 840 GB</text>
+                    
+                    <!-- Total -->
+                    <text x="400" y="170" fill="#ff6b6b" font-size="13" font-weight="bold" text-anchor="middle" font-family="sans-serif">Total: ~1.4 TB per GPU!</text>
+                    
+                    <!-- ZeRO Stages -->
+                    <text x="50" y="215" fill="#fbbf24" font-size="11" font-weight="bold" font-family="sans-serif">ZeRO Stages:</text>
+                    <text x="50" y="235" fill="#00ff88" font-size="9" font-family="sans-serif">ZeRO-1: Partition OS across GPUs &#8594; OS per GPU: 840/N GB</text>
+                    <text x="50" y="252" fill="#00ff88" font-size="9" font-family="sans-serif">ZeRO-2: Partition OS + G &#8594; (OS+G) per GPU: 1120/N GB</text>
+                    <text x="50" y="269" fill="#00ff88" font-size="9" font-family="sans-serif">ZeRO-3: Partition OS + G + P &#8594; Total per GPU: 1400/N GB</text>
+                    
+                    <text x="450" y="269" fill="#ef4444" font-size="10" font-weight="bold" font-family="sans-serif">ZeRO-Offload/Infinity: GPU exhausted &#8594; Offload to NVMe</text>
+                </svg>
             </div>
 
             <pre><code><span style="color: #6a9955;"># Complete DeepSpeed configuration for 70B model training</span>
@@ -451,7 +464,7 @@ mkdir -p /mnt/nvme_raid0/deepspeed_offload
 
         <!-- Megatron-LM Section -->
         <section class="section">
-            <h2 class="section-title">"[BOLT]" Megatron-LM Storage Architecture</h2>
+            <h2 class="section-title">Megatron-LM Storage Architecture</h2>
             
             <div class="info-box insight">
                 <strong>’¡ Megatron Insight:</strong> Megatron-LM (NVIDIA's LLM framework) takes a different approach 
@@ -460,39 +473,72 @@ mkdir -p /mnt/nvme_raid0/deepspeed_offload
                 careful data preprocessing.
             </div>
 
-            <h3 class="subsection-title">Megatron Data Pipeline</h3>
+                        <h3 class="subsection-title">Megatron Data Pipeline</h3>
             
-            <div class="architecture-diagram">
-<span style="color: var(--accent-cyan);">Megatron-LM Data Flow</span>
-
-+ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
--                       Data Preprocessing (Offline)                      -
-+ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - �¤
--                                                                         -
--  Raw Text         Tokenization        Binary Format       Index File    -
--  + -  -  -  -  -  -  -  -  -  - |    + -  -  -  -  -  -  -  -  -  - |       + -  -  -  -  -  -  -  -  -  -  -  -  -  - |    + -  -  -  -  -  -  -  -  -  - |   -
--  - corpus.  - -  -  - dash;¶- GPT2     - -  -  -  -  -  - dash;¶- train.bin    - -  -  - dash;¶- train.   -   -
--  - json     -    - BPE      -       - (mmap)       -    - idx      -   -
--  - -  -  -  -  -  -  -  -  -  - |    - -  -  -  -  -  -  -  -  -  - |       - -  -  -  -  -  -  -  -  -  -  -  -  -  - |    - -  -  -  -  -  -  -  -  -  - |   -
--                                                                         -
--  Key: .bin file is memory-mapped during training                       -
--       .idx file contains document boundaries                            -
-- -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
-                                -
-                                dash;¼
-+ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
--                        Training Data Loading                            -
-+ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - �¤
--                                                                         -
--   mmap()          Page Cache          GPU Memory                        -
--  + -  -  -  -  -  -  -  -  - |     + -  -  -  -  -  -  -  -  -  -  -  -  - |     + -  -  -  -  -  -  -  -  -  -  -  -  - |                   -
--  - train.  - -  -  -  - dash;¶- Linux Page  - -  -  -  - dash;¶- Training    -                   -
--  - bin     -     - Cache       -     - Batch       -                   -
--  - (NVMe)  -     - (DRAM)      -     - (HBM)       -                   -
--  - -  -  -  -  -  -  -  -  - |     - -  -  -  -  -  -  -  -  -  -  -  -  - |     - -  -  -  -  -  -  -  -  -  -  -  -  - |                   -
--                                                                         -
--  Sequential access = good prefetch = high throughput                   -
-- -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
+            <div class="arch-diagram">
+                <div class="arch-title">Megatron-LM Data Flow</div>
+                <svg viewBox="0 0 800 340" style="width: 100%; max-width: 800px; margin: 20px auto; display: block; background: #0a0a12; border-radius: 8px;">
+                    <!-- Data Preprocessing Section -->
+                    <text x="400" y="22" fill="#00d4ff" font-size="11" font-weight="bold" text-anchor="middle" font-family="sans-serif">Data Preprocessing (Offline)</text>
+                    <rect x="20" y="30" width="760" height="100" rx="6" fill="#1a1a28" stroke="#3b82f6" stroke-width="2"/>
+                    
+                    <!-- Raw Text -->
+                    <rect x="40" y="50" width="130" height="50" rx="4" fill="#0a0a12" stroke="#888" stroke-width="1"/>
+                    <text x="105" y="72" fill="#888" font-size="9" font-weight="bold" text-anchor="middle" font-family="sans-serif">Raw Text</text>
+                    <text x="105" y="88" fill="#666" font-size="8" text-anchor="middle" font-family="monospace">corpus.json</text>
+                    
+                    <text x="190" y="75" fill="#00ff88" font-size="12" font-family="sans-serif">&#8594;</text>
+                    
+                    <!-- Tokenization -->
+                    <rect x="210" y="50" width="130" height="50" rx="4" fill="#0a0a12" stroke="#a855f7" stroke-width="1"/>
+                    <text x="275" y="72" fill="#a855f7" font-size="9" font-weight="bold" text-anchor="middle" font-family="sans-serif">Tokenization</text>
+                    <text x="275" y="88" fill="#666" font-size="8" text-anchor="middle" font-family="monospace">GPT2 BPE</text>
+                    
+                    <text x="360" y="75" fill="#00ff88" font-size="12" font-family="sans-serif">&#8594;</text>
+                    
+                    <!-- Binary Format -->
+                    <rect x="380" y="50" width="150" height="50" rx="4" fill="#0a0a12" stroke="#00ff88" stroke-width="1"/>
+                    <text x="455" y="72" fill="#00ff88" font-size="9" font-weight="bold" text-anchor="middle" font-family="sans-serif">Binary Format</text>
+                    <text x="455" y="88" fill="#666" font-size="8" text-anchor="middle" font-family="monospace">train.bin (mmap)</text>
+                    
+                    <text x="550" y="75" fill="#00ff88" font-size="12" font-family="sans-serif">&#8594;</text>
+                    
+                    <!-- Index File -->
+                    <rect x="570" y="50" width="130" height="50" rx="4" fill="#0a0a12" stroke="#fbbf24" stroke-width="1"/>
+                    <text x="635" y="72" fill="#fbbf24" font-size="9" font-weight="bold" text-anchor="middle" font-family="sans-serif">Index File</text>
+                    <text x="635" y="88" fill="#666" font-size="8" text-anchor="middle" font-family="monospace">train.idx</text>
+                    
+                    <text x="400" y="122" fill="#888" font-size="8" text-anchor="middle" font-family="sans-serif">Key: .bin = memory-mapped | .idx = document boundaries</text>
+                    
+                    <!-- Arrow down -->
+                    <text x="400" y="152" fill="#00ff88" font-size="14" font-family="sans-serif">&#8595;</text>
+                    
+                    <!-- Training Data Loading Section -->
+                    <text x="400" y="175" fill="#00d4ff" font-size="11" font-weight="bold" text-anchor="middle" font-family="sans-serif">Training Data Loading</text>
+                    <rect x="20" y="185" width="760" height="110" rx="6" fill="#1a1a28" stroke="#3b82f6" stroke-width="2"/>
+                    
+                    <!-- mmap -->
+                    <rect x="60" y="205" width="170" height="60" rx="4" fill="#0a0a12" stroke="#fbbf24" stroke-width="2"/>
+                    <text x="145" y="230" fill="#fbbf24" font-size="10" font-weight="bold" text-anchor="middle" font-family="sans-serif">mmap()</text>
+                    <text x="145" y="248" fill="#666" font-size="8" text-anchor="middle" font-family="sans-serif">train.bin (NVMe)</text>
+                    
+                    <text x="250" y="235" fill="#00ff88" font-size="14" font-family="sans-serif">&#8594;</text>
+                    
+                    <!-- Page Cache -->
+                    <rect x="280" y="205" width="170" height="60" rx="4" fill="#0a0a12" stroke="#a855f7" stroke-width="2"/>
+                    <text x="365" y="230" fill="#a855f7" font-size="10" font-weight="bold" text-anchor="middle" font-family="sans-serif">Page Cache</text>
+                    <text x="365" y="248" fill="#666" font-size="8" text-anchor="middle" font-family="sans-serif">Linux (DRAM)</text>
+                    
+                    <text x="470" y="235" fill="#00ff88" font-size="14" font-family="sans-serif">&#8594;</text>
+                    
+                    <!-- GPU Memory -->
+                    <rect x="500" y="205" width="170" height="60" rx="4" fill="#0a0a12" stroke="#00ff88" stroke-width="2"/>
+                    <text x="585" y="230" fill="#00ff88" font-size="10" font-weight="bold" text-anchor="middle" font-family="sans-serif">GPU Memory</text>
+                    <text x="585" y="248" fill="#666" font-size="8" text-anchor="middle" font-family="sans-serif">Training Batch (HBM)</text>
+                    
+                    <!-- Bottom note -->
+                    <text x="400" y="315" fill="#00ff88" font-size="10" text-anchor="middle" font-family="sans-serif">Sequential access = good prefetch = high throughput</text>
+                </svg>
             </div>
 
             <pre><code><span style="color: #6a9955;"># Megatron-LM data preprocessing and training setup</span>
@@ -785,4 +831,4 @@ print(f<span style="color: #ce9178;">"Checkpoint every {interval:,.0f} samples"<
 
     </div>
 </body>
-</html>
+</

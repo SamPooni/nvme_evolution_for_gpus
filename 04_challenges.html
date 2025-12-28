@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Challenges & Call to Action | GPU-NVMe Documentation</title>
+    <title>Implementation Challenges | GPU-NVMe Documentation</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
@@ -120,7 +120,7 @@
             );
         }
 
-        // Call to Action Item
+        // Recommendations Item
         function ActionItem({ number, text, highlight }) {
             const [hovered, setHovered] = useState(false);
             
@@ -292,7 +292,7 @@
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent'
                         }}>
-                            Challenges & Call to Action
+                            Implementation Challenges
                         </h1>
                         <p style={{
                             fontSize: '1.3rem',
@@ -322,7 +322,7 @@
                         </div>
                     </section>
 
-                    {/* Call to Action Section */}
+                    {/* Recommendations Section */}
                     <section style={{
                         padding: '4rem 2rem',
                         background: 'linear-gradient(180deg, transparent, rgba(168, 85, 247, 0.1))'
@@ -334,7 +334,7 @@
                                 marginBottom: '0.5rem',
                                 textAlign: 'center'
                             }}>
-                                š€ Call to Action
+                                Recommendations
                             </h2>
                             <p style={{
                                 color: '#888',
@@ -400,29 +400,29 @@
                             marginBottom: '2rem',
                             textAlign: 'center'
                         }}>
-                            “‹ Summary
+                            Summary
                         </h2>
                         
                         <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
                             <SummaryBox 
                                 title="The Problem"
-                                icon="[!] "
+                                icon=" "
                                 color="#ff6b6b"
                                 items={[
-                                    "NVMe designed for CPU (1 thread/queue)",
-                                    "GPU I/O agents need parallel queue access",
+                                    "NVMe control plane is CPU-mediated",
+                                    "GPU threads funnel through limited I/O agents",
                                     "Synchronization overhead in I/O paths",
-                                    "SM efficiency drops during I/O operations"
+                                    "Pipeline staging often not optimized"
                                 ]}
                             />
                             <SummaryBox 
                                 title="Why It Matters"
-                                icon="🎯"
+                                icon="*"
                                 color="#fbbf24"
                                 items={[
-                                    "AI training needs fast data pipelines",
-                                    "GPU compute wasted waiting for I/O",
-                                    "Storage becoming critical bottleneck",
+                                    "AI workloads consume data extremely fast",
+                                    "Control-plane latency becomes visible",
+                                    "End-to-end pipeline efficiency matters",
                                     "Cost of idle GPU time is massive"
                                 ]}
                             />
@@ -440,7 +440,7 @@
                         </div>
                     </section>
 
-                    {/* Q&A Section - Page 25 */}
+                    
                     <section style={{
                         padding: '4rem 2rem',
                         background: 'linear-gradient(180deg, transparent, rgba(0, 255, 136, 0.05))',
@@ -457,17 +457,17 @@
                                 fontSize: '0.9rem',
                                 color: '#00ff88'
                             }}>
-                                Page 25
+                                Key Questions
                             </div>
                             <h2 style={{
                                 fontSize: '3rem',
                                 color: '#00ff88',
                                 marginBottom: '1rem'
                             }}>
-                                Questions???
+                                Key Technical Questions
                             </h2>
                             <p style={{ color: '#888', fontSize: '1.2rem', marginBottom: '2rem' }}>
-                                Discussion topics for the storage community
+                                Important considerations for GPU-NVMe implementations
                             </p>
                             
                             <div style={{
@@ -493,7 +493,7 @@
                                     borderRadius: '12px',
                                     padding: '1.5rem'
                                 }}>
-                                    <span style={{ fontSize: '1.5rem' }}>“ˆ</span>
+                                    <span style={{ fontSize: '1.5rem' }}></span>
                                     <p style={{ color: '#ccc', marginTop: '0.5rem' }}>
                                         What I/O queue scaling approaches best serve high-throughput GPU I/O agents?
                                     </p>
@@ -504,7 +504,7 @@
                                     borderRadius: '12px',
                                     padding: '1.5rem'
                                 }}>
-                                    <span style={{ fontSize: '1.5rem' }}>"[BOLT]"</span>
+                                    <span style={{ fontSize: '1.5rem' }}></span>
                                     <p style={{ color: '#ccc', marginTop: '0.5rem' }}>
                                         Can doorbell mechanisms be redesigned for polling-first architectures?
                                     </p>
@@ -513,7 +513,7 @@
                         </div>
                     </section>
 
-                    {/* Credits Section - Page 26 */}
+                    
                     <section style={{
                         padding: '3rem 2rem',
                         borderTop: '1px solid rgba(255,255,255,0.1)',
@@ -530,7 +530,7 @@
                             fontSize: '0.9rem',
                             color: '#a855f7'
                         }}>
-                            Page 26
+                            Summary
                         </div>
                         
                         <h2 style={{ 
@@ -538,37 +538,16 @@
                             color: '#fff', 
                             marginBottom: '1rem' 
                         }}>
-                            Thank you for attending!
+                            Summary
                         </h2>
                         
                         <p style={{ color: '#888', marginBottom: '2rem' }}>
-                            Based on SNIA SDC 2025 Presentation
+                            Key Takeaways from GPU-NVMe Architecture
                         </p>
                         
                         <h3 style={{ color: '#fff', marginBottom: '0.5rem', fontSize: '1.3rem' }}>
                             "Why does NVMe need to evolve for efficient storage access from GPUs?"
                         </h3>
-                        
-                        <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
-                            <p style={{ color: '#ccc', marginBottom: '0.5rem' }}>
-                                <strong>Chandra Guda</strong> (SMTS)
-                            </p>
-                            <p style={{ color: '#ccc', marginBottom: '0.5rem' }}>
-                                <strong>Suresh Rajgopal</strong> (DMTS)
-                            </p>
-                            <p style={{ color: '#ccc', marginBottom: '0.5rem' }}>
-                                <strong>Pierre Labat</strong> (SMTS)
-                            </p>
-                        </div>
-                        
-                        <p style={{
-                            color: '#a855f7',
-                            fontWeight: 'bold',
-                            fontSize: '1.5rem',
-                            marginBottom: '1.5rem'
-                        }}>
-                            Micron Technology
-                        </p>
                         
                         <div style={{
                             display: 'flex',
@@ -582,24 +561,24 @@
                                 borderRadius: '8px',
                                 padding: '1rem 1.5rem'
                             }}>
-                                <p style={{ color: '#888', fontSize: '0.9rem' }}>Conference</p>
-                                <p style={{ color: '#00ff88', fontWeight: 'bold' }}>SNIA SDC 2025</p>
+                                <p style={{ color: '#888', fontSize: '0.9rem' }}>Challenge</p>
+                                <p style={{ color: '#00ff88', fontWeight: 'bold' }}>CPU Bottleneck</p>
                             </div>
                             <div style={{
                                 background: 'rgba(0,0,0,0.3)',
                                 borderRadius: '8px',
                                 padding: '1rem 1.5rem'
                             }}>
-                                <p style={{ color: '#888', fontSize: '0.9rem' }}>Date</p>
-                                <p style={{ color: '#00ff88', fontWeight: 'bold' }}>September 15-17, 2025</p>
+                                <p style={{ color: '#888', fontSize: '0.9rem' }}>Solution</p>
+                                <p style={{ color: '#00ff88', fontWeight: 'bold' }}>GPU Direct Storage</p>
                             </div>
                             <div style={{
                                 background: 'rgba(0,0,0,0.3)',
                                 borderRadius: '8px',
                                 padding: '1rem 1.5rem'
                             }}>
-                                <p style={{ color: '#888', fontSize: '0.9rem' }}>Location</p>
-                                <p style={{ color: '#00ff88', fontWeight: 'bold' }}>Hyatt Regency Santa Clara, CA</p>
+                                <p style={{ color: '#888', fontSize: '0.9rem' }}>Future</p>
+                                <p style={{ color: '#00ff88', fontWeight: 'bold' }}>NVMe 2.0+ Extensions</p>
                             </div>
                         </div>
                         
@@ -608,8 +587,7 @@
                             marginTop: '2rem',
                             fontSize: '0.9rem'
                         }}>
-                            Access presentations at{' '}
-                            <span style={{ color: '#00d4ff' }}>http://sniadeveloper.org/conference</span>
+                            Continue to the next section for implementation details
                         </p>
                     </section>
 

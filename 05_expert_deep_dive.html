@@ -294,7 +294,7 @@
             </div>
 
             <div class="warning-box">
-                <strong>[!]  GPU Contention Point:</strong> The <code>cid</code> (Command ID) at bytes 2-3 must be unique within a queue. In practice, a small set of I/O-agent warps (not all threads) handle queue submission. These agents synchronize to claim unique CIDs. This is the <strong>first synchronization bottleneck</strong>.
+                <strong>  GPU Contention Point:</strong> The <code>cid</code> (Command ID) at bytes 2-3 must be unique within a queue. In practice, a small set of I/O-agent warps (not all threads) handle queue submission. These agents synchronize to claim unique CIDs. This is the <strong>first synchronization bottleneck</strong>.
             </div>
 
             <h3 class="subsection-title">Completion Queue Entry (CQE) - 16 Bytes</h3>
@@ -666,7 +666,7 @@ Per-drive realistic targets:
             <div class="highlight-box">
                 <strong>Protocol Efficiency:</strong> 4096 / 4328 = <strong>94.6%</strong> for 4KB I/O<br>
                 For 512B I/O: 512 / 744 = <strong>68.8%</strong> efficiency<br>
-                <span style="color: #ff6b6b;">[!]  Sub-4KB I/O is an anti-pattern: even a "512B read" transfers 4KB+ from NAND, wasting bandwidth.</span>
+                <span style="color: #ff6b6b;">  Sub-4KB I/O is an anti-pattern: even a "512B read" transfers 4KB+ from NAND, wasting bandwidth.</span>
             </div>
 
             <div class="info-box" style="background: #2a1a1a; border-left: 4px solid #ff6b6b; margin-top: 15px;">
@@ -695,7 +695,7 @@ Per-drive realistic targets:
 
         <!-- Section 4: GPUDirect Storage -->
         <div class="section">
-            <h2 class="section-title">š€ GPUDirect Storage (GDS) Architecture</h2>
+            <h2 class="section-title">GPUDirect Storage (GDS) Architecture</h2>
             
             <p>NVIDIA's GPUDirect Storage is the current solution for GPU-NVMe integration. Understanding its architecture reveals remaining limitations.</p>
 
@@ -720,7 +720,7 @@ SSD &rarr; PCIe &rarr; <span style="color: #00ff88;">GPU HBM (direct)</span>
             <h3 class="subsection-title">“Š PCIe P2P Topology Truth Table</h3>
             
             <div class="info-box" style="background: rgba(251, 191, 36, 0.1); border-left-color: #fbbf24;">
-                <strong>[!]  P2P Gotcha:</strong> Even with GPUDirect Storage support, P2P DMA can fail silently or fall back to bounce buffers depending on PCIe topology, ACS settings, and IOMMU configuration. This table shows when P2P actually works.
+                <strong>  P2P Gotcha:</strong> Even with GPUDirect Storage support, P2P DMA can fail silently or fall back to bounce buffers depending on PCIe topology, ACS settings, and IOMMU configuration. This table shows when P2P actually works.
             </div>
             
             <table class="data-table">
@@ -735,52 +735,52 @@ SSD &rarr; PCIe &rarr; <span style="color: #00ff88;">GPU HBM (direct)</span>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>GPU �” NVMe behind same PCIe switch</td>
+                        <td>GPU �” NVMe behind same PCIe switch</td>
                         <td>Disabled</td>
                         <td>Disabled</td>
-                        <td class="good">[OK] Yes</td>
+                        <td class="good"> Yes</td>
                         <td>Ideal case, full bandwidth</td>
                     </tr>
                     <tr>
-                        <td>GPU �” NVMe behind same PCIe switch</td>
+                        <td>GPU �” NVMe behind same PCIe switch</td>
                         <td><strong>Enabled</strong></td>
                         <td>Disabled</td>
-                        <td class="bad">[X]  No</td>
+                        <td class="bad">  No</td>
                         <td>ACS blocks P2P at switch</td>
                     </tr>
                     <tr>
-                        <td>GPU �” NVMe behind same PCIe switch</td>
+                        <td>GPU �” NVMe behind same PCIe switch</td>
                         <td>Disabled</td>
                         <td><strong>Enabled (strict)</strong></td>
-                        <td class="bad">[X]  No</td>
+                        <td class="bad">  No</td>
                         <td>IOMMU intercepts DMA</td>
                     </tr>
                     <tr>
-                        <td>GPU �” NVMe behind same PCIe switch</td>
+                        <td>GPU �” NVMe behind same PCIe switch</td>
                         <td>Disabled</td>
                         <td><strong>Passthrough</strong></td>
-                        <td class="good">[OK] Yes</td>
+                        <td class="good"> Yes</td>
                         <td>IOMMU allows P2P</td>
                     </tr>
                     <tr>
-                        <td>GPU �” NVMe on <em>different</em> CPU root complexes</td>
+                        <td>GPU �” NVMe on <em>different</em> CPU root complexes</td>
                         <td>Any</td>
                         <td>Any</td>
-                        <td class="bad">[X]  No</td>
+                        <td class="bad">  No</td>
                         <td>Must traverse CPU, no P2P</td>
                     </tr>
                     <tr>
-                        <td>GPU �” NVMe through PLX/Broadcom switch</td>
+                        <td>GPU �” NVMe through PLX/Broadcom switch</td>
                         <td>Check</td>
                         <td>Disabled/PT</td>
-                        <td class="medium">[!]  Maybe</td>
+                        <td class="medium">  Maybe</td>
                         <td>Depends on switch firmware</td>
                     </tr>
                     <tr>
                         <td>Multi-GPU NVLink + shared NVMe pool</td>
                         <td>Disabled</td>
                         <td>Disabled/PT</td>
-                        <td class="good">[OK] Yes (one GPU)</td>
+                        <td class="good"> Yes (one GPU)</td>
                         <td>P2P to closest GPU only</td>
                     </tr>
                 </tbody>
@@ -816,25 +816,25 @@ GPU1    NV4     X     SYS    OK
             
             <div class="grid-2">
                 <div class="info-box" style="background: rgba(239, 68, 68, 0.1); border-left-color: #ef4444;">
-                    <strong>[X]  Silent Fallback</strong><br>
+                    <strong>  Silent Fallback</strong><br>
                     GDS doesn't error when P2P fails&mdash;it silently uses bounce buffers. Check <code>gds_stats</code> for "compat mode" transfers.
                 </div>
                 <div class="info-box" style="background: rgba(239, 68, 68, 0.1); border-left-color: #ef4444;">
-                    <strong>[X]  Virtualization ACS</strong><br>
+                    <strong>  Virtualization ACS</strong><br>
                     Hypervisors enable ACS for isolation. VMs rarely get true P2P (except SR-IOV passthrough with ACS override).
                 </div>
                 <div class="info-box" style="background: rgba(239, 68, 68, 0.1); border-left-color: #ef4444;">
-                    <strong>[X]  NUMA Crossing</strong><br>
+                    <strong>  NUMA Crossing</strong><br>
                     GPU on NUMA node 0, NVMe on NUMA node 1 = P2P impossible without QPI/UPI traversal.
                 </div>
                 <div class="info-box" style="background: rgba(239, 68, 68, 0.1); border-left-color: #ef4444;">
-                    <strong>[X]  BAR Size Limits</strong><br>
+                    <strong>  BAR Size Limits</strong><br>
                     GPU BAR1 must be large enough. Above 4G decoding must be enabled in BIOS.
                 </div>
             </div>
             
             <div class="info-box" style="background: rgba(0, 255, 136, 0.1); border-left-color: #00ff88;">
-                <strong>[OK] Production Rule:</strong> Before deploying GDS, run <code>gdscheck -p</code> and <code>nvidia-smi topo -p2p r</code> to verify P2P paths. If you see "SYS" or "compat mode", fix topology before expecting GDS speedups.
+                <strong> Production Rule:</strong> Before deploying GDS, run <code>gdscheck -p</code> and <code>nvidia-smi topo -p2p r</code> to verify P2P paths. If you see "SYS" or "compat mode", fix topology before expecting GDS speedups.
             </div>
 
             <h3 class="subsection-title">GDS Limitations</h3>
@@ -900,9 +900,9 @@ GPU1    NV4     X     SYS    OK
 
         <!-- Section 5: Proposed NVMe Changes -->
         <div class="section">
-            <h2 class="section-title">”§ Proposed NVMe Protocol Enhancements</h2>
+            <h2 class="section-title">”Proposed NVMe Protocol Enhancements</h2>
             
-            <p>Based on the analysis in the Micron presentation and storage industry discussions:</p>
+            <p>Based on storage industry analysis and discussions:</p>
 
             <h3 class="subsection-title">1. Thread-Local Command IDs</h3>
             <div class="code-block">
@@ -962,7 +962,7 @@ gpu_shadow_doorbell = tail;  <span class="code-comment">// Local write, fast</sp
 
         <!-- Section 6: Implementation Considerations -->
         <div class="section">
-            <h2 class="section-title">[!]™ Implementation Considerations</h2>
+            <h2 class="section-title">™ Implementation Considerations</h2>
 
             <h3 class="subsection-title">Memory Ordering & Coherence</h3>
             <div class="insight-box">
@@ -1022,5 +1022,4 @@ gpu_shadow_doorbell = tail;  <span class="code-comment">// Local write, fast</sp
             <a href="06_implementation.html" class="nav-btn">Next: Implementation Patterns &rarr;</a>
         </div>
     </div>
-</body>
-</html>
+</bo

@@ -479,7 +479,7 @@
 
     <div class="container">
         <div class="hero">
-            <span class="reality-badge">[!]  REALITY CHECK</span>
+            <span class="reality-badge">  REALITY CHECK</span>
             <h1>Advanced Solutions &amp; Hard Truths</h1>
             <p>The technologies the industry doesn't want to talk honestly about: what's production-ready, what's hype, and what actually solves GPU-storage bottlenecks today.</p>
         </div>
@@ -552,7 +552,7 @@
                         <td><span class="good">Shipping</span></td>
                     </tr>
                     <tr>
-                        <td><strong>Micron CZ120</strong></td>
+                        <td><strong>CXL Memory Expander</strong></td>
                         <td>Memory Expander</td>
                         <td>DDR5 DRAM</td>
                         <td class="good">~170 ns</td>
@@ -606,9 +606,9 @@
                     <ul class="card-specs">
                         <li><strong>No CXL support announced</strong> for H100/H200/B100</li>
                         <li>Betting on NVLink (900 GB/s) over CXL (64 GB/s)</li>
-                        <li>Grace CPU has CXL, but GPU�”CXL path unclear</li>
+                        <li>Grace CPU has CXL, but GPU�”CXL path unclear</li>
                         <li>GDS (GPUDirect Storage) is their storage answer</li>
-                        <li>NVLink-C2C for GPU�”CPU coherency instead</li>
+                        <li>NVLink-C2C for GPU�”CPU coherency instead</li>
                     </ul>
                     <div class="info-box warning" style="margin-top: 15px;">
                         <strong>Risk:</strong> If you're NVIDIA-only, CXL storage may not help your GPU path directly.
@@ -643,7 +643,7 @@
                 <div class="arch-title">Traditional vs. Computational Storage Data Flow</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
                     <div>
-                        <h4 style="color: #ef4444; text-align: center; margin-bottom: 15px;">[X]  Traditional: Move All Data</h4>
+                        <h4 style="color: #ef4444; text-align: center; margin-bottom: 15px;">  Traditional: Move All Data</h4>
                         <div class="arch-flow" style="flex-direction: column;">
                             <div class="arch-box arch-storage">SSD: 100 GB raw</div>
                             <div class="arch-arrow">&larr; 100 GB transfer</div>
@@ -657,7 +657,7 @@
                     </div>
                     
                     <div>
-                        <h4 style="color: #00ff88; text-align: center; margin-bottom: 15px;">[OK]  Computational Storage</h4>
+                        <h4 style="color: #00ff88; text-align: center; margin-bottom: 15px;">  Computational Storage</h4>
                         <div class="arch-flow" style="flex-direction: column;">
                             <div class="arch-box arch-storage">SSD: 100 GB raw</div>
                             <div class="arch-arrow">&larr; In-SSD processing</div>
@@ -719,10 +719,10 @@
                 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">SNIA CSA Standard</h3>
+                        <h3 class="card-title">Computational Storage Standard</h3>
                         <span class="card-badge badge-emerging">Standardizing</span>
                     </div>
-                    <p class="card-desc">SNIA Computational Storage Architecture defines standard APIs for offloading computation to storage devices.</p>
+                    <p class="card-desc">Computational Storage Architecture (CSA) defines standard APIs for offloading computation to storage devices.</p>
                     <ul class="card-specs">
                         <li>CSx Compute Programs</li>
                         <li>Standard discovery/management</li>
@@ -920,7 +920,7 @@
             <h2 class="section-title">DPU Storage Offload (Deploy Today)</h2>
             
             <div class="info-box success">
-                <strong>[OK]  Production-Ready Now:</strong> DPUs (Data Processing Units) like NVIDIA BlueField can offload NVMe processing from CPU, freeing CPU cores for other work and providing a dedicated I/O path. This is not vaporware &mdash; it's shipping in production datacenters.
+                <strong>  Production-Ready Now:</strong> DPUs (Data Processing Units) like NVIDIA BlueField can offload NVMe processing from CPU, freeing CPU cores for other work and providing a dedicated I/O path. This is not vaporware &mdash; it's shipping in production datacenters.
             </div>
 
             <div class="arch-diagram">
@@ -930,12 +930,12 @@
                         GPU<br>
                         <small>Compute</small>
                     </div>
-                    <div class="arch-arrow">�”</div>
+                    <div class="arch-arrow">�”</div>
                     <div class="arch-box arch-dpu">
                         BlueField DPU<br>
                         <small>NVMe-oF Target</small>
                     </div>
-                    <div class="arch-arrow">�”</div>
+                    <div class="arch-arrow">�”</div>
                     <div class="arch-box arch-storage">
                         NVMe SSDs<br>
                         <small>Local/Remote</small>
@@ -1034,7 +1034,7 @@
                     -  - -  -  -  -  -  -  -  -  -  -  - |  -
                     - -  -  -  -  -  -  -  - + -  -  -  -  -  -  -  - |
                              -
-               + -  -  -  -  -  -  -  -  -  -  -  -  - �¼ -  -  -  -  -  -  -  -  -  -  -  -  - |
+               + -  -  -  -  -  -  -  -  -  -  -  -  - �¼ -  -  -  -  -  -  -  -  -  -  -  -  - |
                dash;¼             dash;¼             dash;¼
           Local SSD    NVMe-oF Target   Object Store
             </div>
@@ -1056,7 +1056,7 @@
             <h2 class="section-title">Ultra Ethernet (UEC): Reality Check</h2>
             
             <div class="info-box warning">
-                <strong>[!]  Honesty Time:</strong> UEC is a consortium (AMD, Arista, Broadcom, Cisco, Meta, Microsoft, etc.) working on AI-optimized Ethernet. It's promising but <strong>no silicon ships yet</strong>. Specs are still being finalized. Do not make purchasing decisions based on UEC timelines.
+                <strong>  Honesty Time:</strong> UEC is a consortium (AMD, Arista, Broadcom, Cisco, Meta, Microsoft, etc.) working on AI-optimized Ethernet. It's promising but <strong>no silicon ships yet</strong>. Specs are still being finalized. Do not make purchasing decisions based on UEC timelines.
             </div>
 
             <h3 class="subsection-title">What UEC Actually Is</h3>
@@ -1207,7 +1207,7 @@
             </table>
             
             <div class="info-box warning">
-                <strong>[!]  Latency Reality Check:</strong>
+                <strong>  Latency Reality Check:</strong>
                 <ul style="margin-top: 10px; margin-left: 20px;">
                     <li><strong>Add 20-50 &micro;s</strong> for each network hop (ToR switch, spine, etc.)</li>
                     <li><strong>Add 50-100 &micro;s</strong> for storage array controller overhead</li>
@@ -1429,12 +1429,12 @@ $ fio --name=nvmeof-latency --filename=/dev/nvme0n1 \
             
             <div class="cards-grid">
                 <div class="info-box warning">
-                    <h4 style="color: #ef4444; margin-bottom: 10px;">🚨 CXL �  Magic</h4>
+                    <h4 style="color: #ef4444; margin-bottom: 10px;">🚨 CXL �  Magic</h4>
                     <p>CXL memory expanders (DRAM) are real and useful. CXL SSDs still have NAND latency. NVIDIA doesn't support CXL on GPUs. Don't conflate the two.</p>
                 </div>
                 
                 <div class="info-box success">
-                    <h4 style="color: #00ff88; margin-bottom: 10px;">[OK]  DPUs Work Today</h4>
+                    <h4 style="color: #00ff88; margin-bottom: 10px;">  DPUs Work Today</h4>
                     <p>BlueField SNAP and similar DPU solutions are production-ready. They offload storage complexity from CPU, work with GDS, and are deployed at scale.</p>
                 </div>
                 
@@ -1444,7 +1444,7 @@ $ fio --name=nvmeof-latency --filename=/dev/nvme0n1 \
                 </div>
                 
                 <div class="info-box reality">
-                    <h4 style="color: #fbbf24; margin-bottom: 10px;">[!]  UEC is 2027+ Realistically</h4>
+                    <h4 style="color: #fbbf24; margin-bottom: 10px;">  UEC is 2027+ Realistically</h4>
                     <p>No shipping silicon. Spec just released. Use RoCEv2 or InfiniBand today. Plan for UEC in 3+ years if the ecosystem materializes.</p>
                 </div>
             </div>
@@ -1463,5 +1463,4 @@ $ fio --name=nvmeof-latency --filename=/dev/nvme0n1 \
             <a href="index.html" class="nav-btn">Back to Overview &rarr;</a>
         </div>
     </div>
-</body>
-</html>
+</bo

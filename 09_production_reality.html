@@ -480,7 +480,7 @@
 
     <div class="container">
         <div class="hero">
-            <span class="production-badge">[PROD] PRODUCTION DEPLOYMENT</span>
+            <span class="production-badge"> PRODUCTION DEPLOYMENT</span>
             <h1>What You Actually Need to Deploy</h1>
             <p>NVMe-oF, Linux storage stack, Kubernetes integration, error handling, security, cost analysis, and benchmarking &mdash; the missing pieces for production GPU-storage systems.</p>
         </div>
@@ -651,7 +651,7 @@ round-robin   <span class="code-comment"># or numa, queue-depth</span>
             <h2 class="section-title">2. Linux Storage Stack Deep Dive</h2>
             
             <div class="info-box warning">
-                <strong>[!]  The Hidden Bottleneck:</strong> You optimized your NVMe, enabled GDS, bought expensive SSDs... but you're still going through the kernel. The Linux storage stack adds 5-50&micro;s of latency and significant CPU overhead. Understanding this is critical.
+                <strong>  The Hidden Bottleneck:</strong> You optimized your NVMe, enabled GDS, bought expensive SSDs... but you're still going through the kernel. The Linux storage stack adds 5-50&micro;s of latency and significant CPU overhead. Understanding this is critical.
             </div>
 
             <h3 class="subsection-title">Storage Stack Layers</h3>
@@ -697,7 +697,7 @@ round-robin   <span class="code-comment"># or numa, queue-depth</span>
             <h3 class="subsection-title">io_uring: The Modern Async I/O Interface</h3>
             
             <div class="info-box success">
-                <strong>[OK]  io_uring Benefits:</strong> Submission Queue (SQ) and Completion Queue (CQ) in shared memory. Zero-copy. Batched submissions. Kernel-poll mode eliminates syscalls entirely. This is what high-performance storage uses now.
+                <strong>  io_uring Benefits:</strong> Submission Queue (SQ) and Completion Queue (CQ) in shared memory. Zero-copy. Batched submissions. Kernel-poll mode eliminates syscalls entirely. This is what high-performance storage uses now.
             </div>
 
             <div class="comparison">
@@ -749,7 +749,7 @@ round-robin   <span class="code-comment"># or numa, queue-depth</span>
             </div>
 
             <div class="info-box warning">
-                <strong>[!]  SQPOLL Requirements & Caveats:</strong>
+                <strong>  SQPOLL Requirements & Caveats:</strong>
                 <ul style="margin: 10px 0; padding-left: 20px;">
                     <li><strong>CAP_SYS_NICE required:</strong> SQPOLL spawns a kernel thread that busy-polls, requiring elevated privileges</li>
                     <li><strong>CPU dedication:</strong> The sq_thread pins to a CPU core (set via sq_thread_cpu). That core is 100% utilized even with no I/O</li>
@@ -815,7 +815,7 @@ params.sq_thread_cpu = <span class="code-number">15</span>;        <span class="
             <h3 class="subsection-title">SPDK: Complete Kernel Bypass</h3>
             
             <div class="info-box production">
-                <strong>[PROD] SPDK (Storage Performance Development Kit):</strong> User-space NVMe driver. Completely bypasses the kernel. Polls NVMe completion queues directly. Used by Ceph, DAOS, and high-frequency trading systems.
+                <strong> SPDK (Storage Performance Development Kit):</strong> User-space NVMe driver. Completely bypasses the kernel. Polls NVMe completion queues directly. Used by Ceph, DAOS, and high-frequency trading systems.
             </div>
 
             <div class="arch-diagram">
@@ -853,7 +853,7 @@ params.sq_thread_cpu = <span class="code-number">15</span>;        <span class="
             </div>
 
             <div class="info-box warning">
-                <strong>[!]  SPDK + GPU Caveat:</strong> SPDK doesn't natively integrate with GDS. You'd need to manage GPU memory registration yourself. For most GPU workloads, GDS with io_uring-based batching is more practical than full SPDK.
+                <strong>  SPDK + GPU Caveat:</strong> SPDK doesn't natively integrate with GDS. You'd need to manage GPU memory registration yourself. For most GPU workloads, GDS with io_uring-based batching is more practical than full SPDK.
             </div>
         </div>
 
@@ -1279,7 +1279,7 @@ LnkSta: Speed 16GT/s, Width x2              <-- DEGRADED! 4x slower</span>
     device = line.split()[<span class="code-number">0</span>]
     health = check_pcie_link_health(device)
     <span class="code-keyword">if</span> health <span class="code-keyword">and</span> health[<span class="code-string">'degraded'</span>]:
-        <span class="code-function">print</span>(f<span class="code-string">"[!]  {device}: DEGRADED - {health['status']} (should be {health['capability']})"</span>)
+        <span class="code-function">print</span>(f<span class="code-string">"  {device}: DEGRADED - {health['status']} (should be {health['capability']})"</span>)
         <span class="code-function">print</span>(f<span class="code-string">"   Bandwidth loss: {health['bandwidth_loss']*100:.0f}%"</span>)
             </div>
 
@@ -1330,7 +1330,7 @@ LnkSta: Speed 16GT/s, Width x2              <-- DEGRADED! 4x slower</span>
             checkpoint recovery works is to break things intentionally. Here's how to do it safely.</p>
             
             <div class="info-box warning">
-                <strong>[!]  Test Environment Only!</strong> Error injection can cause data loss. Never run on 
+                <strong>  Test Environment Only!</strong> Error injection can cause data loss. Never run on 
                 production systems. Use a dedicated test NVMe with no valuable data.
             </div>
 
@@ -1412,7 +1412,7 @@ LnkSta: Speed 16GT/s, Width x2              <-- DEGRADED! 4x slower</span>
         self._write_sysfs(<span class="code-string">'times'</span>, max_errors)
         self._write_sysfs(<span class="code-string">'status'</span>, <span class="code-string">'0x280'</span>)  <span class="code-comment"># Write Fault with DNR</span>
         self._write_sysfs(<span class="code-string">'verbose'</span>, <span class="code-string">'1'</span>)
-        <span class="code-keyword">print</span>(f<span class="code-string">"[OK]  Write errors enabled: {probability}% chance, max {max_errors}"</span>)
+        <span class="code-keyword">print</span>(f<span class="code-string">"  Write errors enabled: {probability}% chance, max {max_errors}"</span>)
     
     <span class="code-keyword">def</span> <span class="code-function">enable_read_errors</span>(self, probability=5, max_errors=10):
         <span class="code-string">"""Enable read fault injection for checkpoint load testing"""</span>
@@ -1420,12 +1420,12 @@ LnkSta: Speed 16GT/s, Width x2              <-- DEGRADED! 4x slower</span>
         self._write_sysfs(<span class="code-string">'times'</span>, max_errors)
         self._write_sysfs(<span class="code-string">'status'</span>, <span class="code-string">'0x281'</span>)  <span class="code-comment"># Read Error with DNR</span>
         self._write_sysfs(<span class="code-string">'verbose'</span>, <span class="code-string">'1'</span>)
-        <span class="code-keyword">print</span>(f<span class="code-string">"[OK]  Read errors enabled: {probability}% chance, max {max_errors}"</span>)
+        <span class="code-keyword">print</span>(f<span class="code-string">"  Read errors enabled: {probability}% chance, max {max_errors}"</span>)
     
     <span class="code-keyword">def</span> <span class="code-function">disable</span>(self):
         <span class="code-string">"""Disable all fault injection"""</span>
         self._write_sysfs(<span class="code-string">'times'</span>, <span class="code-string">'0'</span>)
-        <span class="code-keyword">print</span>(<span class="code-string">"[OK]  Fault injection disabled"</span>)
+        <span class="code-keyword">print</span>(<span class="code-string">"  Fault injection disabled"</span>)
     
     <span class="code-keyword">def</span> <span class="code-function">_write_sysfs</span>(self, name, value):
         path = f<span class="code-string">"{self.fault_path}/{name}"</span>
@@ -1453,16 +1453,16 @@ LnkSta: Speed 16GT/s, Width x2              <-- DEGRADED! 4x slower</span>
                 
                 <span class="code-comment"># Atomic rename</span>
                 os.rename(temp_path, checkpoint_path)
-                <span class="code-keyword">print</span>(f<span class="code-string">"[OK]  Checkpoint saved successfully on attempt {attempt+1}"</span>)
+                <span class="code-keyword">print</span>(f<span class="code-string">"  Checkpoint saved successfully on attempt {attempt+1}"</span>)
                 <span class="code-keyword">return</span> <span class="code-keyword">True</span>
                 
             <span class="code-keyword">except</span> (IOError, OSError) <span class="code-keyword">as</span> e:
-                <span class="code-keyword">print</span>(f<span class="code-string">"[!]  Save attempt {attempt+1} failed: {e}"</span>)
+                <span class="code-keyword">print</span>(f<span class="code-string">"  Save attempt {attempt+1} failed: {e}"</span>)
                 <span class="code-keyword">if</span> os.path.exists(temp_path):
                     os.remove(temp_path)
                 time.sleep(0.5)  <span class="code-comment"># Brief pause before retry</span>
         
-        <span class="code-keyword">print</span>(<span class="code-string">"[OK]  All save attempts failed - error handling WORKING correctly"</span>)
+        <span class="code-keyword">print</span>(<span class="code-string">"  All save attempts failed - error handling WORKING correctly"</span>)
         <span class="code-keyword">return</span> <span class="code-keyword">False</span>
         
     <span class="code-keyword">finally</span>:
@@ -1480,18 +1480,18 @@ LnkSta: Speed 16GT/s, Width x2              <-- DEGRADED! 4x slower</span>
         <span class="code-comment"># Primary attempt</span>
         <span class="code-keyword">try</span>:
             state_dict = torch.load(checkpoint_path, map_location=<span class="code-string">'cuda:0'</span>)
-            <span class="code-keyword">print</span>(<span class="code-string">"[OK]  Primary checkpoint loaded"</span>)
+            <span class="code-keyword">print</span>(<span class="code-string">"  Primary checkpoint loaded"</span>)
             <span class="code-keyword">return</span> state_dict
         <span class="code-keyword">except</span> (IOError, RuntimeError) <span class="code-keyword">as</span> e:
-            <span class="code-keyword">print</span>(f<span class="code-string">"[!]  Primary load failed: {e}"</span>)
+            <span class="code-keyword">print</span>(f<span class="code-string">"  Primary load failed: {e}"</span>)
         
         <span class="code-comment"># Fallback to backup</span>
         <span class="code-keyword">try</span>:
             state_dict = torch.load(backup_path, map_location=<span class="code-string">'cuda:0'</span>)
-            <span class="code-keyword">print</span>(<span class="code-string">"[OK]  Backup checkpoint loaded - recovery WORKING"</span>)
+            <span class="code-keyword">print</span>(<span class="code-string">"  Backup checkpoint loaded - recovery WORKING"</span>)
             <span class="code-keyword">return</span> state_dict
         <span class="code-keyword">except</span> (IOError, RuntimeError) <span class="code-keyword">as</span> e:
-            <span class="code-keyword">print</span>(f<span class="code-string">"[OK]  Both primary and backup failed: {e}"</span>)
+            <span class="code-keyword">print</span>(f<span class="code-string">"  Both primary and backup failed: {e}"</span>)
             <span class="code-keyword">raise</span>
             
     <span class="code-keyword">finally</span>:
@@ -1532,7 +1532,7 @@ available_spare                         : 100%</span>
             </div>
 
             <div class="info-box success">
-                <strong>[OK] Error Injection Test Checklist:</strong>
+                <strong> Error Injection Test Checklist:</strong>
                 <table style="width: 100%; margin-top: 10px;">
                     <tr><td><strong>Test</strong></td><td><strong>Expected Behavior</strong></td><td><strong>Pass If</strong></td></tr>
                     <tr><td>Write error during checkpoint</td><td>Retry or fail gracefully</td><td>No corruption, no crash</td></tr>
@@ -1549,7 +1549,7 @@ available_spare                         : 100%</span>
             <h2 class="section-title">5. Security & Encryption</h2>
             
             <div class="info-box warning">
-                <strong>[!]  AI Models are Valuable IP:</strong> Your trained models, datasets, and checkpoints are worth millions. If they're on NVMe storage without encryption, they're at risk. Physical access = data access.
+                <strong>  AI Models are Valuable IP:</strong> Your trained models, datasets, and checkpoints are worth millions. If they're on NVMe storage without encryption, they're at risk. Physical access = data access.
             </div>
 
             <h3 class="subsection-title">Storage Security Options</h3>
@@ -1637,7 +1637,7 @@ available_spare                         : 100%</span>
             </div>
 
             <div class="info-box success">
-                <strong>[OK]  GDS + TCG Opal:</strong> Because encryption happens inside the SSD controller, it's transparent to DMA. GDS works at full speed with TCG Opal-encrypted drives. This is the recommended configuration for production AI systems.
+                <strong>  GDS + TCG Opal:</strong> Because encryption happens inside the SSD controller, it's transparent to DMA. GDS works at full speed with TCG Opal-encrypted drives. This is the recommended configuration for production AI systems.
             </div>
         </div>
 
@@ -1741,7 +1741,7 @@ available_spare                         : 100%</span>
             </div>
 
             <div class="info-box production">
-                <strong>[PROD] Production Tip:</strong> For LLM inference with large KV-cache, use XL-FLASH as a swap tier. When KV-cache exceeds HBM, page to XL-FLASH at 3&micro;s instead of TLC NVMe at 100&micro;s. 30&times; latency improvement for KV-cache misses.
+                <strong> Production Tip:</strong> For LLM inference with large KV-cache, use XL-FLASH as a swap tier. When KV-cache exceeds HBM, page to XL-FLASH at 3&micro;s instead of TLC NVMe at 100&micro;s. 30&times; latency improvement for KV-cache misses.
             </div>
         </div>
 
@@ -1750,7 +1750,7 @@ available_spare                         : 100%</span>
             <h2 class="section-title">7. RAID & Erasure Coding</h2>
             
             <div class="info-box warning">
-                <strong>[!]  The Conflict:</strong> RAID/EC provides data protection but adds latency and complexity. Software RAID (mdraid) in the kernel breaks GDS. Hardware RAID controllers add latency. What's the answer?
+                <strong>  The Conflict:</strong> RAID/EC provides data protection but adds latency and complexity. Software RAID (mdraid) in the kernel breaks GDS. Hardware RAID controllers add latency. What's the answer?
             </div>
 
             <h3 class="subsection-title">RAID Options for GPU Storage</h3>
@@ -1807,7 +1807,7 @@ available_spare                         : 100%</span>
             <h3 class="subsection-title">PyTorch Distributed Checkpoint (DCP)</h3>
             
             <div class="info-box success">
-                <strong>[OK]  Best Practice:</strong> For AI training, use application-level checkpoint redundancy instead of storage RAID. PyTorch Distributed Checkpoint can write shards to multiple storage targets asynchronously, providing redundancy without impacting training throughput.
+                <strong>  Best Practice:</strong> For AI training, use application-level checkpoint redundancy instead of storage RAID. PyTorch Distributed Checkpoint can write shards to multiple storage targets asynchronously, providing redundancy without impacting training throughput.
             </div>
 
             <div class="code-block">
@@ -1838,7 +1838,7 @@ storage_writers = [
             <h3 class="subsection-title">Failure Domain Analysis</h3>
             
             <div class="info-box warning">
-                <strong>[!]  Blast Radius Planning:</strong> A single failure shouldn't bring down your entire training run. Map your failure domains to understand blast radius and design appropriate redundancy.
+                <strong>  Blast Radius Planning:</strong> A single failure shouldn't bring down your entire training run. Map your failure domains to understand blast radius and design appropriate redundancy.
             </div>
 
                         <div class="arch-diagram">
@@ -1948,7 +1948,7 @@ storage_writers = [
             </table>
 
             <div class="info-box production">
-                <strong>[PROD] Production Recommendations:</strong>
+                <strong> Production Recommendations:</strong>
                 <ul style="margin: 10px 0; padding-left: 20px;">
                     <li><strong>Training jobs:</strong> Checkpoint to at least 2 independent failure domains (e.g., local NVMe + remote storage or different racks)</li>
                     <li><strong>Checkpoint frequency:</strong> Balance based on (compute_cost_per_hour &times; hours_between_checkpoints) vs checkpoint_storage_cost</li>
@@ -2348,7 +2348,7 @@ Read latency avg: 85 us, p99: 120 us
             </div>
 
             <div class="info-box production">
-                <strong>[PROD] Planning Guidance:</strong>
+                <strong> Planning Guidance:</strong>
                 <ul style="margin-top: 10px; margin-left: 20px;">
                     <li><strong>2024 deployments:</strong> PCIe Gen4 NVMe is cost-effective and mature. Gen5 SSDs available but premium-priced.</li>
                     <li><strong>2025 deployments:</strong> Gen5 SSDs will be mainstream. Fewer drives, simpler topologies.</li>
@@ -2362,7 +2362,7 @@ Read latency avg: 85 us, p99: 120 us
                 <div class="arch-title">Good vs. Bad PCIe Topology for GPU Storage</div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
                     <div>
-                        <h4 style="color: #ef4444; text-align: center; margin-bottom: 15px;">[X]  Bad: Through CPU</h4>
+                        <h4 style="color: #ef4444; text-align: center; margin-bottom: 15px;">  Bad: Through CPU</h4>
                         <div style="text-align: center;">
                             <div class="arch-box arch-gpu" style="margin: 10px auto;">GPU</div>
                             <div class="arch-arrow-down">&larr; x16</div>
@@ -2375,7 +2375,7 @@ Read latency avg: 85 us, p99: 120 us
                         </div>
                     </div>
                     <div>
-                        <h4 style="color: #00ff88; text-align: center; margin-bottom: 15px;">[OK]  Good: PCIe Switch</h4>
+                        <h4 style="color: #00ff88; text-align: center; margin-bottom: 15px;">  Good: PCIe Switch</h4>
                         <div style="text-align: center;">
                             <div class="arch-box arch-gpu" style="margin: 10px auto;">GPU</div>
                             <div class="arch-arrow-down">&larr; x16</div>
@@ -2434,13 +2434,13 @@ Machine (512GB total)
 -  + -  NUMANode L#0 (P#0 256GB)
 -  + -  L3 L#0 (45MB)
 -  + -  PCI 10de:2330 (GPU0)     &larr; GPU on NUMA 0
--  + -  PCI 144d:a808 (nvme0)    &larr; SSD on NUMA 0 [OK]  GOOD
--  - -  PCI 144d:a808 (nvme1)    &larr; SSD on NUMA 0 [OK]  GOOD
+-  + -  PCI 144d:a808 (nvme0)    &larr; SSD on NUMA 0   GOOD
+-  - -  PCI 144d:a808 (nvme1)    &larr; SSD on NUMA 0   GOOD
 - -  Package L#1
    + -  NUMANode L#1 (P#1 256GB)
    + -  L3 L#1 (45MB)
    + -  PCI 10de:2330 (GPU1)     &larr; GPU on NUMA 1
-   + -  PCI 144d:a808 (nvme2)    &larr; SSD on NUMA 1 [OK]  GOOD
+   + -  PCI 144d:a808 (nvme2)    &larr; SSD on NUMA 1   GOOD
    - -  PCI 15b3:1019 (mlx5)     &larr; NIC on NUMA 1
 
 # Generate graphical output (for detailed analysis)
@@ -2491,28 +2491,28 @@ Legend:
                         <td>PIX / PXB</td>
                         <td style="color: #00ff88;">+0.5-1&micro;s</td>
                         <td>~100%</td>
-                        <td>[OK]  Ideal for GDS</td>
+                        <td>  Ideal for GDS</td>
                     </tr>
                     <tr>
                         <td>Same NUMA, different switch</td>
                         <td>PHB</td>
                         <td style="color: #fbbf24;">+1-2&micro;s</td>
                         <td>~95%</td>
-                        <td>[OK]  Good alternative</td>
+                        <td>  Good alternative</td>
                     </tr>
                     <tr>
                         <td>Cross-NUMA (same socket)</td>
                         <td>NODE</td>
                         <td style="color: #f97316;">+2-5&micro;s</td>
                         <td>70-85%</td>
-                        <td>[!]  Avoid if possible</td>
+                        <td>  Avoid if possible</td>
                     </tr>
                     <tr>
                         <td>Cross-Socket (QPI/UPI)</td>
                         <td>SYS</td>
                         <td style="color: #ef4444;">+5-10&micro;s</td>
                         <td>50-70%</td>
-                        <td>[X]  Never for latency-sensitive</td>
+                        <td>  Never for latency-sensitive</td>
                     </tr>
                 </tbody>
             </table>
@@ -2545,7 +2545,7 @@ nvme1   OK      OK       OK      X
 </div>
 
             <div class="info-box warning">
-                <strong>[!]  ACS Security Trade-off:</strong> Disabling ACS enables P2P but weakens IOMMU isolation. In multi-tenant environments, consider alternative topologies (dedicated PCIe switches) rather than disabling ACS globally.
+                <strong>  ACS Security Trade-off:</strong> Disabling ACS enables P2P but weakens IOMMU isolation. In multi-tenant environments, consider alternative topologies (dedicated PCIe switches) rather than disabling ACS globally.
             </div>
 
             <h3 class="subsection-title">IOMMU Groups & Device Isolation</h3>
@@ -2908,7 +2908,7 @@ $ gdsio -f /mnt/nvme0/testfile -d 0 -s 1G -i 1M -x 0 -I 1 -V
             </div>
 
             <div class="info-box warning">
-                <strong>[!]  Current Limitations:</strong> KV-NVMe + GDS integration is not yet production-ready. Current deployments use file-based embedding stores with GDS. Samsung and Kioxia KV SSDs exist but lack direct GPU memory support. Watch for developments in 2025-2026.
+                <strong>  Current Limitations:</strong> KV-NVMe + GDS integration is not yet production-ready. Current deployments use file-based embedding stores with GDS. Samsung and Kioxia KV SSDs exist but lack direct GPU memory support. Watch for developments in 2025-2026.
             </div>
         </div>
 
@@ -3089,7 +3089,7 @@ sycl::queue q{sycl::gpu_selector_v};
             <h2 class="section-title">13. Benchmark Performance Ranges (Illustrative)</h2>
             
             <div class="info-box warning">
-                <strong>[!]  Important:</strong> Numbers in this section are <em>illustrative ranges</em> based on typical performance characteristics, not direct citations of official results. For certified MLPerf Storage results, see the <a href="https://mlcommons.org/benchmarks/storage/" target="_blank" style="color: #00d4ff;">official MLCommons results</a>.
+                <strong>  Important:</strong> Numbers in this section are <em>illustrative ranges</em> based on typical performance characteristics, not direct citations of official results. For certified MLPerf Storage results, see the <a href="https://mlcommons.org/benchmarks/storage/" target="_blank" style="color: #00d4ff;">official MLCommons results</a>.
             </div>
 
             <h3 class="subsection-title">MLPerf Storage Benchmark Results</h3>
@@ -3097,7 +3097,7 @@ sycl::queue q{sycl::gpu_selector_v};
             <p><a href="https://mlcommons.org/benchmarks/storage/" target="_blank" style="color: #00d4ff;">MLPerf Storage</a> is the industry standard for AI storage benchmarking. Official results: <a href="https://mlcommons.org/benchmarks/storage/" style="color: #00d4ff;">mlcommons.org/benchmarks/storage</a>.</p>
             
             <div class="info-box warning">
-                <strong>[!]  Illustrative Ranges (Not Direct Citations):</strong> The numbers below represent typical performance ranges synthesized from published MLPerf Storage v0.5/v1.0 submissions. For specific submission data, consult the <a href="https://github.com/mlcommons/storage_results_v1.0" style="color: #00d4ff;">MLCommons GitHub repository</a>. 
+                <strong>  Illustrative Ranges (Not Direct Citations):</strong> The numbers below represent typical performance ranges synthesized from published MLPerf Storage v0.5/v1.0 submissions. For specific submission data, consult the <a href="https://github.com/mlcommons/storage_results_v1.0" style="color: #00d4ff;">MLCommons GitHub repository</a>. 
                 Example vendors with public submissions: NVIDIA, DDN, Weka, VAST Data, Pure Storage. Results vary 2-3&times; based on tuning, dataset placement, and software versions.
             </div>
             
@@ -3137,7 +3137,7 @@ sycl::queue q{sycl::gpu_selector_v};
             </table>
 
             <div class="info-box">
-                <strong>“ˆ Key Insight:</strong> GDS-enabled configurations consistently achieve 20-40% higher throughput than traditional NFS/CIFS paths. The gap widens with larger batch sizes where CPU becomes the bottleneck in non-GDS configurations.
+                <strong> Key Insight:</strong> GDS-enabled configurations consistently achieve 20-40% higher throughput than traditional NFS/CIFS paths. The gap widens with larger batch sizes where CPU becomes the bottleneck in non-GDS configurations.
             </div>
 
             <h3 class="subsection-title">gdsio Micro-Benchmark Results</h3>
@@ -3145,7 +3145,7 @@ sycl::queue q{sycl::gpu_selector_v};
             <p>Illustrative results from gdsio on single-GPU + enterprise NVMe configurations:</p>
             
             <div class="info-box">
-                <strong>“‹ Methodology Note:</strong> Results below are illustrative of typical GDS vs POSIX performance ratios. Your results will vary based on: SSD model/generation, PCIe configuration, GPU model, filesystem, kernel version, and GDS version. Always benchmark your specific configuration.
+                <strong>Methodology Note:</strong> Results below are illustrative of typical GDS vs POSIX performance ratios. Your results will vary based on: SSD model/generation, PCIe configuration, GPU model, filesystem, kernel version, and GDS version. Always benchmark your specific configuration.
             </div>
             
             <table class="data-table">
@@ -3208,7 +3208,7 @@ sycl::queue q{sycl::gpu_selector_v};
             </div>
             
             <div class="info-box" style="background: rgba(0, 150, 255, 0.1); border-left-color: #0096ff;">
-                <strong>“š Source Note:</strong> Numbers above are illustrative, synthesized from NVIDIA GDS documentation, GTC presentations (2022-2024), and enterprise storage vendor whitepapers. Your mileage will vary&mdash;always benchmark your specific configuration. For reproducibility, use the gdsio command above with your hardware.
+                <strong>Source Note:</strong> Numbers above are illustrative, synthesized from NVIDIA GDS documentation, industry benchmarks and vendor documentation. Your mileage will vary&mdash;always benchmark your specific configuration. For reproducibility, use the gdsio command above with your hardware.
             </div>
 
             <h3 class="subsection-title">DALI Data Pipeline Benchmark</h3>
@@ -3260,7 +3260,7 @@ sycl::queue q{sycl::gpu_selector_v};
             <h3 class="subsection-title">Latency Distribution (P50/P99/P99.9)</h3>
             
             <div class="info-box">
-                <strong>“‹ Note:</strong> Latency values below are typical ranges observed in benchmarking. Actual latency depends heavily on: I/O size, queue depth, SSD model, PCIe generation, network configuration (for NVMe-oF), and background activities (GC, wear leveling).
+                <strong>Note:</strong> Latency values below are typical ranges observed in benchmarking. Actual latency depends heavily on: I/O size, queue depth, SSD model, PCIe generation, network configuration (for NVMe-oF), and background activities (GC, wear leveling).
             </div>
             
             <table class="data-table">
@@ -3313,10 +3313,10 @@ sycl::queue q{sycl::gpu_selector_v};
             </table>
 
             <div class="info-box production">
-                <strong>[PROD] Production Guidance:</strong> For latency-sensitive inference workloads, target P99 < 500&micro;s. This typically requires local NVMe with GDS or NVMe-oF RDMA. TCP-based protocols struggle to meet this SLA under load.
+                <strong> Production Guidance:</strong> For latency-sensitive inference workloads, target P99 < 500&micro;s. This typically requires local NVMe with GDS or NVMe-oF RDMA. TCP-based protocols struggle to meet this SLA under load.
             </div>
 
-            <h3 class="subsection-title">[!]  Tail Latency Deep Dive: Why P99.9 Kills GPU Pipelines</h3>
+            <h3 class="subsection-title">  Tail Latency Deep Dive: Why P99.9 Kills GPU Pipelines</h3>
             
             <div class="info-box warning">
                 <strong>Critical Insight:</strong> GPU tensor operations process batches. A single slow I/O stalls an entire batch&mdash;potentially hundreds of samples. One 10ms outlier in a batch of 256 samples means 256&times; the expected latency impact. Tail latency is not a statistics problem; it's a batch-blocking problem.
@@ -3534,7 +3534,7 @@ nvme smart-log /dev/nvme0 | grep -i temp
             </div>
 
             <div class="info-box production">
-                <strong>[PROD] Production Rule of Thumb:</strong> 
+                <strong> Production Rule of Thumb:</strong> 
                 <ul style="margin: 0.5rem 0 0 1rem; color: #ccc;">
                     <li><strong>Inference SLA:</strong> If your P99.9 needs to be < 1ms, use QD &le; 8 per drive and separate drives from write workloads</li>
                     <li><strong>Training:</strong> Tail latency matters less; optimize for throughput with QD 32-128</li>
@@ -3564,11 +3564,11 @@ nvme smart-log /dev/nvme0 | grep -i temp
                         <td>Samsung</td>
                     </tr>
                     <tr>
-                        <td><strong>Micron 7450 PRO</strong></td>
+                        <td><strong>Enterprise NVMe SSD</strong></td>
                         <td>1 DWPD</td>
                         <td class="good">0.9 DWPD</td>
                         <td>7,008 TB</td>
-                        <td>Micron</td>
+                        <td>Enterprise</td>
                     </tr>
                     <tr>
                         <td><strong>Kioxia CM7-R</strong></td>
@@ -3638,7 +3638,7 @@ nvme smart-log /dev/nvme0 | grep -i temp
             </div>
             
             <div class="info-box warning">
-                <strong>[!]  Real Failure Story:</strong> A major AI lab lost 40% of checkpoint SSDs in 18 months. 
+                <strong>  Real Failure Story:</strong> A major AI lab lost 40% of checkpoint SSDs in 18 months. 
                 Root cause: Consumer-grade 0.3 DWPD SSDs used for 4&times; DWPD workload (no FDP, WAF ~4&times;).
                 Fix: Migrated to 3 DWPD enterprise drives + enabled FDP. Projected lifetime: 5+ years.
             </div>
@@ -3649,7 +3649,7 @@ nvme smart-log /dev/nvme0 | grep -i temp
             <h2 class="section-title">The Metadata Tax: Small Files and POSIX Overhead</h2>
             
             <div class="warning-box">
-                <strong>[!]  Hidden Performance Killer:</strong> Even with perfect I/O paths, POSIX metadata operations can dominate GPU pipeline latency when loading many small files. This "metadata tax" is invisible in bandwidth metrics but devastating to batch completion time.
+                <strong>  Hidden Performance Killer:</strong> Even with perfect I/O paths, POSIX metadata operations can dominate GPU pipeline latency when loading many small files. This "metadata tax" is invisible in bandwidth metrics but devastating to batch completion time.
             </div>
             
             <h3 class="subsection-title">The Small File Problem</h3>
@@ -3798,7 +3798,7 @@ pipe = Pipeline(batch_size=<span class="code-number">256</span>, num_threads=<sp
             </div>
             
             <div class="info-box" style="background: rgba(0, 255, 136, 0.1); border-left-color: #00ff88;">
-                <strong>[OK] Production Rule:</strong> If your dataset has >100K files, <em>always</em> shard into containers (TFRecord, WebDataset, tar) before training. The 30-minute conversion saves hours of metadata overhead per epoch.
+                <strong> Production Rule:</strong> If your dataset has >100K files, <em>always</em> shard into containers (TFRecord, WebDataset, tar) before training. The 30-minute conversion saves hours of metadata overhead per epoch.
             </div>
         </div>
 

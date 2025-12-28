@@ -341,12 +341,12 @@
                         <div className="page-header">
                             <div className="page-number">03</div>
                             <h1 className="page-title">Thread Synchronization in NVMe Hurts GPU Utilization</h1>
-                            <p className="page-subtitle">Pages 16-20 from Micron SNIA SDC 2025</p>
+                            <p className="page-subtitle">Synchronization Challenges</p>
                         </div>
 
                         {/* Thread Count Reminder */}
                         <div className="section">
-                            <h2 className="section-title">The Scale Problem (Page 17)</h2>
+                            <h2 className="section-title">The Scale Problem</h2>
                             
                             <div className="thread-count-section">
                                 <div className="gpu-stat">
@@ -447,7 +447,7 @@
                                                         }}
                                                     >
                                                         <div className={`sync-indicator indicator-${step.type}`}>
-                                                            {step.type === 'sync' ? '”’ SYNC' : '"[BOLT]" PARALLEL'}
+                                                            {step.type === 'sync' ? '”’ SYNC' : 'PARALLEL'}
                                                         </div>
                                                         <div className="sync-desc">{step.desc}</div>
                                                     </div>
@@ -466,7 +466,7 @@
 
                         {/* Cost of Synchronization */}
                         <div className="section">
-                            <h2 className="section-title">The Cost of Synchronization (Page 19)</h2>
+                            <h2 className="section-title">The Cost of Synchronization</h2>
                             
                             <p style={{color: '#888', marginBottom: '20px'}}>
                                 Synchronizations are handled via loops that sleep/update GPU memory atomic variables:
@@ -474,7 +474,7 @@
 
                             <div className="cost-grid">
                                 <div className="cost-card">
-                                    <div className="cost-icon">"[BOLT]"</div>
+                                    <div className="cost-icon"></div>
                                     <div className="cost-title">Loss of SM Cycles</div>
                                     <div className="cost-desc">Thread serialization means only 1 thread runs instead of 32, wasting 96.875% of compute capacity</div>
                                 </div>
@@ -498,7 +498,7 @@
 
                         {/* Solution Direction */}
                         <div className="section">
-                            <h2 className="section-title">The Path Forward (Page 20)</h2>
+                            <h2 className="section-title">The Path Forward</h2>
                             
                             <div className="solution-box">
                                 <div className="solution-title">NVMe Protocol Revisions Can Help</div>
@@ -508,21 +508,20 @@
                                         <div style={{color: '#00ff88', fontWeight: '600'}}>Reduce Sync Points</div>
                                     </div>
                                     <div style={{textAlign: 'center'}}>
-                                        <div style={{fontSize: '2rem'}}>"[BOLT]"</div>
+                                        <div style={{fontSize: '2rem'}}></div>
                                         <div style={{color: '#00ff88', fontWeight: '600'}}>Improve Parallelization</div>
                                     </div>
                                     <div style={{textAlign: 'center'}}>
-                                        <div style={{fontSize: '2rem'}}>“ˆ</div>
+                                        <div style={{fontSize: '2rem'}}></div>
                                         <div style={{color: '#00ff88', fontWeight: '600'}}>Improve GPU Utilization</div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="key-point" style={{marginTop: '30px'}}>
-                                <strong>Key Insight:</strong> The fundamental mismatch is that NVMe was designed for CPUs where 
-                                one thread owns one queue with no contention. GPUs have hundreds of thousands of threads 
-                                that may all need to access queues simultaneously, requiring expensive synchronization that 
-                                destroys GPU efficiency.
+                                <strong>Key Insight:</strong> NVMe's control plane assumes a few host threads manage queue submission/completion. 
+                                GPUs have thousands of threads that may need storage access, requiring synchronization to 
+                                funnel through limited I/O agent warps—this coordination overhead hurts GPU efficiency.
                             </div>
                         </div>
 
@@ -531,12 +530,12 @@
                             <div style={{display: 'inline-block', background: 'rgba(0, 212, 255, 0.2)', border: '1px solid #00d4ff', borderRadius: '20px', padding: '5px 15px', marginBottom: '15px', fontSize: '0.85rem', color: '#00d4ff'}}>
                                 Pages 21-22
                             </div>
-                            <h2 className="section-title">"[BOLT]" Interrupts vs Polling</h2>
+                            <h2 className="section-title">Interrupts vs Polling</h2>
                             
                             <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '20px', marginTop: '20px'}}>
                                 {/* Polling - Good */}
                                 <div style={{background: 'rgba(0, 255, 136, 0.1)', border: '2px solid #00ff88', borderRadius: '12px', padding: '20px'}}>
-                                    <h3 style={{color: '#00ff88', marginBottom: '15px', fontSize: '1.3rem'}}>[OK] Polling (Recommended)</h3>
+                                    <h3 style={{color: '#00ff88', marginBottom: '15px', fontSize: '1.3rem'}}> Polling (Recommended)</h3>
                                     <p style={{color: '#ccc', marginBottom: '15px', lineHeight: '1.7'}}>
                                         Polling is well suited to parallelization and SIMT architecture. Polling allows threads to 
                                         <strong style={{color: '#00ff88'}}> stay executing in lock steps</strong>, each thread polling a 
@@ -553,7 +552,7 @@
 
                                 {/* Interrupts - Bad */}
                                 <div style={{background: 'rgba(255, 107, 107, 0.1)', border: '2px solid #ff6b6b', borderRadius: '12px', padding: '20px'}}>
-                                    <h3 style={{color: '#ff6b6b', marginBottom: '15px', fontSize: '1.3rem'}}>[X]  Interrupts (Problematic)</h3>
+                                    <h3 style={{color: '#ff6b6b', marginBottom: '15px', fontSize: '1.3rem'}}>  Interrupts (Problematic)</h3>
                                     <p style={{color: '#ccc', marginBottom: '15px', lineHeight: '1.7'}}>
                                         If interrupts were used, an interrupt handler would 
                                         <strong style={{color: '#ff6b6b'}}> break the parallelism</strong>. GPUs are designed for 

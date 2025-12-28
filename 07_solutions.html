@@ -235,7 +235,7 @@
         }
         
         .card-benefits li::before {
-            content: '[OK] ';
+            content: ' ';
             position: absolute;
             left: 0;
             color: #00ff88;
@@ -920,7 +920,7 @@
             <h2 class="section-title">Paradigm Shift: CXL Memory Semantics</h2>
             
             <div class="info-box success">
-                <strong>š€ The Big Idea:</strong> CXL replaces command queues with memory semantics. Instead of submitting NVMe commands, the GPU issues standard load/store operations to a unified memory address space that spans DRAM, storage, and remote memory.
+                <strong>The Big Idea:</strong> CXL replaces command queues with memory semantics. Instead of submitting NVMe commands, the GPU issues standard load/store operations to a unified memory address space that spans DRAM, storage, and remote memory.
             </div>
 
             <div class="arch-diagram">
@@ -928,7 +928,7 @@
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
                     <div>
-                        <h4 style="color: #ef4444; text-align: center; margin-bottom: 15px;">[X]  NVMe Today</h4>
+                        <h4 style="color: #ef4444; text-align: center; margin-bottom: 15px;">  NVMe Today</h4>
                         <div class="arch-flow" style="flex-direction: column;">
                             <div class="arch-box arch-gpu">GPU Thread</div>
                             <div class="arch-arrow">&larr;</div>
@@ -944,7 +944,7 @@
                     </div>
                     
                     <div>
-                        <h4 style="color: #00ff88; text-align: center; margin-bottom: 15px;">[OK]  CXL.mem Future</h4>
+                        <h4 style="color: #00ff88; text-align: center; margin-bottom: 15px;">  CXL.mem Future</h4>
                         <div class="arch-flow" style="flex-direction: column;">
                             <div class="arch-box arch-gpu">GPU Thread</div>
                             <div class="arch-arrow">&larr;</div>
@@ -1019,7 +1019,7 @@
             </table>
 
             <div class="info-box warning">
-                <strong>[!]  CXL Latency Reality Check:</strong>
+                <strong>  CXL Latency Reality Check:</strong>
                 <ul style="margin: 10px 0; padding-left: 20px;">
                     <li><strong>200-500 ns:</strong> CXL memory expander (Type 3) accessing DRAM behind CXL controller. This is for DRAM-backed CXL, not persistent storage</li>
                     <li><strong>2-10 &micro;s:</strong> CXL-attached persistent memory (Intel Optane-class or future SCM)</li>
@@ -1224,7 +1224,7 @@
                     </p>
                     <ul class="card-benefits">
                         <li>Elastic storage pools</li>
-                        <li>GPU�”GPU�”Storage</li>
+                        <li>GPU�”GPU�”Storage</li>
                         <li>Composable infrastructure</li>
                     </ul>
                 </div>
@@ -1373,7 +1373,7 @@
             </div>
 
             <div class="info-box warning">
-                <strong>[!]  Key Decision Factors:</strong>
+                <strong>  Key Decision Factors:</strong>
                 <ul style="margin-top: 10px; margin-left: 20px;">
                     <li><strong>Timeline:</strong> Production now &rarr; GDS; 2026+ &rarr; CXL/UEC</li>
                     <li><strong>Access Pattern:</strong> Sequential &rarr; GDS sufficient; Random &rarr; Need CXL</li>
@@ -1389,7 +1389,7 @@
             
             <div class="solutions-grid">
                 <div class="info-box success">
-                    <h4 style="color: #00ff88; margin-bottom: 10px;">[OK]  Today's Best Practice</h4>
+                    <h4 style="color: #00ff88; margin-bottom: 10px;">  Today's Best Practice</h4>
                     <p>GPUDirect Storage + multi-SSD striping + batch submission. Achieves 50-100 GB/s with existing hardware. Software-only optimizations can improve IOPS 10&times;.</p>
                 </div>
                 
@@ -1399,7 +1399,7 @@
                 </div>
                 
                 <div class="info-box success">
-                    <h4 style="color: #00ff88; margin-bottom: 10px;">š€ CXL: Memory Semantics</h4>
+                    <h4 style="color: #00ff88; margin-bottom: 10px;">CXL: Memory Semantics</h4>
                     <p>CXL eliminates command queues entirely. Load/store access to storage with ns-class latency. Shared memory pools enable new architectures.</p>
                 </div>
                 
@@ -1425,4 +1425,4 @@
         </div>
     </div>
 </body>
-</html>
+</ht

@@ -295,12 +295,12 @@
                         <div className="page-header">
                             <div className="page-number">01</div>
                             <h1 className="page-title">Motivation: Why are we here - AI</h1>
-                            <p className="page-subtitle">Pages 3-5 from Micron SNIA SDC 2025</p>
+                            <p className="page-subtitle">GPU-NVMe Architecture Overview</p>
                         </div>
 
-                        {/* Page 3: AI Infrastructure */}
+                        
                         <div className="section">
-                            <h2 className="section-title">AI Infrastructure (Page 3)</h2>
+                            <h2 className="section-title">AI Infrastructure</h2>
                             <div className="ai-infra">
                                 <div className="ai-pillars">
                                     <div className="pillar pillar-compute">Compute</div>
@@ -323,9 +323,9 @@
                             </div>
                         </div>
 
-                        {/* Page 4: Training vs Inference */}
+                        
                         <div className="section">
-                            <h2 className="section-title">GPUs are at the heart of AI Training and Inference (Page 4)</h2>
+                            <h2 className="section-title">GPUs are at the heart of AI Training and Inference</h2>
                             
                             <div className="arch-toggle">
                                 <button 
@@ -343,72 +343,117 @@
                             </div>
 
                             {archMode === 'training' ? (
-                                <div className="arch-diagram">
-                                    <div className="arch-row">
-                                        <div className="component cpu">CPU</div>
-                                        <div className="component dram">DRAM</div>
-                                        <div style={{width: '40px'}}></div>
-                                        <div className="component cpu">CPU</div>
-                                        <div className="component dram">DRAM</div>
-                                    </div>
-                                    <div className="data-arrow">&larr; &larr;</div>
-                                    <div className="arch-row">
-                                        <div className="component ssd">SSD</div>
-                                        <div className="component ssd">SSD</div>
-                                        <div className="component switch">PCIe Switch</div>
-                                        <div className="component ssd">SSD</div>
-                                        <div className="component ssd">SSD</div>
-                                    </div>
-                                    <div className="data-arrow">&larr; &larr;</div>
-                                    <div className="arch-row">
-                                        {[1,2,3,4].map(i => (
-                                            <div key={i} className="gpu-block">
-                                                <span>GPU</span>
-                                                <div className="hbm">HBM</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="data-arrow">&bull;</div>
-                                    <div className="component switch" style={{background: '#a855f7'}}>Accelerator Switch</div>
-                                    <div className="data-arrow">&bull;</div>
-                                    <div className="arch-row">
-                                        {[1,2,3,4].map(i => (
-                                            <div key={i} className="gpu-block">
-                                                <span>GPU</span>
-                                                <div className="hbm">HBM</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="data-arrow">&larr;</div>
-                                    <div className="arch-row">
-                                        <div className="component nic">NIC</div>
-                                        <div className="component nic">NIC</div>
-                                        <div className="component nic">NIC</div>
-                                        <div className="component nic">NIC</div>
-                                    </div>
-                                    <div style={{color: '#888', marginTop: '10px'}}>
-                                        &rarr; Remote SSD
-                                    </div>
+                                <div className="arch-diagram" style={{padding: '20px'}}>
+                                    <svg viewBox="0 0 700 350" style={{width: '100%', maxWidth: '700px', margin: '0 auto', display: 'block'}}>
+                                        {/* Title */}
+                                        <text x="350" y="25" fill="#00d4ff" fontSize="14" fontWeight="bold" textAnchor="middle">Multi-GPU Training Node Architecture</text>
+                                        
+                                        {/* CPU/DRAM Section */}
+                                        <rect x="250" y="40" width="200" height="45" rx="6" fill="#1a1a28" stroke="#3b82f6" strokeWidth="2"/>
+                                        <text x="350" y="60" fill="#3b82f6" fontSize="11" fontWeight="bold" textAnchor="middle">Host System</text>
+                                        <text x="350" y="77" fill="#888" fontSize="9" textAnchor="middle">CPU + DRAM</text>
+                                        
+                                        {/* PCIe connection */}
+                                        <line x1="350" y1="85" x2="350" y2="110" stroke="#666" strokeWidth="2"/>
+                                        <text x="380" y="100" fill="#666" fontSize="8">PCIe</text>
+                                        
+                                        {/* NVMe SSDs */}
+                                        <rect x="50" y="115" width="120" height="40" rx="4" fill="#1a1a28" stroke="#fbbf24" strokeWidth="2"/>
+                                        <text x="110" y="140" fill="#fbbf24" fontSize="10" fontWeight="bold" textAnchor="middle">NVMe SSDs</text>
+                                        
+                                        {/* PCIe Switch */}
+                                        <rect x="250" y="115" width="200" height="40" rx="4" fill="#1a1a28" stroke="#a855f7" strokeWidth="2"/>
+                                        <text x="350" y="140" fill="#a855f7" fontSize="10" fontWeight="bold" textAnchor="middle">PCIe Switch</text>
+                                        
+                                        {/* NIC */}
+                                        <rect x="530" y="115" width="120" height="40" rx="4" fill="#1a1a28" stroke="#f97316" strokeWidth="2"/>
+                                        <text x="590" y="140" fill="#f97316" fontSize="10" fontWeight="bold" textAnchor="middle">Network (IB/ETH)</text>
+                                        
+                                        {/* Connections to switch */}
+                                        <line x1="170" y1="135" x2="250" y2="135" stroke="#666" strokeWidth="1"/>
+                                        <line x1="450" y1="135" x2="530" y2="135" stroke="#666" strokeWidth="1"/>
+                                        
+                                        {/* Connection to GPUs */}
+                                        <line x1="350" y1="155" x2="350" y2="180" stroke="#666" strokeWidth="2"/>
+                                        
+                                        {/* NVSwitch */}
+                                        <rect x="200" y="185" width="300" height="35" rx="4" fill="#1a1a28" stroke="#00ff88" strokeWidth="2"/>
+                                        <text x="350" y="207" fill="#00ff88" fontSize="10" fontWeight="bold" textAnchor="middle">NVSwitch (GPU Interconnect)</text>
+                                        
+                                        {/* GPUs */}
+                                        <line x1="350" y1="220" x2="350" y2="240" stroke="#00ff88" strokeWidth="2"/>
+                                        
+                                        <rect x="80" y="245" width="100" height="55" rx="6" fill="#0a0a12" stroke="#00ff88" strokeWidth="2"/>
+                                        <text x="130" y="268" fill="#00ff88" fontSize="10" fontWeight="bold" textAnchor="middle">GPU 0</text>
+                                        <text x="130" y="285" fill="#666" fontSize="8" textAnchor="middle">HBM</text>
+                                        
+                                        <rect x="200" y="245" width="100" height="55" rx="6" fill="#0a0a12" stroke="#00ff88" strokeWidth="2"/>
+                                        <text x="250" y="268" fill="#00ff88" fontSize="10" fontWeight="bold" textAnchor="middle">GPU 1</text>
+                                        <text x="250" y="285" fill="#666" fontSize="8" textAnchor="middle">HBM</text>
+                                        
+                                        <rect x="320" y="245" width="100" height="55" rx="6" fill="#0a0a12" stroke="#00ff88" strokeWidth="2"/>
+                                        <text x="370" y="268" fill="#00ff88" fontSize="10" fontWeight="bold" textAnchor="middle">GPU 2</text>
+                                        <text x="370" y="285" fill="#666" fontSize="8" textAnchor="middle">HBM</text>
+                                        
+                                        <rect x="440" y="245" width="100" height="55" rx="6" fill="#0a0a12" stroke="#00ff88" strokeWidth="2"/>
+                                        <text x="490" y="268" fill="#00ff88" fontSize="10" fontWeight="bold" textAnchor="middle">GPU 3</text>
+                                        <text x="490" y="285" fill="#666" fontSize="8" textAnchor="middle">HBM</text>
+                                        
+                                        {/* GPU connections to NVSwitch */}
+                                        <line x1="130" y1="245" x2="130" y2="220" stroke="#00ff88" strokeWidth="1"/>
+                                        <line x1="130" y1="220" x2="200" y2="220" stroke="#00ff88" strokeWidth="1"/>
+                                        <line x1="250" y1="245" x2="250" y2="220" stroke="#00ff88" strokeWidth="1"/>
+                                        <line x1="370" y1="245" x2="370" y2="220" stroke="#00ff88" strokeWidth="1"/>
+                                        <line x1="490" y1="245" x2="490" y2="220" stroke="#00ff88" strokeWidth="1"/>
+                                        <line x1="490" y1="220" x2="500" y2="220" stroke="#00ff88" strokeWidth="1"/>
+                                        
+                                        {/* Data flow annotations */}
+                                        <text x="60" y="175" fill="#fbbf24" fontSize="8">Training Data</text>
+                                        <text x="560" y="175" fill="#f97316" fontSize="8">Gradient Sync</text>
+                                        <text x="350" y="330" fill="#888" fontSize="9" textAnchor="middle">GPUs connected via high-speed NVLink for gradient exchange</text>
+                                    </svg>
                                 </div>
                             ) : (
-                                <div className="arch-diagram">
-                                    <div className="arch-row">
-                                        <div className="component dram">DRAM</div>
-                                        <div style={{width: '20px'}}></div>
-                                        <div className="component dram">DRAM</div>
-                                    </div>
-                                    <div className="data-arrow">&larr; &larr;</div>
-                                    <div className="arch-row">
-                                        <div className="gpu-block">
-                                            <span>GPU</span>
-                                        </div>
-                                        <div style={{width: '40px'}}></div>
-                                        <div className="component cpu">CPU</div>
-                                    </div>
-                                    <div className="data-arrow">&larr; &larr;</div>
-                                    <div className="component switch">PCIe Switch</div>
-                                    <div className="data-arrow">&larr; &larr;</div>
-                                    <div className="component ssd">SSD</div>
+                                <div className="arch-diagram" style={{padding: '20px'}}>
+                                    <svg viewBox="0 0 600 280" style={{width: '100%', maxWidth: '600px', margin: '0 auto', display: 'block'}}>
+                                        {/* Title */}
+                                        <text x="300" y="25" fill="#00d4ff" fontSize="14" fontWeight="bold" textAnchor="middle">Inference Server Architecture</text>
+                                        
+                                        {/* CPU/DRAM */}
+                                        <rect x="380" y="50" width="150" height="50" rx="6" fill="#1a1a28" stroke="#3b82f6" strokeWidth="2"/>
+                                        <text x="455" y="72" fill="#3b82f6" fontSize="10" fontWeight="bold" textAnchor="middle">CPU</text>
+                                        <text x="455" y="90" fill="#888" fontSize="8" textAnchor="middle">+ DRAM</text>
+                                        
+                                        {/* GPU */}
+                                        <rect x="70" y="50" width="150" height="70" rx="6" fill="#0a0a12" stroke="#00ff88" strokeWidth="2"/>
+                                        <text x="145" y="80" fill="#00ff88" fontSize="12" fontWeight="bold" textAnchor="middle">GPU</text>
+                                        <text x="145" y="100" fill="#666" fontSize="9" textAnchor="middle">HBM (Model + KV Cache)</text>
+                                        
+                                        {/* Connection GPU-CPU */}
+                                        <line x1="220" y1="85" x2="380" y2="85" stroke="#666" strokeWidth="1" strokeDasharray="4"/>
+                                        <text x="300" y="78" fill="#666" fontSize="8" textAnchor="middle">Control Path</text>
+                                        
+                                        {/* PCIe Switch */}
+                                        <rect x="200" y="150" width="200" height="35" rx="4" fill="#1a1a28" stroke="#a855f7" strokeWidth="2"/>
+                                        <text x="300" y="172" fill="#a855f7" fontSize="10" fontWeight="bold" textAnchor="middle">PCIe Switch</text>
+                                        
+                                        {/* Connections to switch */}
+                                        <line x1="145" y1="120" x2="145" y2="168" stroke="#666" strokeWidth="2"/>
+                                        <line x1="145" y1="168" x2="200" y2="168" stroke="#666" strokeWidth="2"/>
+                                        <line x1="455" y1="100" x2="455" y2="168" stroke="#666" strokeWidth="2"/>
+                                        <line x1="400" y1="168" x2="455" y2="168" stroke="#666" strokeWidth="2"/>
+                                        
+                                        {/* NVMe SSD */}
+                                        <rect x="200" y="210" width="200" height="45" rx="4" fill="#1a1a28" stroke="#fbbf24" strokeWidth="2"/>
+                                        <text x="300" y="232" fill="#fbbf24" fontSize="10" fontWeight="bold" textAnchor="middle">NVMe SSD</text>
+                                        <text x="300" y="248" fill="#888" fontSize="8" textAnchor="middle">Model weights, prompts</text>
+                                        
+                                        {/* Connection switch to SSD */}
+                                        <line x1="300" y1="185" x2="300" y2="210" stroke="#fbbf24" strokeWidth="2"/>
+                                        
+                                        {/* Data flow label */}
+                                        <text x="300" y="275" fill="#888" fontSize="9" textAnchor="middle">Inference: Load model once, serve many requests</text>
+                                    </svg>
                                 </div>
                             )}
 
@@ -417,70 +462,127 @@
                             </div>
                         </div>
 
-                        {/* Page 5: Making Storage Accessible */}
+                        
                         <div className="section">
-                            <h2 className="section-title">Making Storage Accessible to GPUs (Page 5)</h2>
+                            <h2 className="section-title">Making Storage Accessible to GPUs</h2>
                             <p style={{marginBottom: '20px', color: '#888'}}>
                                 If data is needed by the GPU, then can the IO be initiated from GPU instead of the CPU?
                             </p>
 
-                            <div className="comparison-grid">
-                                <div className="comparison-card">
-                                    <h3 className="comparison-title">Without Peer-to-Peer (Bounce Buffer)</h3>
-                                    <div className="path-diagram">
-                                        <div className="path-step cpu">CPU</div>
-                                        <div className="arrow-down">&larr;</div>
-                                        <div className="path-step dram">System Memory (Bounce Buffer)</div>
-                                        <div className="arrow-down">&larr;</div>
-                                        <div className="path-step switch">PCIe Switch</div>
-                                        <div style={{display: 'flex', gap: '20px', width: '100%'}}>
-                                            <div style={{flex: 1}}>
-                                                <div className="arrow-down">&larr;</div>
-                                                <div className="path-step ssd">NVMe SSD</div>
-                                            </div>
-                                            <div style={{flex: 1}}>
-                                                <div className="arrow-down">&larr;</div>
-                                                <div className="path-step gpu">GPU</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div style={{marginTop: '15px', color: '#ff6b6b', fontSize: '0.9rem'}}>
-                                        [X]  Data must go through CPU and system memory
+                            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '20px'}}>
+                                {/* Bounce Buffer Path */}
+                                <div style={{background: 'rgba(255,107,107,0.05)', border: '1px solid rgba(255,107,107,0.3)', borderRadius: '12px', padding: '20px'}}>
+                                    <h3 style={{color: '#ff6b6b', marginBottom: '15px', textAlign: 'center'}}>Without P2P (Bounce Buffer)</h3>
+                                    <svg viewBox="0 0 350 320" style={{width: '100%', maxWidth: '350px', margin: '0 auto', display: 'block'}}>
+                                        {/* SSD */}
+                                        <rect x="25" y="250" width="120" height="50" rx="6" fill="#1a1a28" stroke="#fbbf24" strokeWidth="2"/>
+                                        <text x="85" y="280" fill="#fbbf24" fontSize="12" fontWeight="bold" textAnchor="middle">NVMe SSD</text>
+                                        
+                                        {/* Arrow SSD to DRAM */}
+                                        <path d="M 85 250 L 85 200 L 175 200 L 175 170" stroke="#ff6b6b" strokeWidth="2" fill="none" markerEnd="url(#arrowRed)"/>
+                                        <text x="100" y="190" fill="#ff6b6b" fontSize="9">1. Read</text>
+                                        
+                                        {/* DRAM (Bounce Buffer) */}
+                                        <rect x="115" y="120" width="120" height="50" rx="6" fill="#1a1a28" stroke="#f97316" strokeWidth="2"/>
+                                        <text x="175" y="142" fill="#f97316" fontSize="10" fontWeight="bold" textAnchor="middle">System DRAM</text>
+                                        <text x="175" y="158" fill="#888" fontSize="8" textAnchor="middle">(Bounce Buffer)</text>
+                                        
+                                        {/* CPU */}
+                                        <rect x="115" y="20" width="120" height="45" rx="6" fill="#1a1a28" stroke="#3b82f6" strokeWidth="2"/>
+                                        <text x="175" y="48" fill="#3b82f6" fontSize="11" fontWeight="bold" textAnchor="middle">CPU</text>
+                                        
+                                        {/* Arrow DRAM to CPU */}
+                                        <line x1="150" y1="120" x2="150" y2="65" stroke="#888" strokeWidth="1" strokeDasharray="4"/>
+                                        <text x="130" y="95" fill="#888" fontSize="8">memcpy</text>
+                                        
+                                        {/* GPU */}
+                                        <rect x="205" y="250" width="120" height="50" rx="6" fill="#1a1a28" stroke="#00ff88" strokeWidth="2"/>
+                                        <text x="265" y="280" fill="#00ff88" fontSize="12" fontWeight="bold" textAnchor="middle">GPU</text>
+                                        
+                                        {/* Arrow DRAM to GPU */}
+                                        <path d="M 200 170 L 200 200 L 265 200 L 265 250" stroke="#ff6b6b" strokeWidth="2" fill="none" markerEnd="url(#arrowRed)"/>
+                                        <text x="220" y="220" fill="#ff6b6b" fontSize="9">2. Copy</text>
+                                        
+                                        {/* PCIe labels */}
+                                        <text x="60" y="225" fill="#666" fontSize="8">PCIe</text>
+                                        <text x="240" y="225" fill="#666" fontSize="8">PCIe</text>
+                                        
+                                        {/* Arrow marker */}
+                                        <defs>
+                                            <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                                <path d="M0,0 L0,6 L9,3 z" fill="#ff6b6b"/>
+                                            </marker>
+                                        </defs>
+                                    </svg>
+                                    <div style={{textAlign: 'center', marginTop: '10px'}}>
+                                        <span style={{color: '#ff6b6b', fontSize: '0.85rem'}}>❌ Data crosses PCIe twice</span><br/>
+                                        <span style={{color: '#888', fontSize: '0.8rem'}}>~50-100μs added latency</span>
                                     </div>
                                 </div>
 
-                                <div className="comparison-card">
-                                    <h3 className="comparison-title">With Peer-to-Peer DMA</h3>
-                                    <div className="path-diagram">
-                                        <div className="path-step cpu" style={{opacity: 0.5}}>CPU (Control Only)</div>
-                                        <div className="arrow-down" style={{opacity: 0.5}}>&larr;</div>
-                                        <div className="path-step switch">PCIe Switch</div>
-                                        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', width: '100%'}}>
-                                            <div className="path-step ssd" style={{flex: 1}}>NVMe SSD</div>
-                                            <span style={{color: '#00ff88', fontSize: '1.5rem'}}>&bull;</span>
-                                            <div className="path-step gpu" style={{flex: 1}}>GPU</div>
-                                        </div>
-                                    </div>
-                                    <div style={{marginTop: '15px', color: '#00ff88', fontSize: '0.9rem'}}>
-                                        [OK]  Direct data path between SSD and GPU
+                                {/* P2P DMA Path */}
+                                <div style={{background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.3)', borderRadius: '12px', padding: '20px'}}>
+                                    <h3 style={{color: '#00ff88', marginBottom: '15px', textAlign: 'center'}}>With P2P DMA (GPUDirect Storage)</h3>
+                                    <svg viewBox="0 0 350 320" style={{width: '100%', maxWidth: '350px', margin: '0 auto', display: 'block'}}>
+                                        {/* CPU - faded */}
+                                        <rect x="115" y="20" width="120" height="45" rx="6" fill="#1a1a28" stroke="#3b82f6" strokeWidth="1" opacity="0.4"/>
+                                        <text x="175" y="40" fill="#3b82f6" fontSize="9" fontWeight="bold" textAnchor="middle" opacity="0.6">CPU</text>
+                                        <text x="175" y="55" fill="#888" fontSize="8" textAnchor="middle" opacity="0.6">(Control Only)</text>
+                                        
+                                        {/* Control path arrow */}
+                                        <line x1="175" y1="65" x2="175" y2="110" stroke="#888" strokeWidth="1" strokeDasharray="4"/>
+                                        <text x="185" y="90" fill="#888" fontSize="7">cmd submit</text>
+                                        
+                                        {/* PCIe Switch */}
+                                        <rect x="100" y="115" width="150" height="40" rx="6" fill="#1a1a28" stroke="#a855f7" strokeWidth="2"/>
+                                        <text x="175" y="140" fill="#a855f7" fontSize="11" fontWeight="bold" textAnchor="middle">PCIe Switch</text>
+                                        
+                                        {/* SSD */}
+                                        <rect x="25" y="220" width="120" height="50" rx="6" fill="#1a1a28" stroke="#fbbf24" strokeWidth="2"/>
+                                        <text x="85" y="250" fill="#fbbf24" fontSize="12" fontWeight="bold" textAnchor="middle">NVMe SSD</text>
+                                        
+                                        {/* GPU */}
+                                        <rect x="205" y="220" width="120" height="50" rx="6" fill="#1a1a28" stroke="#00ff88" strokeWidth="2"/>
+                                        <text x="265" y="250" fill="#00ff88" fontSize="12" fontWeight="bold" textAnchor="middle">GPU HBM</text>
+                                        
+                                        {/* Direct data path - thick green arrow */}
+                                        <path d="M 85 220 L 85 180 L 265 180 L 265 220" stroke="#00ff88" strokeWidth="3" fill="none" markerEnd="url(#arrowGreen)"/>
+                                        <text x="175" y="175" fill="#00ff88" fontSize="10" fontWeight="bold" textAnchor="middle">Direct DMA</text>
+                                        
+                                        {/* P2P indicator */}
+                                        <rect x="140" y="185" width="70" height="20" rx="4" fill="#00ff88" opacity="0.2"/>
+                                        <text x="175" y="199" fill="#00ff88" fontSize="8" textAnchor="middle">P2P</text>
+                                        
+                                        {/* Arrow marker */}
+                                        <defs>
+                                            <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                                <path d="M0,0 L0,6 L9,3 z" fill="#00ff88"/>
+                                            </marker>
+                                        </defs>
+                                    </svg>
+                                    <div style={{textAlign: 'center', marginTop: '10px'}}>
+                                        <span style={{color: '#00ff88', fontSize: '0.85rem'}}>✓ Single PCIe traversal</span><br/>
+                                        <span style={{color: '#888', fontSize: '0.8rem'}}>~10-20μs (5x faster)</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="highlight-box">
-                                <h4>NVMe Control Path from GPU</h4>
-                                <div style={{display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap', marginTop: '15px'}}>
-                                    <div style={{background: '#22c55e', padding: '10px 20px', borderRadius: '8px'}}>
-                                        GPU Memory
-                                        <div style={{fontSize: '0.75rem', color: '#000'}}>Queue Meta data | Cache Meta data | I/O buffers</div>
+                            <div className="highlight-box" style={{marginTop: '25px'}}>
+                                <h4 style={{color: '#00d4ff', marginBottom: '10px'}}>Key Insight: Control Plane vs Data Plane</h4>
+                                <div style={{display: 'flex', gap: '30px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center'}}>
+                                    <div style={{textAlign: 'center'}}>
+                                        <div style={{background: '#3b82f6', padding: '8px 16px', borderRadius: '6px', marginBottom: '5px'}}>Control Plane</div>
+                                        <span style={{color: '#888', fontSize: '0.8rem'}}>CPU submits NVMe commands</span>
                                     </div>
-                                    <span style={{color: '#666'}}>--&rarr; Control Path</span>
-                                    <span style={{color: '#00ff88'}}>&bull; Data Path</span>
-                                    <div style={{background: '#f59e0b', padding: '10px 20px', borderRadius: '8px', color: '#000'}}>
-                                        Storage
-                                        <div style={{fontSize: '0.75rem'}}>DB Reg | DMA | Media</div>
+                                    <span style={{color: '#666', fontSize: '1.5rem'}}>≠</span>
+                                    <div style={{textAlign: 'center'}}>
+                                        <div style={{background: '#00ff88', color: '#000', padding: '8px 16px', borderRadius: '6px', marginBottom: '5px'}}>Data Plane</div>
+                                        <span style={{color: '#888', fontSize: '0.8rem'}}>DMA moves bytes directly</span>
                                     </div>
                                 </div>
+                                <p style={{color: '#888', fontSize: '0.85rem', marginTop: '15px', textAlign: 'center'}}>
+                                    GPUDirect Storage separates these: CPU handles control, but data bypasses CPU entirely.
+                                </p>
                             </div>
                         </div>
 

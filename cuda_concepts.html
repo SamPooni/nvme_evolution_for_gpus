@@ -1,0 +1,2407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CUDA Execution Concepts - Visual Guide</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0d1117;
+            min-height: 100vh;
+            color: #e6edf3;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, #1a1f35 0%, #0d1117 50%, #161b22 100%);
+            padding: 60px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #58a6ff, #3fb950, #f0883e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+        
+        .hero p {
+            color: #8b949e;
+            font-size: 1.15rem;
+            font-weight: 400;
+        }
+        
+        .toc {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 24px 32px;
+            margin: 30px auto;
+            max-width: 700px;
+        }
+        
+        .toc h3 {
+            color: #8b949e;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+        
+        .toc-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .toc-item {
+            background: #0d1117;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #58a6ff;
+            text-decoration: none;
+            border: 1px solid #30363d;
+            transition: all 0.2s;
+        }
+        
+        .toc-item:hover {
+            background: #1f6feb;
+            color: #fff;
+            border-color: #1f6feb;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .card {
+            background: linear-gradient(145deg, #161b22 0%, #0d1117 100%);
+            border: 1px solid #30363d;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 50px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.05) inset;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .card-number {
+            background: #30363d;
+            color: #8b949e;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .diagram-wrapper {
+            background: #0d1117;
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid #21262d;
+            margin: 20px 0;
+        }
+        
+        .insight-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 24px;
+        }
+        
+        .insight-box.warning {
+            background: linear-gradient(135deg, rgba(240,136,62,0.1) 0%, rgba(240,136,62,0.05) 100%);
+            border: 1px solid rgba(240,136,62,0.3);
+        }
+        
+        .insight-box.success {
+            background: linear-gradient(135deg, rgba(63,185,80,0.1) 0%, rgba(63,185,80,0.05) 100%);
+            border: 1px solid rgba(63,185,80,0.3);
+        }
+        
+        .insight-box.info {
+            background: linear-gradient(135deg, rgba(88,166,255,0.1) 0%, rgba(88,166,255,0.05) 100%);
+            border: 1px solid rgba(88,166,255,0.3);
+        }
+        
+        .insight-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        
+        .insight-content h4 {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        
+        .insight-content p {
+            color: #8b949e;
+            line-height: 1.6;
+        }
+        
+        .flex-diagrams {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 30px;
+        }
+        
+        .sub-card {
+            background: #161b22;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #30363d;
+        }
+        
+        .sub-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge.good { background: rgba(63,185,80,0.2); color: #3fb950; }
+        .badge.bad { background: rgba(248,81,73,0.2); color: #f85149; }
+        
+        .formula-box {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+        }
+        
+        .formula {
+            font-family: 'Georgia', serif;
+            font-size: 1.4rem;
+            color: #58a6ff;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #58a6ff;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 20px;
+            padding: 10px 0;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>CUDA Execution Concepts</h1>
+        <p>A Visual Guide to GPU Performance Optimization</p>
+        
+        <div class="toc">
+            <h3>Learning Path</h3>
+            <div class="toc-list">
+                <a href="#occupancy" class="toc-item">1. Occupancy</a>
+                <a href="#scheduling" class="toc-item">2. Warp Scheduling</a>
+                <a href="#datapaths" class="toc-item">3. GPU↔NVMe Paths</a>
+                <a href="#coarsening" class="toc-item">4. Thread Coarsening</a>
+                <a href="#divergence" class="toc-item">5. Warp Divergence</a>
+                <a href="#coalescing" class="toc-item">6. Memory Coalescing</a>
+                <a href="#reference" class="toc-item">7. Memory Reference</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        
+        <!-- ============================================ -->
+        <!-- 1. OCCUPANCY -->
+        <!-- ============================================ -->
+        <div class="card" id="occupancy">
+            <div class="card-header">
+                <span class="card-number">1</span>
+                <div class="card-icon" style="background: linear-gradient(135deg, #8957e5, #a371f7);">📊</div>
+                <div>
+                    <h2 class="card-title" style="color: #a371f7;">Occupancy</h2>
+                    <p style="color: #8b949e; margin-top: 4px;">How fully utilized is the GPU? The foundation of performance.</p>
+                </div>
+            </div>
+            
+            <div class="formula-box">
+                <div class="formula">
+                    Occupancy = <sup>Active Warps per SM</sup>&frasl;<sub>Maximum Warps per SM</sub>
+                </div>
+                <p style="color: #8b949e; margin-top: 12px; font-size: 0.9rem;">
+                    Example: 48 active warps / 64 max warps = <strong style="color: #3fb950;">75% occupancy</strong>
+                </p>
+            </div>
+            
+            <div class="diagram-wrapper">
+                <svg viewBox="0 0 900 400" style="width: 100%; height: auto;">
+                    <defs>
+                        <linearGradient id="smGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#30363d"/>
+                            <stop offset="100%" style="stop-color:#21262d"/>
+                        </linearGradient>
+                        <linearGradient id="activeWarp" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#238636"/>
+                            <stop offset="100%" style="stop-color:#3fb950"/>
+                        </linearGradient>
+                        <linearGradient id="inactiveWarp" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#21262d"/>
+                            <stop offset="100%" style="stop-color:#30363d"/>
+                        </linearGradient>
+                    </defs>
+                    
+                    <!-- SM Container -->
+                    <rect x="50" y="30" width="800" height="340" rx="16" fill="url(#smGrad)" stroke="#30363d" stroke-width="2"/>
+                    <text x="450" y="60" fill="#8b949e" font-family="Inter" font-size="14" font-weight="600" text-anchor="middle">Streaming Multiprocessor (SM) — 64 Warp Slots</text>
+                    
+                    <!-- Warp slots grid (8x8 = 64 slots) -->
+                    <g transform="translate(70, 80)">
+                        <!-- Row labels -->
+                        <text x="-15" y="22" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="end">0-7</text>
+                        <text x="-15" y="60" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="end">8-15</text>
+                        <text x="-15" y="98" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="end">16-23</text>
+                        <text x="-15" y="136" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="end">24-31</text>
+                        <text x="-15" y="174" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="end">32-39</text>
+                        <text x="-15" y="212" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="end">40-47</text>
+                        <text x="-15" y="250" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="end">48-55</text>
+                        <text x="-15" y="288" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="end">56-63</text>
+                        
+                        <!-- Active warps (48 = 6 rows) -->
+                        <!-- Row 1 -->
+                        <rect x="0" y="5" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="95" y="5" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="190" y="5" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="285" y="5" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="380" y="5" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="475" y="5" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="570" y="5" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="665" y="5" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        
+                        <!-- Row 2 -->
+                        <rect x="0" y="43" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="95" y="43" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="190" y="43" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="285" y="43" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="380" y="43" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="475" y="43" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="570" y="43" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="665" y="43" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        
+                        <!-- Row 3 -->
+                        <rect x="0" y="81" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="95" y="81" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="190" y="81" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="285" y="81" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="380" y="81" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="475" y="81" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="570" y="81" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="665" y="81" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        
+                        <!-- Row 4 -->
+                        <rect x="0" y="119" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="95" y="119" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="190" y="119" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="285" y="119" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="380" y="119" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="475" y="119" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="570" y="119" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="665" y="119" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        
+                        <!-- Row 5 -->
+                        <rect x="0" y="157" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="95" y="157" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="190" y="157" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="285" y="157" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="380" y="157" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="475" y="157" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="570" y="157" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="665" y="157" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        
+                        <!-- Row 6 -->
+                        <rect x="0" y="195" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="95" y="195" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="190" y="195" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="285" y="195" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="380" y="195" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="475" y="195" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="570" y="195" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        <rect x="665" y="195" width="88" height="30" rx="4" fill="url(#activeWarp)"/>
+                        
+                        <!-- Row 7 - INACTIVE -->
+                        <rect x="0" y="233" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                        <rect x="95" y="233" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                        <rect x="190" y="233" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                        <rect x="285" y="233" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                        <rect x="380" y="233" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                        <rect x="475" y="233" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                        <rect x="570" y="233" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                        <rect x="665" y="233" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                        
+                        <!-- Row 8 - INACTIVE -->
+                        <rect x="0" y="271" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                        <rect x="95" y="271" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                        <rect x="190" y="271" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                        <rect x="285" y="271" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                        <rect x="380" y="271" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                        <rect x="475" y="271" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                        <rect x="570" y="271" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                        <rect x="665" y="271" width="88" height="30" rx="4" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="4,2"/>
+                    </g>
+                    
+                    <!-- Legend -->
+                    <g transform="translate(70, 390)">
+                        <rect x="0" y="-25" width="20" height="14" rx="3" fill="url(#activeWarp)"/>
+                        <text x="28" y="-14" fill="#3fb950" font-family="Inter" font-size="11" font-weight="500">Active Warp (48)</text>
+                        
+                        <rect x="150" y="-25" width="20" height="14" rx="3" fill="url(#inactiveWarp)" stroke="#30363d" stroke-dasharray="3,1"/>
+                        <text x="178" y="-14" fill="#8b949e" font-family="Inter" font-size="11">Empty Slot (16)</text>
+                        
+                        <text x="350" y="-14" fill="#a371f7" font-family="Inter" font-size="13" font-weight="600">= 75% Occupancy</text>
+                    </g>
+                </svg>
+            </div>
+            
+            <h3 style="color: #e6edf3; margin: 30px 0 20px; font-size: 1.15rem;">What Limits Occupancy?</h3>
+            
+            <div class="flex-diagrams">
+                <div class="sub-card">
+                    <h3 style="color: #f85149;">🔢 Registers per Thread</h3>
+                    <svg viewBox="0 0 380 150" style="width: 100%; height: auto;">
+                        <rect width="100%" height="100%" fill="#0d1117"/>
+                        <text x="190" y="25" fill="#8b949e" font-family="Inter" font-size="11" text-anchor="middle">SM has 65,536 registers total</text>
+                        
+                        <!-- Example calculation -->
+                        <rect x="20" y="40" width="340" height="90" rx="8" fill="#161b22" stroke="#30363d"/>
+                        <text x="40" y="65" fill="#8b949e" font-family="Inter" font-size="11">If kernel uses <tspan fill="#f85149" font-weight="600">64 registers/thread</tspan>:</text>
+                        <text x="40" y="88" fill="#8b949e" font-family="Inter" font-size="11">Max threads = 65,536 ÷ 64 = <tspan fill="#d29922" font-weight="600">1,024 threads</tspan></text>
+                        <text x="40" y="111" fill="#8b949e" font-family="Inter" font-size="11">= 1,024 ÷ 32 = <tspan fill="#f85149" font-weight="600">32 warps</tspan> (only 50% occupancy!)</text>
+                    </svg>
+                </div>
+                
+                <div class="sub-card">
+                    <h3 style="color: #f0883e;">💾 Shared Memory per Block</h3>
+                    <svg viewBox="0 0 380 150" style="width: 100%; height: auto;">
+                        <rect width="100%" height="100%" fill="#0d1117"/>
+                        <text x="190" y="25" fill="#8b949e" font-family="Inter" font-size="11" text-anchor="middle">SM has 48KB shared memory</text>
+                        
+                        <rect x="20" y="40" width="340" height="90" rx="8" fill="#161b22" stroke="#30363d"/>
+                        <text x="40" y="65" fill="#8b949e" font-family="Inter" font-size="11">If block uses <tspan fill="#f0883e" font-weight="600">24KB shared mem</tspan>:</text>
+                        <text x="40" y="88" fill="#8b949e" font-family="Inter" font-size="11">Max blocks/SM = 48KB ÷ 24KB = <tspan fill="#d29922" font-weight="600">2 blocks</tspan></text>
+                        <text x="40" y="111" fill="#8b949e" font-family="Inter" font-size="11">If block = 512 threads → <tspan fill="#f0883e" font-weight="600">32 warps</tspan> (50%)</text>
+                    </svg>
+                </div>
+            </div>
+            
+            <div class="insight-box info">
+                <span class="insight-icon">💡</span>
+                <div class="insight-content">
+                    <h4 style="color: #58a6ff;">Why Occupancy Matters</h4>
+                    <p>Higher occupancy means <strong style="color: #3fb950;">more warps available</strong> to hide memory latency. When one warp stalls waiting for data, the scheduler can switch to another ready warp. Low occupancy = fewer warps to switch to = <span style="color: #f85149;">cores sit idle waiting</span>. But 100% isn't always optimal — sometimes using more registers for fewer warps gives better per-thread performance!</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ============================================ -->
+        <!-- 2. WARP SCHEDULING -->
+        <!-- ============================================ -->
+        <div class="card" id="scheduling">
+            <div class="card-header">
+                <span class="card-number">2</span>
+                <div class="card-icon" style="background: linear-gradient(135deg, #1f6feb, #58a6ff);">🔄</div>
+                <div>
+                    <h2 class="card-title" style="color: #58a6ff;">Warp Scheduling</h2>
+                    <p style="color: #8b949e; margin-top: 4px;">How GPUs hide memory latency by switching between warps</p>
+                </div>
+            </div>
+            
+            <div class="diagram-wrapper">
+                <svg viewBox="0 0 950 480" style="width: 100%; height: auto;">
+                    <defs>
+                        <linearGradient id="coreGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3fb950"/>
+                            <stop offset="100%" style="stop-color:#238636"/>
+                        </linearGradient>
+                        <linearGradient id="memGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#f0883e"/>
+                            <stop offset="100%" style="stop-color:#bd5a00"/>
+                        </linearGradient>
+                        <linearGradient id="ctrlGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#d29922"/>
+                            <stop offset="100%" style="stop-color:#9e6a03"/>
+                        </linearGradient>
+                        <pattern id="grid2" width="40" height="40" patternUnits="userSpaceOnUse">
+                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#21262d" stroke-width="0.5"/>
+                        </pattern>
+                    </defs>
+                    
+                    <rect width="100%" height="100%" fill="url(#grid2)" opacity="0.5"/>
+                    
+                    <!-- CUDA Cores -->
+                    <g transform="translate(50, 20)">
+                        <text x="275" y="-5" fill="#8b949e" font-family="Inter" font-size="11">CUDA Cores (execute in parallel)</text>
+                        <rect x="0" y="5" width="60" height="40" rx="6" fill="url(#coreGrad)"/>
+                        <text x="30" y="31" fill="#fff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Core</text>
+                        <rect x="70" y="5" width="60" height="40" rx="6" fill="url(#coreGrad)"/>
+                        <text x="100" y="31" fill="#fff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Core</text>
+                        <rect x="140" y="5" width="60" height="40" rx="6" fill="url(#coreGrad)"/>
+                        <text x="170" y="31" fill="#fff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Core</text>
+                        <rect x="210" y="5" width="60" height="40" rx="6" fill="url(#coreGrad)"/>
+                        <text x="240" y="31" fill="#fff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Core</text>
+                        <rect x="280" y="5" width="60" height="40" rx="6" fill="url(#coreGrad)"/>
+                        <text x="310" y="31" fill="#fff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Core</text>
+                        <rect x="350" y="5" width="60" height="40" rx="6" fill="url(#coreGrad)"/>
+                        <text x="380" y="31" fill="#fff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Core</text>
+                        <rect x="420" y="5" width="60" height="40" rx="6" fill="url(#coreGrad)"/>
+                        <text x="450" y="31" fill="#fff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Core</text>
+                        <rect x="490" y="5" width="60" height="40" rx="6" fill="url(#coreGrad)"/>
+                        <text x="520" y="31" fill="#fff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Core</text>
+                    </g>
+                    
+                    <!-- Time labels -->
+                    <g font-family="Inter" font-size="12" fill="#8b949e" font-weight="500">
+                        <text x="30" y="95" text-anchor="middle">t=0</text>
+                        <text x="30" y="145" text-anchor="middle">t=1</text>
+                        <text x="30" y="195" text-anchor="middle">t=2</text>
+                        <text x="30" y="245" text-anchor="middle">t=3</text>
+                        <text x="30" y="295" text-anchor="middle">t=4</text>
+                        <text x="30" y="345" text-anchor="middle">t=5</text>
+                        <text x="30" y="395" text-anchor="middle">t=6</text>
+                        <text x="30" y="445" text-anchor="middle">t=7</text>
+                    </g>
+                    
+                    <!-- Blue Warp - executing then stalls -->
+                    <g transform="translate(50, 80)">
+                        <!-- t=0 Active -->
+                        <rect x="0" y="0" width="550" height="40" rx="6" fill="#1f6feb" opacity="0.3"/>
+                        <rect x="0" y="0" width="550" height="40" rx="6" fill="none" stroke="#58a6ff" stroke-width="2"/>
+                        <text x="275" y="25" fill="#58a6ff" font-family="Inter" font-size="12" font-weight="500" text-anchor="middle">Warp A executing (COMPUTE)</text>
+                        
+                        <!-- t=1 Active -->
+                        <rect x="0" y="50" width="550" height="40" rx="6" fill="#1f6feb" opacity="0.3"/>
+                        <rect x="0" y="50" width="550" height="40" rx="6" fill="none" stroke="#58a6ff" stroke-width="2"/>
+                        <text x="275" y="75" fill="#58a6ff" font-family="Inter" font-size="12" font-weight="500" text-anchor="middle">Warp A executing (COMPUTE)</text>
+                        
+                        <!-- t=2 MEMORY REQUEST -->
+                        <rect x="0" y="100" width="550" height="40" rx="6" fill="#f85149" opacity="0.15"/>
+                        <rect x="0" y="100" width="550" height="40" rx="6" fill="none" stroke="#f85149" stroke-width="2" stroke-dasharray="8,4"/>
+                        <text x="275" y="125" fill="#f85149" font-family="Inter" font-size="12" font-weight="500" text-anchor="middle">🔴 Warp A STALLED — waiting for memory</text>
+                        
+                        <!-- t=3 Stalled -->
+                        <rect x="0" y="150" width="550" height="40" rx="6" fill="#f85149" opacity="0.08"/>
+                        <rect x="0" y="150" width="550" height="40" rx="6" fill="none" stroke="#f85149" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.5"/>
+                        <text x="275" y="175" fill="#8b949e" font-family="Inter" font-size="11" text-anchor="middle">still waiting...</text>
+                        
+                        <!-- t=4 Stalled -->
+                        <rect x="0" y="200" width="550" height="40" rx="6" fill="#f85149" opacity="0.08"/>
+                        <rect x="0" y="200" width="550" height="40" rx="6" fill="none" stroke="#f85149" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.5"/>
+                        <text x="275" y="225" fill="#8b949e" font-family="Inter" font-size="11" text-anchor="middle">still waiting...</text>
+                        
+                        <!-- t=5 Data arrives! -->
+                        <rect x="0" y="250" width="550" height="40" rx="6" fill="#1f6feb" opacity="0.3"/>
+                        <rect x="0" y="250" width="550" height="40" rx="6" fill="none" stroke="#58a6ff" stroke-width="2"/>
+                        <text x="275" y="275" fill="#3fb950" font-family="Inter" font-size="12" font-weight="500" text-anchor="middle">✓ Data arrived! Warp A resumes</text>
+                    </g>
+                    
+                    <!-- Yellow Warp - fills in during stall -->
+                    <g transform="translate(50, 280)">
+                        <!-- t=2 starts executing -->
+                        <rect x="0" y="0" width="550" height="40" rx="6" fill="#9e6a03" opacity="0.3"/>
+                        <rect x="0" y="0" width="550" height="40" rx="6" fill="none" stroke="#d29922" stroke-width="2"/>
+                        <text x="275" y="25" fill="#d29922" font-family="Inter" font-size="12" font-weight="500" text-anchor="middle">↳ Scheduler switches to Warp B!</text>
+                        
+                        <!-- t=3 -->
+                        <rect x="0" y="50" width="550" height="40" rx="6" fill="#9e6a03" opacity="0.3"/>
+                        <rect x="0" y="50" width="550" height="40" rx="6" fill="none" stroke="#d29922" stroke-width="2"/>
+                        <text x="275" y="75" fill="#d29922" font-family="Inter" font-size="12" font-weight="500" text-anchor="middle">Warp B executing (COMPUTE)</text>
+                        
+                        <!-- t=4 -->
+                        <rect x="0" y="100" width="550" height="40" rx="6" fill="#9e6a03" opacity="0.3"/>
+                        <rect x="0" y="100" width="550" height="40" rx="6" fill="none" stroke="#d29922" stroke-width="2"/>
+                        <text x="275" y="125" fill="#d29922" font-family="Inter" font-size="12" font-weight="500" text-anchor="middle">Warp B executing (COMPUTE)</text>
+                    </g>
+                    
+                    <!-- Green Warp - even more latency hiding -->
+                    <g transform="translate(50, 380)">
+                        <rect x="0" y="0" width="550" height="40" rx="6" fill="#238636" opacity="0.3"/>
+                        <rect x="0" y="0" width="550" height="40" rx="6" fill="none" stroke="#3fb950" stroke-width="2"/>
+                        <text x="275" y="25" fill="#3fb950" font-family="Inter" font-size="12" font-weight="500" text-anchor="middle">Warp C ready and waiting...</text>
+                        
+                        <rect x="0" y="50" width="550" height="40" rx="6" fill="#238636" opacity="0.3"/>
+                        <rect x="0" y="50" width="550" height="40" rx="6" fill="none" stroke="#3fb950" stroke-width="2"/>
+                        <text x="275" y="75" fill="#3fb950" font-family="Inter" font-size="12" font-weight="500" text-anchor="middle">Warp C executes when B stalls</text>
+                    </g>
+                    
+                    <!-- Annotations -->
+                    <g font-family="Inter" font-size="11">
+                        <text x="620" y="200" fill="#f85149" font-weight="500">⏱ ~400 cycles</text>
+                        <text x="620" y="218" fill="#8b949e">memory latency</text>
+                        
+                        <path d="M 610 180 Q 590 210 610 250" stroke="#f85149" stroke-width="1.5" fill="none" stroke-dasharray="4,2"/>
+                    </g>
+                    
+                    <!-- SM Box -->
+                    <g transform="translate(740, 80)">
+                        <rect x="0" y="0" width="190" height="380" rx="12" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+                        <text x="95" y="30" fill="#8b949e" font-family="Inter" font-size="14" font-weight="600" text-anchor="middle">Warp Scheduler</text>
+                        
+                        <rect x="20" y="50" width="150" height="35" rx="6" fill="url(#ctrlGrad)"/>
+                        <text x="95" y="73" fill="#fff" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">Scheduler Logic</text>
+                        
+                        <!-- Warp pool -->
+                        <text x="95" y="110" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="middle">Ready Warp Pool</text>
+                        
+                        <rect x="20" y="120" width="150" height="30" rx="5" fill="#1f6feb" opacity="0.3" stroke="#58a6ff"/>
+                        <text x="95" y="140" fill="#58a6ff" font-family="Inter" font-size="10" text-anchor="middle">Warp A</text>
+                        
+                        <rect x="20" y="158" width="150" height="30" rx="5" fill="#9e6a03" opacity="0.3" stroke="#d29922"/>
+                        <text x="95" y="178" fill="#d29922" font-family="Inter" font-size="10" text-anchor="middle">Warp B</text>
+                        
+                        <rect x="20" y="196" width="150" height="30" rx="5" fill="#238636" opacity="0.3" stroke="#3fb950"/>
+                        <text x="95" y="216" fill="#3fb950" font-family="Inter" font-size="10" text-anchor="middle">Warp C</text>
+                        
+                        <rect x="20" y="234" width="150" height="30" rx="5" fill="#8957e5" opacity="0.3" stroke="#a371f7"/>
+                        <text x="95" y="254" fill="#a371f7" font-family="Inter" font-size="10" text-anchor="middle">Warp D</text>
+                        
+                        <text x="95" y="285" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">···more warps···</text>
+                        
+                        <!-- Key insight -->
+                        <rect x="15" y="305" width="160" height="60" rx="8" fill="#3fb950" opacity="0.1" stroke="#3fb950"/>
+                        <text x="95" y="328" fill="#3fb950" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Zero-cost switching!</text>
+                        <text x="95" y="345" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">No context save/restore</text>
+                        <text x="95" y="358" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">(all state in registers)</text>
+                    </g>
+                </svg>
+            </div>
+            
+            <div class="insight-box success">
+                <span class="insight-icon">🚀</span>
+                <div class="insight-content">
+                    <h4 style="color: #3fb950;">Latency Hiding = Throughput</h4>
+                    <p>Memory takes <strong style="color: #f85149;">~400-800 cycles</strong>. But with enough warps, the GPU is <em>always</em> doing useful work. This is why occupancy matters — more resident warps = more opportunities to hide latency = <strong style="color: #3fb950;">higher throughput</strong>.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ============================================ -->
+        <!-- 3. GPU ↔ NVMe DATA PATHS & TOPOLOGIES -->
+        <!-- ============================================ -->
+        <div class="card" id="datapaths">
+            <div class="card-header">
+                <span class="card-number">3</span>
+                <div class="card-icon" style="background: linear-gradient(135deg, #f0883e, #d29922);">🔀</div>
+                <div>
+                    <h2 class="card-title" style="color: #f0883e;">GPU ↔ NVMe Data Paths & Topologies</h2>
+                    <p style="color: #8b949e; margin-top: 4px;">Traditional (bounce buffer) vs GPUDirect Storage (direct DMA) + all PCIe topologies</p>
+                </div>
+            </div>
+            
+            <div class="insight-box info" style="margin-bottom: 30px;">
+                <span class="insight-icon">💡</span>
+                <div class="insight-content">
+                    <h4 style="color: #58a6ff;">Key Clarification: "No CPU Involvement"</h4>
+                    <p><strong style="color: #d29922;">"No CPU involvement"</strong> means no CPU <em>data movement</em> (copies through CPU memory). The CPU is still involved in the <strong style="color: #58a6ff;">control path</strong>: submitting I/O, setting up DMA mappings, filesystem metadata, etc. NVIDIA explicitly documents this: drivers run on CPU for control path, while <strong style="color: #3fb950;">data path bypasses CPU memory</strong>.</p>
+                </div>
+            </div>
+            
+            <h3 style="color: #e6edf3; margin: 20px 0 15px; font-size: 1.15rem;">A) Traditional Path: CPU + Host DRAM Bounce Buffer</h3>
+            
+            <div class="flex-diagrams">
+                <!-- Traditional READ -->
+                <div class="sub-card">
+                    <h3 style="color: #f85149;"><span class="badge bad">SLOW</span> READ: NVMe → GPU (pread + cudaMemcpy)</h3>
+                    <svg viewBox="0 0 440 520" style="width: 100%; height: auto;">
+                        <rect width="100%" height="100%" fill="#0d1117"/>
+                        
+                        <!-- NVMe SSD -->
+                        <g transform="translate(170, 20)">
+                            <rect x="0" y="0" width="100" height="45" rx="8" fill="#8957e5" opacity="0.3" stroke="#a371f7" stroke-width="2"/>
+                            <text x="50" y="28" fill="#a371f7" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">NVMe SSD</text>
+                        </g>
+                        
+                        <!-- Arrow 1 -->
+                        <g transform="translate(220, 70)">
+                            <line x1="0" y1="0" x2="0" y2="30" stroke="#8b949e" stroke-width="2" marker-end="url(#arrowGray)"/>
+                            <text x="50" y="18" fill="#8b949e" font-family="Inter" font-size="9">PCIe DMA</text>
+                        </g>
+                        
+                        <!-- NVMe Controller -->
+                        <g transform="translate(150, 105)">
+                            <rect x="0" y="0" width="140" height="40" rx="6" fill="#8957e5" opacity="0.15" stroke="#a371f7" stroke-width="1"/>
+                            <text x="70" y="25" fill="#a371f7" font-family="Inter" font-size="10" text-anchor="middle">NVMe Controller DMA</text>
+                        </g>
+                        
+                        <!-- Arrow 2 -->
+                        <g transform="translate(220, 150)">
+                            <line x1="0" y1="0" x2="0" y2="30" stroke="#f85149" stroke-width="3" marker-end="url(#arrowRed)"/>
+                        </g>
+                        
+                        <!-- Host DRAM -->
+                        <g transform="translate(130, 185)">
+                            <rect x="0" y="0" width="180" height="50" rx="8" fill="#1f6feb" opacity="0.2" stroke="#58a6ff" stroke-width="2"/>
+                            <text x="90" y="20" fill="#58a6ff" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">Host DRAM</text>
+                            <text x="90" y="38" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">(page cache / kernel buffers)</text>
+                        </g>
+                        
+                        <!-- Arrow 3: CPU COPY -->
+                        <g transform="translate(220, 240)">
+                            <line x1="0" y1="0" x2="0" y2="30" stroke="#f85149" stroke-width="3" marker-end="url(#arrowRed)"/>
+                            <rect x="-55" y="5" width="110" height="20" rx="4" fill="#f85149" opacity="0.3"/>
+                            <text x="0" y="19" fill="#f85149" font-family="Inter" font-size="9" font-weight="600" text-anchor="middle">⚠️ CPU memcpy</text>
+                        </g>
+                        
+                        <!-- User buffer -->
+                        <g transform="translate(145, 275)">
+                            <rect x="0" y="0" width="150" height="45" rx="8" fill="#3fb950" opacity="0.15" stroke="#3fb950" stroke-width="2"/>
+                            <text x="75" y="18" fill="#3fb950" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">User Buffer</text>
+                            <text x="75" y="35" fill="#8b949e" font-family="Inter" font-size="8" text-anchor="middle">(malloc - pageable)</text>
+                        </g>
+                        
+                        <!-- Arrow 4: Staging -->
+                        <g transform="translate(220, 325)">
+                            <line x1="0" y1="0" x2="0" y2="30" stroke="#f85149" stroke-width="3" marker-end="url(#arrowRed)"/>
+                            <rect x="-55" y="5" width="110" height="20" rx="4" fill="#f85149" opacity="0.3"/>
+                            <text x="0" y="19" fill="#f85149" font-family="Inter" font-size="9" font-weight="600" text-anchor="middle">⚠️ staging copy</text>
+                        </g>
+                        
+                        <!-- Pinned buffer -->
+                        <g transform="translate(145, 360)">
+                            <rect x="0" y="0" width="150" height="40" rx="8" fill="#d29922" opacity="0.2" stroke="#d29922" stroke-width="2" stroke-dasharray="6,3"/>
+                            <text x="75" y="16" fill="#d29922" font-family="Inter" font-size="10" text-anchor="middle">Pinned Staging</text>
+                            <text x="75" y="32" fill="#8b949e" font-family="Inter" font-size="8" text-anchor="middle">(if pageable source)</text>
+                        </g>
+                        
+                        <!-- Arrow 5: cudaMemcpy -->
+                        <g transform="translate(220, 405)">
+                            <line x1="0" y1="0" x2="0" y2="35" stroke="#3fb950" stroke-width="3" marker-end="url(#arrowGreen)"/>
+                            <text x="60" y="22" fill="#8b949e" font-family="Inter" font-size="9">cudaMemcpy H2D</text>
+                        </g>
+                        
+                        <!-- GPU HBM -->
+                        <g transform="translate(155, 450)">
+                            <rect x="0" y="0" width="130" height="50" rx="8" fill="#3fb950" opacity="0.3" stroke="#3fb950" stroke-width="2"/>
+                            <text x="65" y="22" fill="#3fb950" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">GPU HBM</text>
+                            <text x="65" y="40" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">(global memory)</text>
+                        </g>
+                        
+                        <defs>
+                            <marker id="arrowGray" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                                <path d="M0,0 L0,8 L8,4 z" fill="#8b949e"/>
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+                
+                <!-- Traditional WRITE -->
+                <div class="sub-card">
+                    <h3 style="color: #f85149;"><span class="badge bad">SLOW</span> WRITE: GPU → NVMe (cudaMemcpy + pwrite)</h3>
+                    <svg viewBox="0 0 440 520" style="width: 100%; height: auto;">
+                        <rect width="100%" height="100%" fill="#0d1117"/>
+                        
+                        <!-- GPU HBM -->
+                        <g transform="translate(155, 20)">
+                            <rect x="0" y="0" width="130" height="50" rx="8" fill="#3fb950" opacity="0.3" stroke="#3fb950" stroke-width="2"/>
+                            <text x="65" y="22" fill="#3fb950" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">GPU HBM</text>
+                            <text x="65" y="40" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">(global memory)</text>
+                        </g>
+                        
+                        <!-- Arrow 1: cudaMemcpy -->
+                        <g transform="translate(220, 75)">
+                            <line x1="0" y1="0" x2="0" y2="35" stroke="#3fb950" stroke-width="3" marker-end="url(#arrowGreen)"/>
+                            <text x="60" y="22" fill="#8b949e" font-family="Inter" font-size="9">cudaMemcpy D2H</text>
+                        </g>
+                        
+                        <!-- User buffer (pinned) -->
+                        <g transform="translate(135, 120)">
+                            <rect x="0" y="0" width="170" height="50" rx="8" fill="#3fb950" opacity="0.15" stroke="#3fb950" stroke-width="2"/>
+                            <text x="85" y="20" fill="#3fb950" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">User Buffer</text>
+                            <text x="85" y="38" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">(pinned recommended)</text>
+                        </g>
+                        
+                        <!-- Arrow 2: pwrite -->
+                        <g transform="translate(220, 175)">
+                            <line x1="0" y1="0" x2="0" y2="35" stroke="#f85149" stroke-width="3" marker-end="url(#arrowRed)"/>
+                            <rect x="-55" y="5" width="110" height="20" rx="4" fill="#f85149" opacity="0.3"/>
+                            <text x="0" y="19" fill="#f85149" font-family="Inter" font-size="9" font-weight="600" text-anchor="middle">⚠️ kernel copy</text>
+                        </g>
+                        
+                        <!-- Page cache -->
+                        <g transform="translate(130, 220)">
+                            <rect x="0" y="0" width="180" height="50" rx="8" fill="#1f6feb" opacity="0.2" stroke="#58a6ff" stroke-width="2"/>
+                            <text x="90" y="20" fill="#58a6ff" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">Host DRAM</text>
+                            <text x="90" y="38" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">(page cache / writeback)</text>
+                        </g>
+                        
+                        <!-- Arrow 3: NVMe DMA -->
+                        <g transform="translate(220, 275)">
+                            <line x1="0" y1="0" x2="0" y2="35" stroke="#a371f7" stroke-width="3" marker-end="url(#arrowPurple)"/>
+                            <text x="50" y="22" fill="#8b949e" font-family="Inter" font-size="9">NVMe DMA</text>
+                        </g>
+                        
+                        <defs>
+                            <marker id="arrowPurple" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                                <path d="M0,0 L0,10 L10,5 z" fill="#a371f7"/>
+                            </marker>
+                        </defs>
+                        
+                        <!-- NVMe SSD -->
+                        <g transform="translate(170, 320)">
+                            <rect x="0" y="0" width="100" height="45" rx="8" fill="#8957e5" opacity="0.3" stroke="#a371f7" stroke-width="2"/>
+                            <text x="50" y="28" fill="#a371f7" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">NVMe SSD</text>
+                        </g>
+                        
+                        <!-- Problems summary -->
+                        <g transform="translate(30, 390)">
+                            <rect x="0" y="0" width="380" height="110" rx="8" fill="#f85149" opacity="0.1" stroke="#f85149"/>
+                            <text x="190" y="25" fill="#f85149" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">Why Traditional Path is Slow:</text>
+                            <text x="20" y="48" fill="#8b949e" font-family="Inter" font-size="10">• POSIX pread/pwrite operate on CPU buffers (not GPU)</text>
+                            <text x="20" y="66" fill="#8b949e" font-family="Inter" font-size="10">• 2-3 memory copies: storage → host → GPU</text>
+                            <text x="20" y="84" fill="#8b949e" font-family="Inter" font-size="10">• Pageable buffers require internal staging</text>
+                            <text x="20" y="102" fill="#8b949e" font-family="Inter" font-size="10">• CPU memory bandwidth becomes bottleneck</text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+            
+            <h3 style="color: #e6edf3; margin: 40px 0 15px; font-size: 1.15rem;">B) GPUDirect Storage: Direct DMA (No Host Bounce)</h3>
+            
+            <div class="flex-diagrams">
+                <!-- GDS READ -->
+                <div class="sub-card">
+                    <h3 style="color: #3fb950;"><span class="badge good">FAST</span> READ: NVMe → GPU (cuFileRead)</h3>
+                    <svg viewBox="0 0 440 400" style="width: 100%; height: auto;">
+                        <rect width="100%" height="100%" fill="#0d1117"/>
+                        
+                        <!-- Control Path -->
+                        <g transform="translate(20, 20)">
+                            <rect x="0" y="0" width="140" height="150" rx="10" fill="#1f6feb" opacity="0.1" stroke="#58a6ff" stroke-width="1" stroke-dasharray="6,3"/>
+                            <text x="70" y="20" fill="#58a6ff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">CONTROL PATH</text>
+                            <text x="70" y="35" fill="#8b949e" font-family="Inter" font-size="8" text-anchor="middle">(CPU still involved)</text>
+                            
+                            <rect x="10" y="50" width="120" height="25" rx="4" fill="#161b22" stroke="#30363d"/>
+                            <text x="70" y="67" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">Application</text>
+                            
+                            <line x1="70" y1="75" x2="70" y2="85" stroke="#58a6ff" stroke-width="1"/>
+                            
+                            <rect x="10" y="85" width="120" height="25" rx="4" fill="#161b22" stroke="#30363d"/>
+                            <text x="70" y="102" fill="#58a6ff" font-family="Inter" font-size="9" text-anchor="middle">cuFile API</text>
+                            
+                            <line x1="70" y1="110" x2="70" y2="120" stroke="#58a6ff" stroke-width="1"/>
+                            
+                            <rect x="10" y="120" width="120" height="25" rx="4" fill="#161b22" stroke="#30363d"/>
+                            <text x="70" y="137" fill="#a371f7" font-family="Inter" font-size="9" text-anchor="middle">nvidia-fs.ko</text>
+                        </g>
+                        
+                        <!-- Data Path -->
+                        <g transform="translate(180, 20)">
+                            <rect x="0" y="0" width="240" height="360" rx="10" fill="#3fb950" opacity="0.08" stroke="#3fb950" stroke-width="2"/>
+                            <text x="120" y="25" fill="#3fb950" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">DATA PATH</text>
+                            <text x="120" y="42" fill="#3fb950" font-family="Inter" font-size="9" text-anchor="middle">(Direct DMA - no bounce)</text>
+                            
+                            <!-- NVMe -->
+                            <rect x="70" y="60" width="100" height="45" rx="8" fill="#8957e5" opacity="0.3" stroke="#a371f7" stroke-width="2"/>
+                            <text x="120" y="88" fill="#a371f7" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">NVMe SSD</text>
+                            
+                            <!-- Big Direct Arrow -->
+                            <g transform="translate(120, 115)">
+                                <line x1="0" y1="0" x2="0" y2="130" stroke="#3fb950" stroke-width="8" marker-end="url(#arrowGreenBig)"/>
+                                <rect x="-55" y="45" width="110" height="40" rx="6" fill="#3fb950" opacity="0.4"/>
+                                <text x="0" y="62" fill="#fff" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">PCIe P2P</text>
+                                <text x="0" y="78" fill="#fff" font-family="Inter" font-size="10" text-anchor="middle">Direct DMA</text>
+                            </g>
+                            
+                            <defs>
+                                <marker id="arrowGreenBig" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
+                                    <path d="M0,0 L0,14 L14,7 z" fill="#3fb950"/>
+                                </marker>
+                            </defs>
+                            
+                            <!-- GPU HBM -->
+                            <rect x="55" y="255" width="130" height="50" rx="8" fill="#3fb950" opacity="0.3" stroke="#3fb950" stroke-width="2"/>
+                            <text x="120" y="278" fill="#3fb950" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">GPU HBM</text>
+                            <text x="120" y="295" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">(target buffer)</text>
+                            
+                            <!-- Bypassed Host DRAM -->
+                            <g transform="translate(55, 315)">
+                                <rect x="0" y="0" width="130" height="30" rx="5" fill="#f85149" opacity="0.1" stroke="#f85149" stroke-dasharray="4,2"/>
+                                <text x="65" y="12" fill="#f85149" font-family="Inter" font-size="9" text-anchor="middle" text-decoration="line-through">Host DRAM</text>
+                                <text x="65" y="25" fill="#3fb950" font-family="Inter" font-size="9" font-weight="600" text-anchor="middle">✓ BYPASSED</text>
+                            </g>
+                        </g>
+                        
+                        <!-- Code -->
+                        <g transform="translate(20, 185)">
+                            <rect x="0" y="0" width="140" height="75" rx="6" fill="#161b22" stroke="#30363d"/>
+                            <text x="10" y="18" fill="#3fb950" font-family="monospace" font-size="9">cuFileRead(</text>
+                            <text x="10" y="33" fill="#8b949e" font-family="monospace" font-size="9">  handle,</text>
+                            <text x="10" y="48" fill="#d29922" font-family="monospace" font-size="9">  gpu_ptr,//GPU!</text>
+                            <text x="10" y="63" fill="#8b949e" font-family="monospace" font-size="9">  size, off);</text>
+                        </g>
+                        
+                        <!-- Requirements -->
+                        <g transform="translate(20, 275)">
+                            <rect x="0" y="0" width="140" height="95" rx="6" fill="#d29922" opacity="0.1" stroke="#d29922"/>
+                            <text x="70" y="18" fill="#d29922" font-family="Inter" font-size="9" font-weight="600" text-anchor="middle">Requirements:</text>
+                            <text x="10" y="36" fill="#8b949e" font-family="Inter" font-size="8">• O_DIRECT flag</text>
+                            <text x="10" y="50" fill="#8b949e" font-family="Inter" font-size="8">• 4KB aligned buffer</text>
+                            <text x="10" y="64" fill="#8b949e" font-family="Inter" font-size="8">• nvidia-fs.ko loaded</text>
+                            <text x="10" y="78" fill="#8b949e" font-family="Inter" font-size="8">• cuFileBufRegister()</text>
+                            <text x="10" y="92" fill="#8b949e" font-family="Inter" font-size="8">• IOMMU/ACS disabled</text>
+                        </g>
+                    </svg>
+                </div>
+                
+                <!-- GDS WRITE -->
+                <div class="sub-card">
+                    <h3 style="color: #3fb950;"><span class="badge good">FAST</span> WRITE: GPU → NVMe (cuFileWrite)</h3>
+                    <svg viewBox="0 0 440 400" style="width: 100%; height: auto;">
+                        <rect width="100%" height="100%" fill="#0d1117"/>
+                        
+                        <!-- Control Path -->
+                        <g transform="translate(20, 20)">
+                            <rect x="0" y="0" width="140" height="150" rx="10" fill="#1f6feb" opacity="0.1" stroke="#58a6ff" stroke-width="1" stroke-dasharray="6,3"/>
+                            <text x="70" y="20" fill="#58a6ff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">CONTROL PATH</text>
+                            <text x="70" y="35" fill="#8b949e" font-family="Inter" font-size="8" text-anchor="middle">(CPU still involved)</text>
+                            
+                            <rect x="10" y="50" width="120" height="25" rx="4" fill="#161b22" stroke="#30363d"/>
+                            <text x="70" y="67" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">Application</text>
+                            
+                            <line x1="70" y1="75" x2="70" y2="85" stroke="#58a6ff" stroke-width="1"/>
+                            
+                            <rect x="10" y="85" width="120" height="25" rx="4" fill="#161b22" stroke="#30363d"/>
+                            <text x="70" y="102" fill="#58a6ff" font-family="Inter" font-size="9" text-anchor="middle">cuFile API</text>
+                            
+                            <line x1="70" y1="110" x2="70" y2="120" stroke="#58a6ff" stroke-width="1"/>
+                            
+                            <rect x="10" y="120" width="120" height="25" rx="4" fill="#161b22" stroke="#30363d"/>
+                            <text x="70" y="137" fill="#a371f7" font-family="Inter" font-size="9" text-anchor="middle">nvidia-fs.ko</text>
+                        </g>
+                        
+                        <!-- Data Path -->
+                        <g transform="translate(180, 20)">
+                            <rect x="0" y="0" width="240" height="360" rx="10" fill="#3fb950" opacity="0.08" stroke="#3fb950" stroke-width="2"/>
+                            <text x="120" y="25" fill="#3fb950" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">DATA PATH</text>
+                            <text x="120" y="42" fill="#3fb950" font-family="Inter" font-size="9" text-anchor="middle">(Direct DMA - no bounce)</text>
+                            
+                            <!-- GPU HBM -->
+                            <rect x="55" y="60" width="130" height="50" rx="8" fill="#3fb950" opacity="0.3" stroke="#3fb950" stroke-width="2"/>
+                            <text x="120" y="83" fill="#3fb950" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">GPU HBM</text>
+                            <text x="120" y="100" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">(source buffer)</text>
+                            
+                            <!-- Big Direct Arrow -->
+                            <g transform="translate(120, 120)">
+                                <line x1="0" y1="0" x2="0" y2="130" stroke="#3fb950" stroke-width="8" marker-end="url(#arrowGreenBig)"/>
+                                <rect x="-55" y="45" width="110" height="40" rx="6" fill="#3fb950" opacity="0.4"/>
+                                <text x="0" y="62" fill="#fff" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">PCIe P2P</text>
+                                <text x="0" y="78" fill="#fff" font-family="Inter" font-size="10" text-anchor="middle">Direct DMA</text>
+                            </g>
+                            
+                            <!-- NVMe -->
+                            <rect x="70" y="260" width="100" height="45" rx="8" fill="#8957e5" opacity="0.3" stroke="#a371f7" stroke-width="2"/>
+                            <text x="120" y="288" fill="#a371f7" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">NVMe SSD</text>
+                            
+                            <!-- Bypassed Host DRAM -->
+                            <g transform="translate(55, 315)">
+                                <rect x="0" y="0" width="130" height="30" rx="5" fill="#f85149" opacity="0.1" stroke="#f85149" stroke-dasharray="4,2"/>
+                                <text x="65" y="12" fill="#f85149" font-family="Inter" font-size="9" text-anchor="middle" text-decoration="line-through">Host DRAM</text>
+                                <text x="65" y="25" fill="#3fb950" font-family="Inter" font-size="9" font-weight="600" text-anchor="middle">✓ BYPASSED</text>
+                            </g>
+                        </g>
+                        
+                        <!-- Summary -->
+                        <g transform="translate(20, 185)">
+                            <rect x="0" y="0" width="140" height="185" rx="6" fill="#3fb950" opacity="0.1" stroke="#3fb950"/>
+                            <text x="70" y="20" fill="#3fb950" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Benefits:</text>
+                            <text x="10" y="42" fill="#8b949e" font-family="Inter" font-size="8">✓ Zero host copies</text>
+                            <text x="10" y="58" fill="#8b949e" font-family="Inter" font-size="8">✓ Full PCIe bandwidth</text>
+                            <text x="10" y="74" fill="#8b949e" font-family="Inter" font-size="8">✓ Lower latency</text>
+                            <text x="10" y="90" fill="#8b949e" font-family="Inter" font-size="8">✓ CPU free for compute</text>
+                            
+                            <line x1="10" y1="105" x2="130" y2="105" stroke="#30363d"/>
+                            
+                            <text x="70" y="122" fill="#d29922" font-family="Inter" font-size="9" font-weight="600" text-anchor="middle">One-line summary:</text>
+                            <text x="70" y="142" fill="#3fb950" font-family="Inter" font-size="8" text-anchor="middle">NVMe DMA ↔ GPU HBM</text>
+                            <text x="70" y="158" fill="#8b949e" font-family="Inter" font-size="8" text-anchor="middle">CPU sets up mappings,</text>
+                            <text x="70" y="172" fill="#8b949e" font-family="Inter" font-size="8" text-anchor="middle">data flows directly</text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Queue Architecture Section -->
+            <h3 style="color: #e6edf3; margin: 40px 0 15px; font-size: 1.15rem;">C) GPUDirect Storage: Queue-Based Architecture</h3>
+            <p style="color: #8b949e; margin-bottom: 20px;">
+                Just like RDMA extends NVMe over fabric, <strong style="color: #3fb950;">GPUDirect Storage</strong> extends NVMe to GPU memory. 
+                SW-HW communication through <strong style="color: #58a6ff;">Submission</strong> &amp; <strong style="color: #3fb950;">Completion</strong> queues — GPU memory as DMA target.
+            </p>
+            
+            <!-- Diagram 1: GPUDirect Storage Queue Architecture (like reference image) -->
+            <div class="diagram-wrapper">
+                <svg viewBox="0 0 900 520" style="width: 100%; height: auto;">
+                    <defs>
+                        <linearGradient id="gpuCardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3fb950"/>
+                            <stop offset="100%" style="stop-color:#238636"/>
+                        </linearGradient>
+                        <linearGradient id="nvmeCardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#a371f7"/>
+                            <stop offset="100%" style="stop-color:#8957e5"/>
+                        </linearGradient>
+                    </defs>
+                    
+                    <rect width="100%" height="100%" fill="#0d1117"/>
+                    
+                    <!-- Title -->
+                    <text x="450" y="30" fill="#3fb950" font-family="Inter" font-size="18" font-weight="700" text-anchor="middle">GPUDirect Storage: GPU as DMA Target for NVMe</text>
+                    
+                    <!-- Layer labels on left -->
+                    <g font-family="Inter" font-size="14" font-weight="600">
+                        <rect x="20" y="55" width="100" height="35" rx="4" fill="#161b22" stroke="#30363d"/>
+                        <text x="70" y="78" fill="#d29922" text-anchor="middle">Software</text>
+                        
+                        <rect x="20" y="170" width="100" height="35" rx="4" fill="#161b22" stroke="#30363d"/>
+                        <text x="70" y="193" fill="#58a6ff" text-anchor="middle">Memory</text>
+                        
+                        <rect x="20" y="390" width="100" height="35" rx="4" fill="#161b22" stroke="#30363d"/>
+                        <text x="70" y="413" fill="#a371f7" text-anchor="middle">Hardware</text>
+                    </g>
+                    
+                    <!-- Vertical divider -->
+                    <line x1="135" y1="50" x2="135" y2="500" stroke="#30363d" stroke-width="2"/>
+                    
+                    <!-- Horizontal dividers -->
+                    <line x1="135" y1="130" x2="880" y2="130" stroke="#30363d" stroke-width="2"/>
+                    <line x1="135" y1="355" x2="880" y2="355" stroke="#30363d" stroke-width="2"/>
+                    
+                    <!-- SOFTWARE LAYER -->
+                    <g transform="translate(420, 60)">
+                        <rect x="0" y="0" width="140" height="50" rx="6" fill="#1f6feb" opacity="0.15" stroke="#58a6ff" stroke-width="2"/>
+                        <text x="70" y="25" fill="#58a6ff" font-family="Inter" font-size="13" font-weight="600" text-anchor="middle">cuFile API</text>
+                        <text x="70" y="42" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="middle">nvidia-fs.ko</text>
+                    </g>
+                    
+                    <!-- Annotation -->
+                    <text x="700" y="70" fill="#8b949e" font-family="Inter" font-size="11" text-anchor="start">SW-HW communication</text>
+                    <text x="700" y="85" fill="#8b949e" font-family="Inter" font-size="11" text-anchor="start">through work &amp; completion</text>
+                    <text x="700" y="100" fill="#8b949e" font-family="Inter" font-size="11" text-anchor="start">queues in shared memory</text>
+                    
+                    <!-- Arrows from software to queues -->
+                    <path d="M 450 115 L 320 145" stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#arrowBlue)"/>
+                    <path d="M 530 115 L 660 145" stroke="#58a6ff" stroke-width="2" fill="none" marker-end="url(#arrowBlue)"/>
+                    
+                    <!-- MEMORY LAYER -->
+                    <!-- GPU Memory Queue Pair -->
+                    <g transform="translate(160, 150)">
+                        <rect x="0" y="0" width="300" height="190" rx="8" fill="#3fb950" opacity="0.08" stroke="#3fb950" stroke-width="2" stroke-dasharray="8,4"/>
+                        <text x="150" y="25" fill="#3fb950" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">GPU Memory (HBM) — Data Buffer</text>
+                        
+                        <!-- Submission Queue Ring -->
+                        <g transform="translate(35, 45)">
+                            <circle cx="55" cy="55" r="50" fill="none" stroke="#58a6ff" stroke-width="2"/>
+                            <!-- Ring segments (filled = pending) -->
+                            <path d="M 55 5 A 50 50 0 0 1 100 30" stroke="#58a6ff" stroke-width="10" fill="none" opacity="0.9"/>
+                            <path d="M 100 30 A 50 50 0 0 1 105 55" stroke="#58a6ff" stroke-width="10" fill="none" opacity="0.7"/>
+                            <path d="M 105 55 A 50 50 0 0 1 100 80" stroke="#58a6ff" stroke-width="10" fill="none" opacity="0.5"/>
+                            <path d="M 100 80 A 50 50 0 0 1 80 100" stroke="#58a6ff" stroke-width="10" fill="none" opacity="0.3"/>
+                            <!-- Empty segments -->
+                            <path d="M 80 100 A 50 50 0 0 1 55 105" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 55 105 A 50 50 0 0 1 30 100" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 30 100 A 50 50 0 0 1 10 80" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 10 80 A 50 50 0 0 1 5 55" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 5 55 A 50 50 0 0 1 10 30" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 10 30 A 50 50 0 0 1 30 10" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 30 10 A 50 50 0 0 1 55 5" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <!-- Center label -->
+                            <rect x="15" y="40" width="80" height="30" rx="4" fill="#0d1117" stroke="#58a6ff"/>
+                            <text x="55" y="60" fill="#58a6ff" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">Submission</text>
+                        </g>
+                        
+                        <!-- Completion Queue Ring -->
+                        <g transform="translate(165, 45)">
+                            <circle cx="55" cy="55" r="50" fill="none" stroke="#3fb950" stroke-width="2"/>
+                            <!-- Ring segments (fewer = processed) -->
+                            <path d="M 55 5 A 50 50 0 0 1 100 30" stroke="#3fb950" stroke-width="10" fill="none" opacity="0.9"/>
+                            <path d="M 100 30 A 50 50 0 0 1 105 55" stroke="#3fb950" stroke-width="10" fill="none" opacity="0.7"/>
+                            <!-- Empty segments -->
+                            <path d="M 105 55 A 50 50 0 0 1 100 80" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 100 80 A 50 50 0 0 1 80 100" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 80 100 A 50 50 0 0 1 55 105" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 55 105 A 50 50 0 0 1 30 100" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 30 100 A 50 50 0 0 1 10 80" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 10 80 A 50 50 0 0 1 5 55" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 5 55 A 50 50 0 0 1 10 30" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 10 30 A 50 50 0 0 1 30 10" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 30 10 A 50 50 0 0 1 55 5" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <!-- Center label -->
+                            <rect x="10" y="40" width="90" height="30" rx="4" fill="#0d1117" stroke="#3fb950"/>
+                            <text x="55" y="60" fill="#3fb950" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">Completion</text>
+                        </g>
+                        
+                        <text x="150" y="175" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="middle">cuFileBufRegister(gpu_ptr)</text>
+                    </g>
+                    
+                    <!-- NVMe Queue Pair -->
+                    <g transform="translate(520, 150)">
+                        <rect x="0" y="0" width="300" height="190" rx="8" fill="#a371f7" opacity="0.08" stroke="#a371f7" stroke-width="2" stroke-dasharray="8,4"/>
+                        <text x="150" y="25" fill="#a371f7" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">NVMe Queues (Host Memory)</text>
+                        
+                        <!-- Submission Queue Ring -->
+                        <g transform="translate(35, 45)">
+                            <circle cx="55" cy="55" r="50" fill="none" stroke="#58a6ff" stroke-width="2"/>
+                            <path d="M 55 5 A 50 50 0 0 1 100 30" stroke="#58a6ff" stroke-width="10" fill="none" opacity="0.9"/>
+                            <path d="M 100 30 A 50 50 0 0 1 105 55" stroke="#58a6ff" stroke-width="10" fill="none" opacity="0.7"/>
+                            <path d="M 105 55 A 50 50 0 0 1 100 80" stroke="#58a6ff" stroke-width="10" fill="none" opacity="0.5"/>
+                            <path d="M 100 80 A 50 50 0 0 1 80 100" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 80 100 A 50 50 0 0 1 55 105" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 55 105 A 50 50 0 0 1 30 100" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 30 100 A 50 50 0 0 1 10 80" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 10 80 A 50 50 0 0 1 5 55" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 5 55 A 50 50 0 0 1 10 30" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 10 30 A 50 50 0 0 1 30 10" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 30 10 A 50 50 0 0 1 55 5" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <rect x="15" y="40" width="80" height="30" rx="4" fill="#0d1117" stroke="#58a6ff"/>
+                            <text x="55" y="60" fill="#58a6ff" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">Submission</text>
+                        </g>
+                        
+                        <!-- Completion Queue Ring -->
+                        <g transform="translate(165, 45)">
+                            <circle cx="55" cy="55" r="50" fill="none" stroke="#3fb950" stroke-width="2"/>
+                            <path d="M 55 5 A 50 50 0 0 1 100 30" stroke="#3fb950" stroke-width="10" fill="none" opacity="0.9"/>
+                            <path d="M 100 30 A 50 50 0 0 1 105 55" stroke="#3fb950" stroke-width="10" fill="none" opacity="0.6"/>
+                            <path d="M 105 55 A 50 50 0 0 1 100 80" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 100 80 A 50 50 0 0 1 80 100" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 80 100 A 50 50 0 0 1 55 105" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 55 105 A 50 50 0 0 1 30 100" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 30 100 A 50 50 0 0 1 10 80" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 10 80 A 50 50 0 0 1 5 55" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 5 55 A 50 50 0 0 1 10 30" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 10 30 A 50 50 0 0 1 30 10" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <path d="M 30 10 A 50 50 0 0 1 55 5" stroke="#30363d" stroke-width="10" fill="none"/>
+                            <rect x="10" y="40" width="90" height="30" rx="4" fill="#0d1117" stroke="#3fb950"/>
+                            <text x="55" y="60" fill="#3fb950" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">Completion</text>
+                        </g>
+                        
+                        <text x="150" y="175" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="middle">NVMe I/O Queue Pair</text>
+                    </g>
+                    
+                    <!-- Arrows from queues to hardware -->
+                    <path d="M 250 345 L 250 365" stroke="#3fb950" stroke-width="2" fill="none" marker-end="url(#arrowGreen2)"/>
+                    <path d="M 350 345 L 350 365" stroke="#3fb950" stroke-width="2" fill="none" marker-end="url(#arrowGreen2)"/>
+                    <path d="M 610 345 L 610 365" stroke="#a371f7" stroke-width="2" fill="none" marker-end="url(#arrowPurple2)"/>
+                    <path d="M 720 345 L 720 365" stroke="#a371f7" stroke-width="2" fill="none" marker-end="url(#arrowPurple2)"/>
+                    
+                    <!-- HARDWARE LAYER -->
+                    <!-- GPU Card -->
+                    <g transform="translate(180, 375)">
+                        <rect x="0" y="0" width="240" height="110" rx="8" fill="url(#gpuCardGrad)"/>
+                        <text x="120" y="35" fill="#fff" font-family="Inter" font-size="16" font-weight="700" text-anchor="middle">GPU</text>
+                        <!-- GPU chip visualization -->
+                        <rect x="20" y="50" width="200" height="45" rx="4" fill="rgba(0,0,0,0.3)"/>
+                        <rect x="30" y="60" width="50" height="25" rx="2" fill="rgba(255,255,255,0.3)"/>
+                        <rect x="90" y="60" width="50" height="25" rx="2" fill="rgba(255,255,255,0.3)"/>
+                        <rect x="150" y="60" width="50" height="25" rx="2" fill="rgba(255,255,255,0.3)"/>
+                        <!-- PCIe connector -->
+                        <rect x="80" y="95" width="80" height="15" rx="2" fill="#d29922"/>
+                    </g>
+                    
+                    <!-- NVMe Card -->
+                    <g transform="translate(540, 375)">
+                        <rect x="0" y="0" width="240" height="110" rx="8" fill="url(#nvmeCardGrad)"/>
+                        <text x="120" y="35" fill="#fff" font-family="Inter" font-size="16" font-weight="700" text-anchor="middle">NVMe Flash</text>
+                        <!-- NVMe chip visualization -->
+                        <rect x="20" y="50" width="200" height="45" rx="4" fill="rgba(0,0,0,0.3)"/>
+                        <rect x="30" y="55" width="180" height="35" rx="2" fill="rgba(255,255,255,0.2)"/>
+                        <!-- Heat sink lines -->
+                        <line x1="50" y1="58" x2="50" y2="85" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                        <line x1="70" y1="58" x2="70" y2="85" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                        <line x1="90" y1="58" x2="90" y2="85" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                        <line x1="110" y1="58" x2="110" y2="85" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                        <line x1="130" y1="58" x2="130" y2="85" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                        <line x1="150" y1="58" x2="150" y2="85" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                        <line x1="170" y1="58" x2="170" y2="85" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                        <line x1="190" y1="58" x2="190" y2="85" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                        <!-- PCIe connector -->
+                        <rect x="80" y="95" width="80" height="15" rx="2" fill="#d29922"/>
+                    </g>
+                    
+                    <!-- P2P DMA between GPU and NVMe -->
+                    <g transform="translate(420, 420)">
+                        <rect x="0" y="0" width="120" height="50" rx="25" fill="#3fb950" opacity="0.2" stroke="#3fb950" stroke-width="3"/>
+                        <text x="60" y="22" fill="#3fb950" font-family="Inter" font-size="11" font-weight="700" text-anchor="middle">PCIe P2P</text>
+                        <text x="60" y="38" fill="#3fb950" font-family="Inter" font-size="10" text-anchor="middle">Direct DMA</text>
+                    </g>
+                    
+                    <!-- Bidirectional arrows -->
+                    <path d="M 540 455 L 425 455" stroke="#3fb950" stroke-width="4" marker-end="url(#arrowGreen2)"/>
+                    <path d="M 425 435 L 540 435" stroke="#3fb950" stroke-width="4" marker-end="url(#arrowGreen2)"/>
+                    
+                    <!-- Key insight label -->
+                    <g transform="translate(250, 500)">
+                        <text x="0" y="0" fill="#d29922" font-family="Inter" font-size="11" font-weight="600">Key: DMA target address in NVMe command points to GPU BAR memory, not host DRAM</text>
+                    </g>
+                    
+                    <defs>
+                        <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                            <path d="M0,0 L0,10 L10,5 z" fill="#58a6ff"/>
+                        </marker>
+                        <marker id="arrowGreen2" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                            <path d="M0,0 L0,10 L10,5 z" fill="#3fb950"/>
+                        </marker>
+                        <marker id="arrowPurple2" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                            <path d="M0,0 L0,10 L10,5 z" fill="#a371f7"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+            
+            <!-- Diagram 2: NVMe-oF with GPUDirect Storage -->
+            <h3 style="color: #e6edf3; margin: 40px 0 15px; font-size: 1.15rem;">NVMe-oF (NVMe over Fabrics) with GPUDirect RDMA</h3>
+            <p style="color: #8b949e; margin-bottom: 20px;">
+                For remote storage, <strong style="color: #58a6ff;">NVMe-oF</strong> uses RDMA to extend NVMe across the network. 
+                With GPUDirect RDMA, the NIC can DMA directly to GPU memory — combining GDS + GPUDirect RDMA.
+            </p>
+            
+            <div class="diagram-wrapper">
+                <svg viewBox="0 0 900 650" style="width: 100%; height: auto;">
+                    <defs>
+                        <linearGradient id="fabricGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#1f6feb;stop-opacity:0.3"/>
+                            <stop offset="50%" style="stop-color:#58a6ff;stop-opacity:0.5"/>
+                            <stop offset="100%" style="stop-color:#1f6feb;stop-opacity:0.3"/>
+                        </linearGradient>
+                        <marker id="arrowRedBig" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                            <path d="M0,0 L0,12 L12,6 z" fill="#f85149"/>
+                        </marker>
+                    </defs>
+                    
+                    <rect width="100%" height="100%" fill="#0d1117"/>
+                    
+                    <!-- Title -->
+                    <text x="450" y="30" fill="#58a6ff" font-family="Inter" font-size="18" font-weight="700" text-anchor="middle">NVMe-oF with GPUDirect RDMA</text>
+                    
+                    <!-- Top bar: Block Device / Native Application -->
+                    <rect x="50" y="50" width="800" height="45" rx="6" fill="#484f58"/>
+                    <text x="450" y="80" fill="#fff" font-family="Inter" font-size="14" font-weight="600" text-anchor="middle">Block Device / Native Application (cuFile)</text>
+                    
+                    <!-- ========== LEFT SIDE: INITIATOR (GPU Host) ========== -->
+                    <g transform="translate(50, 110)">
+                        <!-- NVMe Transport Layer header -->
+                        <rect x="0" y="0" width="200" height="35" rx="4" fill="#3fb950" opacity="0.3"/>
+                        <text x="100" y="23" fill="#3fb950" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">NVMe Transport Layer</text>
+                        
+                        <!-- NVMe local -->
+                        <rect x="0" y="45" width="90" height="45" rx="4" fill="#d29922"/>
+                        <text x="45" y="65" fill="#000" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">NVMe</text>
+                        <text x="45" y="80" fill="#000" font-family="Inter" font-size="10" text-anchor="middle">local</text>
+                        
+                        <!-- NVMe Fabric Initiator -->
+                        <rect x="100" y="45" width="100" height="45" rx="4" fill="#3fb950" opacity="0.3"/>
+                        <text x="150" y="62" fill="#3fb950" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">NVMe Fabric</text>
+                        <text x="150" y="77" fill="#3fb950" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">Initiator</text>
+                        
+                        <!-- RDMA box -->
+                        <rect x="115" y="100" width="70" height="35" rx="4" fill="#3fb950" stroke="#3fb950" stroke-width="2"/>
+                        <text x="150" y="123" fill="#fff" font-family="Inter" font-size="12" font-weight="700" text-anchor="middle">RDMA</text>
+                        
+                        <!-- NVMe Device (local) -->
+                        <rect x="0" y="100" width="90" height="45" rx="4" fill="#d29922"/>
+                        <text x="45" y="120" fill="#000" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">NVMe</text>
+                        <text x="45" y="135" fill="#000" font-family="Inter" font-size="10" text-anchor="middle">Device</text>
+                        
+                        <!-- GPU Box -->
+                        <rect x="0" y="155" width="200" height="60" rx="6" fill="#3fb950" opacity="0.2" stroke="#3fb950" stroke-width="2"/>
+                        <text x="100" y="180" fill="#3fb950" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">GPU (HBM Memory)</text>
+                        <text x="100" y="200" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="middle">GPUDirect RDMA Target</text>
+                    </g>
+                    
+                    <!-- ========== CENTER: Alternative paths ========== -->
+                    <g transform="translate(280, 110)">
+                        <!-- Dashed box for traditional paths -->
+                        <rect x="0" y="0" width="180" height="215" rx="6" fill="none" stroke="#58a6ff" stroke-width="2" stroke-dasharray="8,4"/>
+                        
+                        <rect x="20" y="10" width="60" height="30" rx="4" fill="#f85149" opacity="0.3"/>
+                        <text x="50" y="30" fill="#f85149" font-family="Inter" font-size="11" font-weight="500" text-anchor="middle">SCSI</text>
+                        
+                        <rect x="20" y="50" width="60" height="30" rx="4" fill="#f85149" opacity="0.3"/>
+                        <text x="50" y="70" fill="#f85149" font-family="Inter" font-size="11" font-weight="500" text-anchor="middle">iSCSI</text>
+                        
+                        <rect x="20" y="90" width="60" height="35" rx="4" fill="#58a6ff"/>
+                        <text x="50" y="112" fill="#fff" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">TCP/IP</text>
+                        
+                        <rect x="100" y="10" width="60" height="30" rx="4" fill="#f0883e" opacity="0.5"/>
+                        <text x="130" y="25" fill="#f0883e" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">NVMe</text>
+                        <text x="130" y="37" fill="#f0883e" font-family="Inter" font-size="9" text-anchor="middle">local</text>
+                        
+                        <!-- NVMe Device (highlighted) -->
+                        <rect x="95" y="50" width="70" height="75" rx="4" fill="#d29922" stroke="#f85149" stroke-width="3"/>
+                        <text x="130" y="85" fill="#000" font-family="Inter" font-size="12" font-weight="700" text-anchor="middle">NVMe</text>
+                        <text x="130" y="102" fill="#000" font-family="Inter" font-size="11" text-anchor="middle">Device</text>
+                        
+                        <text x="90" y="180" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">(Traditional paths)</text>
+                    </g>
+                    
+                    <!-- ========== FABRIC CLOUD ========== -->
+                    <g transform="translate(100, 360)">
+                        <ellipse cx="350" cy="50" rx="300" ry="60" fill="url(#fabricGrad)" stroke="#58a6ff" stroke-width="2"/>
+                        <text x="350" y="55" fill="#58a6ff" font-family="Inter" font-size="18" font-weight="600" text-anchor="middle">Fabric</text>
+                        <text x="350" y="75" fill="#8b949e" font-family="Inter" font-size="11" text-anchor="middle">(InfiniBand / RoCE / iWARP)</text>
+                    </g>
+                    
+                    <!-- Big red arrow: RDMA path through fabric -->
+                    <path d="M 200 340 L 200 380" stroke="#f85149" stroke-width="6" fill="none"/>
+                    <path d="M 200 420 L 200 480" stroke="#f85149" stroke-width="6" fill="none" marker-end="url(#arrowRedBig)"/>
+                    
+                    <!-- ========== BOTTOM: TARGET SIDE ========== -->
+                    <g transform="translate(50, 490)">
+                        <rect x="115" y="0" width="70" height="35" rx="4" fill="#3fb950" stroke="#3fb950" stroke-width="2"/>
+                        <text x="150" y="23" fill="#fff" font-family="Inter" font-size="12" font-weight="700" text-anchor="middle">RDMA</text>
+                        
+                        <rect x="100" y="45" width="100" height="45" rx="4" fill="#3fb950" opacity="0.3"/>
+                        <text x="150" y="62" fill="#3fb950" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">NVMe Fabric</text>
+                        <text x="150" y="77" fill="#3fb950" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">Target</text>
+                        
+                        <rect x="115" y="100" width="70" height="50" rx="4" fill="#d29922"/>
+                        <text x="150" y="120" fill="#000" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">NVMe</text>
+                        <text x="150" y="137" fill="#000" font-family="Inter" font-size="10" text-anchor="middle">Device</text>
+                    </g>
+                    
+                    <!-- Right side target stack (traditional) -->
+                    <g transform="translate(280, 490)">
+                        <rect x="0" y="0" width="180" height="150" rx="6" fill="none" stroke="#58a6ff" stroke-width="2" stroke-dasharray="8,4"/>
+                        
+                        <rect x="20" y="10" width="60" height="30" rx="4" fill="#58a6ff"/>
+                        <text x="50" y="30" fill="#fff" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">TCP/IP</text>
+                        
+                        <rect x="20" y="50" width="60" height="30" rx="4" fill="#f85149" opacity="0.3"/>
+                        <text x="50" y="70" fill="#f85149" font-family="Inter" font-size="11" text-anchor="middle">iSCSI</text>
+                        
+                        <rect x="20" y="90" width="60" height="30" rx="4" fill="#f85149" opacity="0.3"/>
+                        <text x="50" y="110" fill="#f85149" font-family="Inter" font-size="11" text-anchor="middle">SCSI</text>
+                        
+                        <rect x="100" y="10" width="60" height="35" rx="4" fill="#f0883e"/>
+                        <text x="130" y="25" fill="#000" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">Target</text>
+                        <text x="130" y="40" fill="#000" font-family="Inter" font-size="10" text-anchor="middle">SW</text>
+                        
+                        <rect x="95" y="55" width="70" height="35" rx="4" fill="#f0883e" opacity="0.5"/>
+                        <text x="130" y="70" fill="#f0883e" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">SAS/sATA</text>
+                        <text x="130" y="83" fill="#f0883e" font-family="Inter" font-size="9" text-anchor="middle">Device</text>
+                    </g>
+                    
+                    <!-- Legend -->
+                    <g transform="translate(550, 500)">
+                        <rect x="0" y="0" width="300" height="130" rx="8" fill="#161b22" stroke="#30363d"/>
+                        <text x="150" y="25" fill="#e6edf3" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">GDS + NVMe-oF Data Path</text>
+                        
+                        <rect x="20" y="40" width="15" height="15" rx="2" fill="#3fb950"/>
+                        <text x="45" y="52" fill="#8b949e" font-family="Inter" font-size="10">RDMA (GPUDirect)</text>
+                        
+                        <rect x="20" y="65" width="15" height="15" rx="2" fill="#d29922"/>
+                        <text x="45" y="77" fill="#8b949e" font-family="Inter" font-size="10">NVMe Device</text>
+                        
+                        <rect x="20" y="90" width="15" height="15" rx="2" fill="#f85149"/>
+                        <text x="45" y="102" fill="#8b949e" font-family="Inter" font-size="10">Direct Data Path (no CPU bounce)</text>
+                        
+                        <text x="150" y="122" fill="#58a6ff" font-family="Inter" font-size="9" text-anchor="middle">NIC DMAs directly to GPU HBM via fabric</text>
+                    </g>
+                </svg>
+            </div>
+            
+            <div class="insight-box success" style="margin-top: 20px;">
+                <span class="insight-icon">🚀</span>
+                <div class="insight-content">
+                    <h4 style="color: #3fb950;">The Complete Picture</h4>
+                    <p><strong style="color: #3fb950;">Local NVMe</strong>: NVMe controller DMA → GPU HBM (GDS)<br>
+                    <strong style="color: #58a6ff;">Remote NVMe-oF</strong>: NIC RDMA → GPU HBM (GPUDirect RDMA)<br><br>
+                    Both use the same queue-based model. The key is that the <strong style="color: #d29922;">DMA target address</strong> points to GPU memory (via PCIe BAR) instead of host DRAM.</p>
+                </div>
+            </div>
+            
+            <h3 style="color: #e6edf3; margin: 40px 0 15px; font-size: 1.15rem;">D) PCIe Topologies: All Possible Configurations</h3>
+            <p style="color: #8b949e; margin-bottom: 20px;">
+                P2P capability depends on whether the NVMe controller (local) or NIC (remote) can DMA directly to GPU memory via PCIe. 
+                These topologies determine if you get <strong style="color: #3fb950;">true P2P</strong> or <strong style="color: #f85149;">fallback bounce</strong>.
+            </p>
+            
+            <!-- Local NVMe Topologies -->
+            <h4 style="color: #a371f7; margin: 25px 0 15px; font-size: 1rem;">Local NVMe (Direct-Attached PCIe)</h4>
+            
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 30px;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, rgba(163,113,247,0.15) 0%, rgba(163,113,247,0.05) 100%);">
+                            <th style="padding: 14px; text-align: left; border-bottom: 2px solid #a371f7; color: #a371f7; font-weight: 600; width: 80px;">ID</th>
+                            <th style="padding: 14px; text-align: left; border-bottom: 2px solid #a371f7; color: #a371f7; font-weight: 600;">Topology</th>
+                            <th style="padding: 14px; text-align: center; border-bottom: 2px solid #a371f7; color: #a371f7; font-weight: 600; width: 100px;">P2P?</th>
+                            <th style="padding: 14px; text-align: left; border-bottom: 2px solid #a371f7; color: #a371f7; font-weight: 600;">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #21262d;">
+                            <td style="padding: 14px; color: #3fb950; font-weight: 600;">A1</td>
+                            <td style="padding: 14px; color: #e6edf3;"><strong>GPU + NVMe under same PCIe switch</strong></td>
+                            <td style="padding: 14px; text-align: center;"><span style="color: #3fb950; font-weight: 600;">✅ Best</span></td>
+                            <td style="padding: 14px; color: #8b949e;">Canonical P2P. DGX systems pair GPU+NVMe this way. Shortest path.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #21262d; background: rgba(255,255,255,0.02);">
+                            <td style="padding: 14px; color: #d29922; font-weight: 600;">A2</td>
+                            <td style="padding: 14px; color: #e6edf3;">GPU + NVMe under <em>different</em> switches, same root complex</td>
+                            <td style="padding: 14px; text-align: center;"><span style="color: #d29922; font-weight: 600;">⚠️ Maybe</span></td>
+                            <td style="padding: 14px; color: #8b949e;">Platform/ACS/IOMMU dependent. May work or fall back to bounce.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #21262d;">
+                            <td style="padding: 14px; color: #d29922; font-weight: 600;">A3</td>
+                            <td style="padding: 14px; color: #e6edf3;">GPU + NVMe on different root ports (no shared switch)</td>
+                            <td style="padding: 14px; text-align: center;"><span style="color: #d29922; font-weight: 600;">⚠️ Often problematic</span></td>
+                            <td style="padding: 14px; color: #8b949e;">Frequently becomes bounce on many servers.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #21262d; background: rgba(255,255,255,0.02);">
+                            <td style="padding: 14px; color: #f85149; font-weight: 600;">A4</td>
+                            <td style="padding: 14px; color: #e6edf3;">GPU + NVMe on <em>different CPU sockets</em> / root complexes</td>
+                            <td style="padding: 14px; text-align: center;"><span style="color: #f85149; font-weight: 600;">❌ No</span></td>
+                            <td style="padding: 14px; color: #8b949e;">Typically forces bounce. Cross-socket P2P rarely works.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #21262d;">
+                            <td style="padding: 14px; color: #d29922; font-weight: 600;">A5</td>
+                            <td style="padding: 14px; color: #e6edf3;">NVMe behind RAID/HBA/virtualization layer</td>
+                            <td style="padding: 14px; text-align: center;"><span style="color: #d29922; font-weight: 600;">⚠️ Depends</span></td>
+                            <td style="padding: 14px; color: #8b949e;">Driver stack dependent. Often ends up in bounce mode.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #21262d; background: rgba(255,255,255,0.02);">
+                            <td style="padding: 14px; color: #3fb950; font-weight: 600;">A6</td>
+                            <td style="padding: 14px; color: #e6edf3;">Multiple NVMe in RAID0 (topology-aware pairing)</td>
+                            <td style="padding: 14px; text-align: center;"><span style="color: #3fb950; font-weight: 600;">✅ Yes</span></td>
+                            <td style="padding: 14px; color: #8b949e;">DGX-like: NVMe pairs on same switch → RAID0 groups matched to GPUs.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Remote NVMe Topologies -->
+            <h4 style="color: #58a6ff; margin: 25px 0 15px; font-size: 1rem;">Remote NVMe (NVMe-oF / RDMA / Distributed FS)</h4>
+            <p style="color: #8b949e; margin-bottom: 15px; font-size: 0.9rem;">
+                For remote storage, the DMA engine is the <strong style="color: #58a6ff;">NIC</strong>, not NVMe controller. The NIC must RDMA to GPU memory.
+            </p>
+            
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 30px;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, rgba(88,166,255,0.15) 0%, rgba(88,166,255,0.05) 100%);">
+                            <th style="padding: 14px; text-align: left; border-bottom: 2px solid #58a6ff; color: #58a6ff; font-weight: 600; width: 80px;">ID</th>
+                            <th style="padding: 14px; text-align: left; border-bottom: 2px solid #58a6ff; color: #58a6ff; font-weight: 600;">Topology</th>
+                            <th style="padding: 14px; text-align: center; border-bottom: 2px solid #58a6ff; color: #58a6ff; font-weight: 600; width: 100px;">P2P?</th>
+                            <th style="padding: 14px; text-align: left; border-bottom: 2px solid #58a6ff; color: #58a6ff; font-weight: 600;">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #21262d;">
+                            <td style="padding: 14px; color: #3fb950; font-weight: 600;">B1</td>
+                            <td style="padding: 14px; color: #e6edf3;"><strong>GPU + NIC under same PCIe switch</strong> ═══ RDMA ═══ NVMe-oF Target</td>
+                            <td style="padding: 14px; text-align: center;"><span style="color: #3fb950; font-weight: 600;">✅ Best</span></td>
+                            <td style="padding: 14px; color: #8b949e;">NIC can RDMA directly to GPU memory. Best for remote.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #21262d; background: rgba(255,255,255,0.02);">
+                            <td style="padding: 14px; color: #d29922; font-weight: 600;">B2</td>
+                            <td style="padding: 14px; color: #e6edf3;">GPU + NIC under different switches, same root complex</td>
+                            <td style="padding: 14px; text-align: center;"><span style="color: #d29922; font-weight: 600;">⚠️ Maybe</span></td>
+                            <td style="padding: 14px; color: #8b949e;">Same caveats: ACS/IOMMU/platform dependent.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #21262d;">
+                            <td style="padding: 14px; color: #f85149; font-weight: 600;">B3</td>
+                            <td style="padding: 14px; color: #e6edf3;">GPU + NIC on different CPU sockets / root complexes</td>
+                            <td style="padding: 14px; text-align: center;"><span style="color: #f85149; font-weight: 600;">❌ No</span></td>
+                            <td style="padding: 14px; color: #8b949e;">Commonly becomes bounce on client side.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #21262d; background: rgba(255,255,255,0.02);">
+                            <td style="padding: 14px; color: #3fb950; font-weight: 600;">B4</td>
+                            <td style="padding: 14px; color: #e6edf3;">Distributed FS with GDS support (BeeGFS, Spectrum Scale, etc.)</td>
+                            <td style="padding: 14px; text-align: center;"><span style="color: #3fb950; font-weight: 600;">✅/⚠️</span></td>
+                            <td style="padding: 14px; color: #8b949e;">Depends on NIC↔GPU topology. FS client routes I/O to GDS.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Topology Diagram -->
+            <div class="diagram-wrapper">
+                <svg viewBox="0 0 950 480" style="width: 100%; height: auto;">
+                    <rect width="100%" height="100%" fill="#0d1117"/>
+                    
+                    <text x="475" y="25" fill="#e6edf3" font-family="Inter" font-size="14" font-weight="600" text-anchor="middle">PCIe Topology Comparison: Best (A1) vs Suboptimal (A3/A4)</text>
+                    
+                    <!-- LEFT: Best topology (A1) -->
+                    <g transform="translate(30, 50)">
+                        <rect x="0" y="0" width="420" height="400" rx="12" fill="#3fb950" opacity="0.05" stroke="#3fb950" stroke-width="2"/>
+                        <text x="210" y="30" fill="#3fb950" font-family="Inter" font-size="13" font-weight="600" text-anchor="middle">A1: Same PCIe Switch (Best P2P)</text>
+                        
+                        <!-- CPU -->
+                        <rect x="160" y="55" width="100" height="45" rx="8" fill="#d29922" opacity="0.3" stroke="#d29922" stroke-width="2"/>
+                        <text x="210" y="75" fill="#d29922" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">CPU</text>
+                        <text x="210" y="90" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">Root Complex</text>
+                        
+                        <!-- Host DRAM (crossed out) -->
+                        <rect x="280" y="55" width="80" height="45" rx="8" fill="#f85149" opacity="0.1" stroke="#f85149" stroke-dasharray="4,2"/>
+                        <text x="320" y="75" fill="#f85149" font-family="Inter" font-size="9" text-anchor="middle" text-decoration="line-through">Host DRAM</text>
+                        <text x="320" y="90" fill="#3fb950" font-family="Inter" font-size="8" text-anchor="middle">bypassed</text>
+                        
+                        <line x1="210" y1="100" x2="210" y2="130" stroke="#8b949e" stroke-width="2"/>
+                        
+                        <!-- PCIe Switch -->
+                        <rect x="80" y="130" width="260" height="45" rx="8" fill="#3fb950" opacity="0.2" stroke="#3fb950" stroke-width="2"/>
+                        <text x="210" y="158" fill="#3fb950" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">PCIe Switch (P2P Enabled)</text>
+                        
+                        <line x1="130" y1="175" x2="130" y2="210" stroke="#3fb950" stroke-width="2"/>
+                        <line x1="290" y1="175" x2="290" y2="210" stroke="#a371f7" stroke-width="2"/>
+                        
+                        <!-- GPU -->
+                        <rect x="70" y="210" width="120" height="60" rx="8" fill="#3fb950" opacity="0.3" stroke="#3fb950" stroke-width="2"/>
+                        <text x="130" y="235" fill="#3fb950" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">GPU</text>
+                        <text x="130" y="255" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">HBM Memory</text>
+                        
+                        <!-- NVMe -->
+                        <rect x="230" y="210" width="120" height="60" rx="8" fill="#8957e5" opacity="0.3" stroke="#a371f7" stroke-width="2"/>
+                        <text x="290" y="235" fill="#a371f7" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">NVMe</text>
+                        <text x="290" y="255" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">Storage</text>
+                        
+                        <!-- P2P Arrow -->
+                        <g transform="translate(190, 235)">
+                            <line x1="0" y1="0" x2="35" y2="0" stroke="#3fb950" stroke-width="5" marker-end="url(#arrowGreen)"/>
+                            <line x1="35" y1="10" x2="0" y2="10" stroke="#3fb950" stroke-width="5" marker-end="url(#arrowGreen)"/>
+                        </g>
+                        <text x="210" y="265" fill="#3fb950" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Direct P2P</text>
+                        
+                        <!-- Result -->
+                        <rect x="80" y="300" width="260" height="80" rx="8" fill="#3fb950" opacity="0.1" stroke="#3fb950"/>
+                        <text x="210" y="325" fill="#3fb950" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">✓ Shortest path</text>
+                        <text x="210" y="345" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="middle">✓ Full PCIe bandwidth</text>
+                        <text x="210" y="365" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="middle">✓ No root complex traversal</text>
+                    </g>
+                    
+                    <!-- RIGHT: Suboptimal topology -->
+                    <g transform="translate(500, 50)">
+                        <rect x="0" y="0" width="420" height="400" rx="12" fill="#f85149" opacity="0.05" stroke="#f85149" stroke-width="2"/>
+                        <text x="210" y="30" fill="#f85149" font-family="Inter" font-size="13" font-weight="600" text-anchor="middle">A3/A4: Different Branches (Suboptimal)</text>
+                        
+                        <!-- CPU -->
+                        <rect x="160" y="55" width="100" height="45" rx="8" fill="#d29922" opacity="0.3" stroke="#d29922" stroke-width="2"/>
+                        <text x="210" y="75" fill="#d29922" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">CPU</text>
+                        <text x="210" y="90" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">Root Complex</text>
+                        
+                        <line x1="130" y1="100" x2="130" y2="130" stroke="#8b949e" stroke-width="2"/>
+                        <line x1="290" y1="100" x2="290" y2="130" stroke="#8b949e" stroke-width="2"/>
+                        
+                        <!-- PCIe Switch A -->
+                        <rect x="50" y="130" width="160" height="40" rx="6" fill="#3fb950" opacity="0.15" stroke="#3fb950" stroke-width="1"/>
+                        <text x="130" y="155" fill="#3fb950" font-family="Inter" font-size="10" text-anchor="middle">PCIe Switch A</text>
+                        
+                        <!-- PCIe Switch B -->
+                        <rect x="230" y="130" width="160" height="40" rx="6" fill="#a371f7" opacity="0.15" stroke="#a371f7" stroke-width="1"/>
+                        <text x="310" y="155" fill="#a371f7" font-family="Inter" font-size="10" text-anchor="middle">PCIe Switch B</text>
+                        
+                        <line x1="130" y1="170" x2="130" y2="210" stroke="#3fb950" stroke-width="2"/>
+                        <line x1="310" y1="170" x2="310" y2="210" stroke="#a371f7" stroke-width="2"/>
+                        
+                        <!-- GPU -->
+                        <rect x="70" y="210" width="120" height="60" rx="8" fill="#3fb950" opacity="0.3" stroke="#3fb950" stroke-width="2"/>
+                        <text x="130" y="235" fill="#3fb950" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">GPU</text>
+                        <text x="130" y="255" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">HBM Memory</text>
+                        
+                        <!-- NVMe -->
+                        <rect x="250" y="210" width="120" height="60" rx="8" fill="#8957e5" opacity="0.3" stroke="#a371f7" stroke-width="2"/>
+                        <text x="310" y="235" fill="#a371f7" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">NVMe</text>
+                        <text x="310" y="255" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">Storage</text>
+                        
+                        <!-- Long path arrow -->
+                        <path d="M 130 270 L 130 285 Q 130 295 140 295 L 200 295" stroke="#d29922" stroke-width="2" fill="none" stroke-dasharray="6,3"/>
+                        <path d="M 200 295 L 210 295 Q 220 295 220 285 L 220 100 Q 220 90 230 90 L 270 90" stroke="#d29922" stroke-width="2" fill="none" stroke-dasharray="6,3"/>
+                        <path d="M 270 90 Q 280 90 280 100 L 280 130 Q 280 140 290 140 L 310 170" stroke="#d29922" stroke-width="2" fill="none" stroke-dasharray="6,3" marker-end="url(#arrowOrange)"/>
+                        
+                        <defs>
+                            <marker id="arrowOrange" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                                <path d="M0,0 L0,8 L8,4 z" fill="#d29922"/>
+                            </marker>
+                        </defs>
+                        
+                        <text x="250" y="90" fill="#d29922" font-family="Inter" font-size="9" text-anchor="middle">via root</text>
+                        
+                        <!-- Result -->
+                        <rect x="80" y="300" width="260" height="80" rx="8" fill="#f85149" opacity="0.1" stroke="#f85149"/>
+                        <text x="210" y="325" fill="#d29922" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">⚠️ May still work (P2P via root)</text>
+                        <text x="210" y="345" fill="#f85149" font-family="Inter" font-size="10" text-anchor="middle">❌ Or falls back to bounce</text>
+                        <text x="210" y="365" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="middle">Depends on ACS/IOMMU settings</text>
+                    </g>
+                </svg>
+            </div>
+            
+            <!-- Compatibility mode note -->
+            <div class="insight-box warning" style="margin-top: 20px;">
+                <span class="insight-icon">⚠️</span>
+                <div class="insight-content">
+                    <h4 style="color: #f0883e;">"It Works But Bounces" Scenarios</h4>
+                    <p>Even with good PCIe topology, you can trigger bounce paths:</p>
+                    <ul style="margin: 10px 0 0 20px; color: #8b949e;">
+                        <li><strong style="color: #d29922;">Managed/UVM memory</strong>: <code style="background:#21262d;padding:2px 4px;border-radius:3px;">cudaMallocManaged</code> may use internal bounce buffers</li>
+                        <li><strong style="color: #d29922;">IOMMU enabled</strong>: Breaks P2P on many platforms</li>
+                        <li><strong style="color: #d29922;">ACS enabled</strong>: Access Control Services can block P2P</li>
+                        <li><strong style="color: #d29922;">Missing O_DIRECT</strong>: Falls back through page cache</li>
+                    </ul>
+                    <p style="margin-top: 10px;">Run <code style="background:#21262d;padding:2px 6px;border-radius:4px;">gdscheck -p</code> to verify your actual P2P capability!</p>
+                </div>
+            </div>
+            
+            <!-- Summary -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px;">
+                <div class="insight-box" style="margin: 0; background: linear-gradient(135deg, rgba(248,81,73,0.1) 0%, rgba(248,81,73,0.05) 100%); border: 1px solid rgba(248,81,73,0.3);">
+                    <span class="insight-icon">🐌</span>
+                    <div class="insight-content">
+                        <h4 style="color: #f85149;">Traditional Path Summary</h4>
+                        <code style="background:#21262d;padding:4px 8px;border-radius:4px;font-size:0.85rem;display:block;margin:8px 0;">NVMe → Host DRAM → CPU copy → cudaMemcpy → GPU</code>
+                        <p style="margin-top: 8px;"><strong>2-3 copies</strong>, CPU bandwidth limited</p>
+                    </div>
+                </div>
+                
+                <div class="insight-box" style="margin: 0; background: linear-gradient(135deg, rgba(63,185,80,0.1) 0%, rgba(63,185,80,0.05) 100%); border: 1px solid rgba(63,185,80,0.3);">
+                    <span class="insight-icon">🚀</span>
+                    <div class="insight-content">
+                        <h4 style="color: #3fb950;">GPUDirect Storage Summary</h4>
+                        <code style="background:#21262d;padding:4px 8px;border-radius:4px;font-size:0.85rem;display:block;margin:8px 0;">NVMe ↔ GPU HBM</code> (direct PCIe P2P DMA)
+                        <p style="margin-top: 8px;"><strong>Zero host copies</strong>, CPU sets up DMA only</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ============================================ -->
+        <!-- 4. THREAD COARSENING -->
+        <!-- ============================================ -->
+        <div class="card" id="coarsening">
+            <div class="card-header">
+                <span class="card-number">4</span>
+                <div class="card-icon" style="background: linear-gradient(135deg, #da3633, #f85149);">🧵</div>
+                <div>
+                    <h2 class="card-title" style="color: #f85149;">Thread Coarsening</h2>
+                    <p style="color: #8b949e; margin-top: 4px;">Fewer threads doing more work each — trading occupancy for efficiency</p>
+                </div>
+            </div>
+            
+            <div class="flex-diagrams">
+                <!-- Fine-Grained -->
+                <div class="sub-card">
+                    <h3 style="color: #f85149;"><span class="badge bad">BEFORE</span> Fine-Grained: 1 Thread = 1 Element</h3>
+                    <svg viewBox="0 0 440 340" style="width: 100%; height: auto;">
+                        <defs>
+                            <linearGradient id="threadGradBlue" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#58a6ff"/>
+                                <stop offset="100%" style="stop-color:#1f6feb"/>
+                            </linearGradient>
+                            <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                                <path d="M0,0 L0,10 L10,5 z" fill="#f85149"/>
+                            </marker>
+                        </defs>
+                        <rect width="100%" height="100%" fill="#0d1117"/>
+                        
+                        <text x="220" y="22" fill="#8b949e" font-family="Inter" font-size="11" text-anchor="middle">8 threads launched for 8 elements</text>
+                        
+                        <!-- 8 thread boxes -->
+                        <g transform="translate(20, 32)">
+                            <rect x="0" y="0" width="45" height="32" rx="5" fill="url(#threadGradBlue)"/>
+                            <text x="22" y="21" fill="#fff" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">T0</text>
+                            <rect x="52" y="0" width="45" height="32" rx="5" fill="url(#threadGradBlue)"/>
+                            <text x="74" y="21" fill="#fff" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">T1</text>
+                            <rect x="104" y="0" width="45" height="32" rx="5" fill="url(#threadGradBlue)"/>
+                            <text x="126" y="21" fill="#fff" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">T2</text>
+                            <rect x="156" y="0" width="45" height="32" rx="5" fill="url(#threadGradBlue)"/>
+                            <text x="178" y="21" fill="#fff" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">T3</text>
+                            <rect x="208" y="0" width="45" height="32" rx="5" fill="url(#threadGradBlue)"/>
+                            <text x="230" y="21" fill="#fff" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">T4</text>
+                            <rect x="260" y="0" width="45" height="32" rx="5" fill="url(#threadGradBlue)"/>
+                            <text x="282" y="21" fill="#fff" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">T5</text>
+                            <rect x="312" y="0" width="45" height="32" rx="5" fill="url(#threadGradBlue)"/>
+                            <text x="334" y="21" fill="#fff" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">T6</text>
+                            <rect x="364" y="0" width="45" height="32" rx="5" fill="url(#threadGradBlue)"/>
+                            <text x="386" y="21" fill="#fff" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">T7</text>
+                        </g>
+                        
+                        <!-- Arrows -->
+                        <g stroke="#f85149" stroke-width="2" fill="none">
+                            <line x1="42" y1="70" x2="42" y2="105" marker-end="url(#arrowRed)"/>
+                            <line x1="94" y1="70" x2="94" y2="105" marker-end="url(#arrowRed)"/>
+                            <line x1="146" y1="70" x2="146" y2="105" marker-end="url(#arrowRed)"/>
+                            <line x1="198" y1="70" x2="198" y2="105" marker-end="url(#arrowRed)"/>
+                            <line x1="250" y1="70" x2="250" y2="105" marker-end="url(#arrowRed)"/>
+                            <line x1="302" y1="70" x2="302" y2="105" marker-end="url(#arrowRed)"/>
+                            <line x1="354" y1="70" x2="354" y2="105" marker-end="url(#arrowRed)"/>
+                            <line x1="406" y1="70" x2="406" y2="105" marker-end="url(#arrowRed)"/>
+                        </g>
+                        
+                        <!-- Data array -->
+                        <g transform="translate(20, 115)">
+                            <rect x="0" y="0" width="45" height="32" rx="4" fill="#f85149" opacity="0.25" stroke="#f85149"/>
+                            <text x="22" y="21" fill="#f85149" font-family="Inter" font-size="10" text-anchor="middle">[0]</text>
+                            <rect x="52" y="0" width="45" height="32" rx="4" fill="#f85149" opacity="0.25" stroke="#f85149"/>
+                            <text x="74" y="21" fill="#f85149" font-family="Inter" font-size="10" text-anchor="middle">[1]</text>
+                            <rect x="104" y="0" width="45" height="32" rx="4" fill="#f85149" opacity="0.25" stroke="#f85149"/>
+                            <text x="126" y="21" fill="#f85149" font-family="Inter" font-size="10" text-anchor="middle">[2]</text>
+                            <rect x="156" y="0" width="45" height="32" rx="4" fill="#f85149" opacity="0.25" stroke="#f85149"/>
+                            <text x="178" y="21" fill="#f85149" font-family="Inter" font-size="10" text-anchor="middle">[3]</text>
+                            <rect x="208" y="0" width="45" height="32" rx="4" fill="#f85149" opacity="0.25" stroke="#f85149"/>
+                            <text x="230" y="21" fill="#f85149" font-family="Inter" font-size="10" text-anchor="middle">[4]</text>
+                            <rect x="260" y="0" width="45" height="32" rx="4" fill="#f85149" opacity="0.25" stroke="#f85149"/>
+                            <text x="282" y="21" fill="#f85149" font-family="Inter" font-size="10" text-anchor="middle">[5]</text>
+                            <rect x="312" y="0" width="45" height="32" rx="4" fill="#f85149" opacity="0.25" stroke="#f85149"/>
+                            <text x="334" y="21" fill="#f85149" font-family="Inter" font-size="10" text-anchor="middle">[6]</text>
+                            <rect x="364" y="0" width="45" height="32" rx="4" fill="#f85149" opacity="0.25" stroke="#f85149"/>
+                            <text x="386" y="21" fill="#f85149" font-family="Inter" font-size="10" text-anchor="middle">[7]</text>
+                        </g>
+                        
+                        <!-- Problems -->
+                        <g transform="translate(20, 170)">
+                            <rect x="0" y="0" width="400" height="85" rx="8" fill="#f85149" opacity="0.1" stroke="#f85149"/>
+                            <text x="200" y="22" fill="#f85149" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">Overhead per thread:</text>
+                            <text x="200" y="42" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="middle">❌ Register allocation & scheduling overhead</text>
+                            <text x="200" y="58" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="middle">❌ Instruction fetch redundancy</text>
+                            <text x="200" y="74" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="middle">❌ Address calculation per thread</text>
+                        </g>
+                        
+                        <!-- Code -->
+                        <g transform="translate(20, 268)">
+                            <rect x="0" y="0" width="400" height="55" rx="6" fill="#161b22" stroke="#30363d"/>
+                            <text x="15" y="22" fill="#8b949e" font-family="monospace" font-size="10">int i = blockIdx.x * blockDim.x + threadIdx.x;</text>
+                            <text x="15" y="40" fill="#f85149" font-family="monospace" font-size="10">out[i] = process(in[i]); // 1 element</text>
+                        </g>
+                    </svg>
+                </div>
+                
+                <!-- Coarsened -->
+                <div class="sub-card">
+                    <h3 style="color: #3fb950;"><span class="badge good">AFTER</span> Coarsened: 1 Thread = 4 Elements</h3>
+                    <svg viewBox="0 0 440 340" style="width: 100%; height: auto;">
+                        <defs>
+                            <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                                <path d="M0,0 L0,10 L10,5 z" fill="#3fb950"/>
+                            </marker>
+                            <marker id="arrowYellow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+                                <path d="M0,0 L0,10 L10,5 z" fill="#d29922"/>
+                            </marker>
+                        </defs>
+                        <rect width="100%" height="100%" fill="#0d1117"/>
+                        
+                        <text x="220" y="22" fill="#8b949e" font-family="Inter" font-size="11" text-anchor="middle">Only 2 threads launched (4× coarsening factor)</text>
+                        
+                        <!-- Only 2 thread boxes -->
+                        <g transform="translate(20, 32)">
+                            <rect x="55" y="0" width="140" height="32" rx="5" fill="#238636"/>
+                            <text x="125" y="21" fill="#fff" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">Thread 0</text>
+                            
+                            <rect x="215" y="0" width="140" height="32" rx="5" fill="#9e6a03"/>
+                            <text x="285" y="21" fill="#fff" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">Thread 1</text>
+                        </g>
+                        
+                        <!-- Arrows spreading out -->
+                        <g stroke="#3fb950" stroke-width="2" fill="none">
+                            <path d="M 95 70 L 42 105" marker-end="url(#arrowGreen)"/>
+                            <path d="M 110 70 L 94 105" marker-end="url(#arrowGreen)"/>
+                            <path d="M 140 70 L 146 105" marker-end="url(#arrowGreen)"/>
+                            <path d="M 155 70 L 198 105" marker-end="url(#arrowGreen)"/>
+                        </g>
+                        <g stroke="#d29922" stroke-width="2" fill="none">
+                            <path d="M 255 70 L 250 105" marker-end="url(#arrowYellow)"/>
+                            <path d="M 270 70 L 302 105" marker-end="url(#arrowYellow)"/>
+                            <path d="M 300 70 L 354 105" marker-end="url(#arrowYellow)"/>
+                            <path d="M 315 70 L 406 105" marker-end="url(#arrowYellow)"/>
+                        </g>
+                        
+                        <!-- Data array - color coded -->
+                        <g transform="translate(20, 115)">
+                            <rect x="0" y="0" width="45" height="32" rx="4" fill="#238636" opacity="0.25" stroke="#3fb950"/>
+                            <text x="22" y="21" fill="#3fb950" font-family="Inter" font-size="10" text-anchor="middle">[0]</text>
+                            <rect x="52" y="0" width="45" height="32" rx="4" fill="#238636" opacity="0.25" stroke="#3fb950"/>
+                            <text x="74" y="21" fill="#3fb950" font-family="Inter" font-size="10" text-anchor="middle">[1]</text>
+                            <rect x="104" y="0" width="45" height="32" rx="4" fill="#238636" opacity="0.25" stroke="#3fb950"/>
+                            <text x="126" y="21" fill="#3fb950" font-family="Inter" font-size="10" text-anchor="middle">[2]</text>
+                            <rect x="156" y="0" width="45" height="32" rx="4" fill="#238636" opacity="0.25" stroke="#3fb950"/>
+                            <text x="178" y="21" fill="#3fb950" font-family="Inter" font-size="10" text-anchor="middle">[3]</text>
+                            
+                            <rect x="208" y="0" width="45" height="32" rx="4" fill="#9e6a03" opacity="0.25" stroke="#d29922"/>
+                            <text x="230" y="21" fill="#d29922" font-family="Inter" font-size="10" text-anchor="middle">[4]</text>
+                            <rect x="260" y="0" width="45" height="32" rx="4" fill="#9e6a03" opacity="0.25" stroke="#d29922"/>
+                            <text x="282" y="21" fill="#d29922" font-family="Inter" font-size="10" text-anchor="middle">[5]</text>
+                            <rect x="312" y="0" width="45" height="32" rx="4" fill="#9e6a03" opacity="0.25" stroke="#d29922"/>
+                            <text x="334" y="21" fill="#d29922" font-family="Inter" font-size="10" text-anchor="middle">[6]</text>
+                            <rect x="364" y="0" width="45" height="32" rx="4" fill="#9e6a03" opacity="0.25" stroke="#d29922"/>
+                            <text x="386" y="21" fill="#d29922" font-family="Inter" font-size="10" text-anchor="middle">[7]</text>
+                        </g>
+                        
+                        <!-- Benefits -->
+                        <g transform="translate(20, 170)">
+                            <rect x="0" y="0" width="400" height="85" rx="8" fill="#238636" opacity="0.1" stroke="#3fb950"/>
+                            <text x="200" y="22" fill="#3fb950" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">Amortized overhead:</text>
+                            <text x="200" y="42" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="middle">✓ 4× less thread management</text>
+                            <text x="200" y="58" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="middle">✓ Better instruction cache reuse</text>
+                            <text x="200" y="74" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="middle">✓ More registers available per thread</text>
+                        </g>
+                        
+                        <!-- Code -->
+                        <g transform="translate(20, 268)">
+                            <rect x="0" y="0" width="400" height="55" rx="6" fill="#161b22" stroke="#30363d"/>
+                            <text x="15" y="22" fill="#8b949e" font-family="monospace" font-size="10">int base = threadIdx.x * COARSEN_FACTOR;</text>
+                            <text x="15" y="40" fill="#3fb950" font-family="monospace" font-size="10">for(int j=0; j&lt;4; j++) process(base+j);</text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Trade-off spectrum -->
+            <div class="diagram-wrapper" style="margin-top: 20px;">
+                <svg viewBox="0 0 800 140" style="width: 100%; height: auto;">
+                    <rect width="100%" height="100%" fill="#0d1117"/>
+                    
+                    <text x="400" y="25" fill="#e6edf3" font-family="Inter" font-size="14" font-weight="600" text-anchor="middle">The Occupancy vs Efficiency Trade-off</text>
+                    
+                    <defs>
+                        <linearGradient id="tradeoffGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#f85149"/>
+                            <stop offset="35%" style="stop-color:#d29922"/>
+                            <stop offset="50%" style="stop-color:#3fb950"/>
+                            <stop offset="65%" style="stop-color:#d29922"/>
+                            <stop offset="100%" style="stop-color:#f85149"/>
+                        </linearGradient>
+                    </defs>
+                    
+                    <rect x="100" y="45" width="600" height="25" rx="6" fill="url(#tradeoffGrad)"/>
+                    
+                    <!-- Markers -->
+                    <circle cx="400" cy="57" r="10" fill="#0d1117" stroke="#3fb950" stroke-width="3"/>
+                    
+                    <!-- Labels -->
+                    <text x="100" y="90" fill="#f85149" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">1 elem/thread</text>
+                    <text x="100" y="105" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">High occupancy</text>
+                    <text x="100" y="118" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">High overhead</text>
+                    
+                    <text x="400" y="90" fill="#3fb950" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">Sweet Spot: 2-8 elem</text>
+                    <text x="400" y="105" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">Balanced</text>
+                    
+                    <text x="700" y="90" fill="#f85149" font-family="Inter" font-size="10" font-weight="500" text-anchor="middle">100+ elem/thread</text>
+                    <text x="700" y="105" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">Low occupancy</text>
+                    <text x="700" y="118" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">Can't hide latency</text>
+                </svg>
+            </div>
+            
+            <div class="insight-box warning">
+                <span class="insight-icon">⚖️</span>
+                <div class="insight-content">
+                    <h4 style="color: #f0883e;">The Trade-off</h4>
+                    <p>Coarsening <strong style="color: #3fb950;">reduces overhead</strong> but also <strong style="color: #f85149;">reduces occupancy</strong> (fewer warps). You're trading latency-hiding ability for per-thread efficiency. Profile to find the optimal balance — typically <strong style="color: #58a6ff;">2-8 elements per thread</strong> works well.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ============================================ -->
+        <!-- 5. WARP DIVERGENCE -->
+        <!-- ============================================ -->
+        <div class="card" id="divergence">
+            <div class="card-header">
+                <span class="card-number">5</span>
+                <div class="card-icon" style="background: linear-gradient(135deg, #f0883e, #d29922);">⚡</div>
+                <div>
+                    <h2 class="card-title" style="color: #f0883e;">Warp Divergence</h2>
+                    <p style="color: #8b949e; margin-top: 4px;">When threads in a warp take different execution paths</p>
+                </div>
+            </div>
+            
+            <div class="diagram-wrapper">
+                <svg viewBox="0 0 900 480" style="width: 100%; height: auto;">
+                    <defs>
+                        <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#1f6feb"/>
+                            <stop offset="100%" style="stop-color:#58a6ff"/>
+                        </linearGradient>
+                        <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#238636"/>
+                            <stop offset="100%" style="stop-color:#3fb950"/>
+                        </linearGradient>
+                        <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#bd5a00"/>
+                            <stop offset="100%" style="stop-color:#f0883e"/>
+                        </linearGradient>
+                        <linearGradient id="yellowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#9e6a03"/>
+                            <stop offset="100%" style="stop-color:#d29922"/>
+                        </linearGradient>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#21262d" stroke-width="0.5"/>
+                        </pattern>
+                    </defs>
+                    
+                    <rect width="100%" height="100%" fill="url(#grid)" opacity="0.5"/>
+                    
+                    <!-- Thread Index Labels -->
+                    <g font-family="Inter, sans-serif" font-size="12" fill="#8b949e" font-weight="500">
+                        <text x="95" y="30" text-anchor="middle">0</text>
+                        <text x="145" y="30" text-anchor="middle">1</text>
+                        <text x="195" y="30" text-anchor="middle">2</text>
+                        <text x="245" y="30" text-anchor="middle">3</text>
+                        <text x="310" y="30" text-anchor="middle">···</text>
+                        <text x="375" y="30" text-anchor="middle">23</text>
+                        <text x="440" y="30" text-anchor="middle">24</text>
+                        <text x="505" y="30" text-anchor="middle">25</text>
+                        <text x="570" y="30" text-anchor="middle">···</text>
+                        <text x="635" y="30" text-anchor="middle">31</text>
+                    </g>
+                    
+                    <!-- Header threads -->
+                    <g transform="translate(0, 45)">
+                        <path d="M 95 0 Q 90 15 95 30 Q 100 45 95 60" stroke="#e6edf3" stroke-width="3" fill="none"/>
+                        <path d="M 145 0 Q 140 15 145 30 Q 150 45 145 60" stroke="#e6edf3" stroke-width="3" fill="none"/>
+                        <path d="M 195 0 Q 190 15 195 30 Q 200 45 195 60" stroke="#e6edf3" stroke-width="3" fill="none"/>
+                        <path d="M 245 0 Q 240 15 245 30 Q 250 45 245 60" stroke="#e6edf3" stroke-width="3" fill="none"/>
+                        <path d="M 375 0 Q 370 15 375 30 Q 380 45 375 60" stroke="#e6edf3" stroke-width="3" fill="none"/>
+                        <path d="M 440 0 Q 435 15 440 30 Q 445 45 440 60" stroke="#e6edf3" stroke-width="3" fill="none"/>
+                        <path d="M 505 0 Q 500 15 505 30 Q 510 45 505 60" stroke="#e6edf3" stroke-width="3" fill="none"/>
+                        <path d="M 635 0 Q 630 15 635 30 Q 640 45 635 60" stroke="#e6edf3" stroke-width="3" fill="none"/>
+                    </g>
+                    
+                    <!-- WARP 1 - All Active -->
+                    <g transform="translate(0, 120)">
+                        <rect x="60" y="0" width="610" height="70" rx="8" fill="#1f6feb" opacity="0.15"/>
+                        <rect x="60" y="0" width="610" height="70" rx="8" fill="none" stroke="url(#blueGrad)" stroke-width="2"/>
+                        <path d="M 95 8 Q 88 22 95 36 Q 102 50 95 62" stroke="#58a6ff" stroke-width="3" fill="none" filter="url(#glow)"/>
+                        <path d="M 145 8 Q 138 22 145 36 Q 152 50 145 62" stroke="#58a6ff" stroke-width="3" fill="none"/>
+                        <path d="M 195 8 Q 188 22 195 36 Q 202 50 195 62" stroke="#58a6ff" stroke-width="3" fill="none"/>
+                        <path d="M 245 8 Q 238 22 245 36 Q 252 50 245 62" stroke="#58a6ff" stroke-width="3" fill="none"/>
+                        <text x="310" y="42" fill="#58a6ff" font-size="18" text-anchor="middle">···</text>
+                        <path d="M 375 8 Q 368 22 375 36 Q 382 50 375 62" stroke="#58a6ff" stroke-width="3" fill="none"/>
+                        <path d="M 440 8 Q 433 22 440 36 Q 447 50 440 62" stroke="#58a6ff" stroke-width="3" fill="none"/>
+                        <path d="M 505 8 Q 498 22 505 36 Q 512 50 505 62" stroke="#58a6ff" stroke-width="3" fill="none"/>
+                        <text x="570" y="42" fill="#58a6ff" font-size="18" text-anchor="middle">···</text>
+                        <path d="M 635 8 Q 628 22 635 36 Q 642 50 635 62" stroke="#58a6ff" stroke-width="3" fill="none"/>
+                        <text x="720" y="40" fill="#58a6ff" font-family="Inter" font-size="14" font-weight="600">All 32 active ✓</text>
+                    </g>
+                    
+                    <!-- WARP 2 - Diverged Path A -->
+                    <g transform="translate(0, 205)">
+                        <rect x="60" y="0" width="305" height="70" rx="8" fill="#238636" opacity="0.2"/>
+                        <rect x="60" y="0" width="305" height="70" rx="8" fill="none" stroke="url(#greenGrad)" stroke-width="2"/>
+                        <rect x="365" y="0" width="305" height="70" rx="8" fill="#238636" opacity="0.05"/>
+                        <rect x="365" y="0" width="305" height="70" rx="8" fill="none" stroke="#238636" stroke-width="2" stroke-dasharray="8,4" opacity="0.5"/>
+                        <path d="M 95 8 Q 88 22 95 36 Q 102 50 95 62" stroke="#3fb950" stroke-width="3" fill="none" filter="url(#glow)"/>
+                        <path d="M 145 8 Q 138 22 145 36 Q 152 50 145 62" stroke="#3fb950" stroke-width="3" fill="none"/>
+                        <path d="M 195 8 Q 188 22 195 36 Q 202 50 195 62" stroke="#3fb950" stroke-width="3" fill="none"/>
+                        <path d="M 245 8 Q 238 22 245 36 Q 252 50 245 62" stroke="#3fb950" stroke-width="3" fill="none"/>
+                        <text x="310" y="42" fill="#3fb950" font-size="18" text-anchor="middle">···</text>
+                        <path d="M 440 8 Q 433 22 440 36 Q 447 50 440 62" stroke="#238636" stroke-width="3" fill="none" opacity="0.3"/>
+                        <path d="M 505 8 Q 498 22 505 36 Q 512 50 505 62" stroke="#238636" stroke-width="3" fill="none" opacity="0.3"/>
+                        <path d="M 635 8 Q 628 22 635 36 Q 642 50 635 62" stroke="#238636" stroke-width="3" fill="none" opacity="0.3"/>
+                        <text x="500" y="42" fill="#3fb950" font-size="11" font-style="italic" text-anchor="middle" opacity="0.7">masked off</text>
+                        <text x="720" y="35" fill="#3fb950" font-family="Inter" font-size="14" font-weight="600">Pass 1: Path A</text>
+                        <text x="720" y="52" fill="#8b949e" font-family="Inter" font-size="11">(threads 0-23)</text>
+                    </g>
+                    
+                    <!-- WARP 3 - Diverged Path B -->
+                    <g transform="translate(0, 290)">
+                        <rect x="60" y="0" width="305" height="70" rx="8" fill="#bd5a00" opacity="0.05"/>
+                        <rect x="60" y="0" width="305" height="70" rx="8" fill="none" stroke="#bd5a00" stroke-width="2" stroke-dasharray="8,4" opacity="0.5"/>
+                        <rect x="365" y="0" width="305" height="70" rx="8" fill="#bd5a00" opacity="0.2"/>
+                        <rect x="365" y="0" width="305" height="70" rx="8" fill="none" stroke="url(#orangeGrad)" stroke-width="2"/>
+                        <path d="M 95 8 Q 88 22 95 36 Q 102 50 95 62" stroke="#bd5a00" stroke-width="3" fill="none" opacity="0.3"/>
+                        <path d="M 145 8 Q 138 22 145 36 Q 152 50 145 62" stroke="#bd5a00" stroke-width="3" fill="none" opacity="0.3"/>
+                        <path d="M 195 8 Q 188 22 195 36 Q 202 50 195 62" stroke="#bd5a00" stroke-width="3" fill="none" opacity="0.3"/>
+                        <text x="200" y="42" fill="#f0883e" font-size="11" font-style="italic" text-anchor="middle" opacity="0.7">masked off</text>
+                        <path d="M 440 8 Q 433 22 440 36 Q 447 50 440 62" stroke="#f0883e" stroke-width="3" fill="none" filter="url(#glow)"/>
+                        <path d="M 505 8 Q 498 22 505 36 Q 512 50 505 62" stroke="#f0883e" stroke-width="3" fill="none"/>
+                        <text x="570" y="42" fill="#f0883e" font-size="18" text-anchor="middle">···</text>
+                        <path d="M 635 8 Q 628 22 635 36 Q 642 50 635 62" stroke="#f0883e" stroke-width="3" fill="none"/>
+                        <text x="720" y="35" fill="#f0883e" font-family="Inter" font-size="14" font-weight="600">Pass 2: Path B</text>
+                        <text x="720" y="52" fill="#8b949e" font-family="Inter" font-size="11">(threads 24-31)</text>
+                    </g>
+                    
+                    <!-- WARP 4 - Reconverged -->
+                    <g transform="translate(0, 375)">
+                        <rect x="60" y="0" width="610" height="70" rx="8" fill="#9e6a03" opacity="0.15"/>
+                        <rect x="60" y="0" width="610" height="70" rx="8" fill="none" stroke="url(#yellowGrad)" stroke-width="2"/>
+                        <path d="M 95 8 Q 88 22 95 36 Q 102 50 95 62" stroke="#d29922" stroke-width="3" fill="none" filter="url(#glow)"/>
+                        <path d="M 145 8 Q 138 22 145 36 Q 152 50 145 62" stroke="#d29922" stroke-width="3" fill="none"/>
+                        <path d="M 195 8 Q 188 22 195 36 Q 202 50 195 62" stroke="#d29922" stroke-width="3" fill="none"/>
+                        <path d="M 245 8 Q 238 22 245 36 Q 252 50 245 62" stroke="#d29922" stroke-width="3" fill="none"/>
+                        <text x="310" y="42" fill="#d29922" font-size="18" text-anchor="middle">···</text>
+                        <path d="M 375 8 Q 368 22 375 36 Q 382 50 375 62" stroke="#d29922" stroke-width="3" fill="none"/>
+                        <path d="M 440 8 Q 433 22 440 36 Q 447 50 440 62" stroke="#d29922" stroke-width="3" fill="none"/>
+                        <path d="M 505 8 Q 498 22 505 36 Q 512 50 505 62" stroke="#d29922" stroke-width="3" fill="none"/>
+                        <text x="570" y="42" fill="#d29922" font-size="18" text-anchor="middle">···</text>
+                        <path d="M 635 8 Q 628 22 635 36 Q 642 50 635 62" stroke="#d29922" stroke-width="3" fill="none"/>
+                        <text x="720" y="40" fill="#d29922" font-family="Inter" font-size="14" font-weight="600">Reconverged ✓</text>
+                    </g>
+                    
+                    <!-- Code box -->
+                    <g transform="translate(700, 120)">
+                        <rect x="0" y="0" width="180" height="120" rx="10" fill="#161b22" stroke="#30363d"/>
+                        <text x="15" y="28" fill="#8b949e" font-family="monospace" font-size="11">if (tid &lt; 24)</text>
+                        <text x="25" y="48" fill="#3fb950" font-family="monospace" font-size="11">// Path A</text>
+                        <text x="15" y="72" fill="#8b949e" font-family="monospace" font-size="11">else</text>
+                        <text x="25" y="92" fill="#f0883e" font-family="monospace" font-size="11">// Path B</text>
+                        <text x="15" y="112" fill="#f85149" font-family="monospace" font-size="10" font-weight="600">→ 2 serial passes!</text>
+                    </g>
+                    
+                    <text x="365" y="470" fill="#8b949e" font-family="Inter" font-size="13" text-anchor="middle">Divergent warps execute both paths sequentially →</text>
+                    <text x="600" y="470" fill="#f85149" font-family="Inter" font-size="13" text-anchor="middle" font-weight="600">50% efficiency loss!</text>
+                </svg>
+            </div>
+            
+            <div class="insight-box warning">
+                <span class="insight-icon">⚠️</span>
+                <div class="insight-content">
+                    <h4 style="color: #f0883e;">SIMT Execution Model</h4>
+                    <p>All 32 threads in a warp share <strong>one instruction pointer</strong>. When they diverge on a branch, the GPU must execute <em>both paths serially</em> while masking inactive threads. Design kernels so threads within a warp take the <strong style="color: #3fb950;">same branch</strong> whenever possible.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ============================================ -->
+        <!-- 6. MEMORY COALESCING -->
+        <!-- ============================================ -->
+        <div class="card" id="coalescing">
+            <div class="card-header">
+                <span class="card-number">6</span>
+                <div class="card-icon" style="background: linear-gradient(135deg, #238636, #3fb950);">💾</div>
+                <div>
+                    <h2 class="card-title" style="color: #3fb950;">Memory Coalescing</h2>
+                    <p style="color: #8b949e; margin-top: 4px;">How memory access patterns determine bandwidth efficiency</p>
+                </div>
+            </div>
+            
+            <h3 style="color: #e6edf3; margin: 20px 0 15px; font-size: 1.15rem;">Row-Major vs Column-Major Access</h3>
+            
+            <div class="flex-diagrams">
+                <!-- Row-Major (Good) -->
+                <div class="sub-card">
+                    <h3 style="color: #3fb950;"><span class="badge good">GOOD</span> Row-Major Access (Coalesced)</h3>
+                    <svg viewBox="0 0 420 320" style="width: 100%; height: auto;">
+                        <rect width="100%" height="100%" fill="#0d1117"/>
+                        
+                        <text x="210" y="22" fill="#8b949e" font-family="Inter" font-size="11" text-anchor="middle">Threads access consecutive memory addresses</text>
+                        
+                        <!-- Thread row -->
+                        <g transform="translate(30, 35)">
+                            <rect x="0" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="21" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T0</text>
+                            <rect x="46" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="67" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T1</text>
+                            <rect x="92" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="113" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T2</text>
+                            <rect x="138" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="159" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T3</text>
+                            <rect x="184" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="205" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T4</text>
+                            <rect x="230" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="251" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T5</text>
+                            <rect x="276" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="297" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T6</text>
+                            <rect x="322" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="343" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T7</text>
+                        </g>
+                        
+                        <!-- Arrows straight down -->
+                        <g stroke="#3fb950" stroke-width="2" fill="none">
+                            <line x1="51" y1="68" x2="51" y2="95" marker-end="url(#arrowGreen)"/>
+                            <line x1="97" y1="68" x2="97" y2="95" marker-end="url(#arrowGreen)"/>
+                            <line x1="143" y1="68" x2="143" y2="95" marker-end="url(#arrowGreen)"/>
+                            <line x1="189" y1="68" x2="189" y2="95" marker-end="url(#arrowGreen)"/>
+                            <line x1="235" y1="68" x2="235" y2="95" marker-end="url(#arrowGreen)"/>
+                            <line x1="281" y1="68" x2="281" y2="95" marker-end="url(#arrowGreen)"/>
+                            <line x1="327" y1="68" x2="327" y2="95" marker-end="url(#arrowGreen)"/>
+                            <line x1="373" y1="68" x2="373" y2="95" marker-end="url(#arrowGreen)"/>
+                        </g>
+                        
+                        <!-- 2D Matrix visualization -->
+                        <g transform="translate(30, 105)">
+                            <text x="0" y="-5" fill="#8b949e" font-family="Inter" font-size="10">Matrix in memory (row-major layout):</text>
+                            
+                            <!-- Row 0 - accessed! -->
+                            <rect x="0" y="10" width="42" height="28" rx="3" fill="#3fb950" opacity="0.4" stroke="#3fb950"/>
+                            <text x="21" y="29" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">[0,0]</text>
+                            <rect x="46" y="10" width="42" height="28" rx="3" fill="#3fb950" opacity="0.4" stroke="#3fb950"/>
+                            <text x="67" y="29" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">[0,1]</text>
+                            <rect x="92" y="10" width="42" height="28" rx="3" fill="#3fb950" opacity="0.4" stroke="#3fb950"/>
+                            <text x="113" y="29" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">[0,2]</text>
+                            <rect x="138" y="10" width="42" height="28" rx="3" fill="#3fb950" opacity="0.4" stroke="#3fb950"/>
+                            <text x="159" y="29" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">[0,3]</text>
+                            <rect x="184" y="10" width="42" height="28" rx="3" fill="#3fb950" opacity="0.4" stroke="#3fb950"/>
+                            <text x="205" y="29" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">[0,4]</text>
+                            <rect x="230" y="10" width="42" height="28" rx="3" fill="#3fb950" opacity="0.4" stroke="#3fb950"/>
+                            <text x="251" y="29" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">[0,5]</text>
+                            <rect x="276" y="10" width="42" height="28" rx="3" fill="#3fb950" opacity="0.4" stroke="#3fb950"/>
+                            <text x="297" y="29" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">[0,6]</text>
+                            <rect x="322" y="10" width="42" height="28" rx="3" fill="#3fb950" opacity="0.4" stroke="#3fb950"/>
+                            <text x="343" y="29" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">[0,7]</text>
+                            
+                            <!-- Row 1 - not accessed -->
+                            <rect x="0" y="42" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <text x="21" y="61" fill="#8b949e" font-family="Inter" font-size="8" text-anchor="middle">[1,0]</text>
+                            <rect x="46" y="42" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="92" y="42" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="138" y="42" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="184" y="42" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="230" y="42" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="276" y="42" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="322" y="42" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                        </g>
+                        
+                        <!-- Result -->
+                        <rect x="60" y="210" width="300" height="40" rx="8" fill="#3fb950"/>
+                        <text x="210" y="236" fill="#0d1117" font-family="Inter" font-size="13" font-weight="600" text-anchor="middle">1 × 128-byte transaction</text>
+                        
+                        <text x="210" y="275" fill="#3fb950" font-family="Inter" font-size="16" font-weight="700" text-anchor="middle">100% bandwidth utilization</text>
+                        
+                        <!-- Code -->
+                        <g transform="translate(30, 290)">
+                            <text x="0" y="15" fill="#3fb950" font-family="monospace" font-size="10">A[row][threadIdx.x] // consecutive!</text>
+                        </g>
+                    </svg>
+                </div>
+                
+                <!-- Column-Major (Bad) -->
+                <div class="sub-card">
+                    <h3 style="color: #f85149;"><span class="badge bad">BAD</span> Column-Major Access (Strided)</h3>
+                    <svg viewBox="0 0 420 320" style="width: 100%; height: auto;">
+                        <rect width="100%" height="100%" fill="#0d1117"/>
+                        
+                        <text x="210" y="22" fill="#8b949e" font-family="Inter" font-size="11" text-anchor="middle">Threads access addresses stride apart</text>
+                        
+                        <!-- Thread row -->
+                        <g transform="translate(30, 35)">
+                            <rect x="0" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="21" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T0</text>
+                            <rect x="46" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="67" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T1</text>
+                            <rect x="92" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="113" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T2</text>
+                            <rect x="138" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="159" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T3</text>
+                            <rect x="184" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="205" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T4</text>
+                            <rect x="230" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="251" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T5</text>
+                            <rect x="276" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="297" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T6</text>
+                            <rect x="322" y="0" width="42" height="28" rx="4" fill="#1f6feb"/>
+                            <text x="343" y="19" fill="#fff" font-family="Inter" font-size="9" font-weight="500" text-anchor="middle">T7</text>
+                        </g>
+                        
+                        <!-- Arrows going to different rows (column access) -->
+                        <g stroke="#f85149" stroke-width="2" fill="none">
+                            <line x1="51" y1="68" x2="51" y2="95" marker-end="url(#arrowRed)"/>
+                            <line x1="97" y1="68" x2="51" y2="127" marker-end="url(#arrowRed)"/>
+                            <line x1="143" y1="68" x2="51" y2="159" marker-end="url(#arrowRed)"/>
+                            <line x1="189" y1="68" x2="51" y2="191" marker-end="url(#arrowRed)"/>
+                        </g>
+                        
+                        <!-- 2D Matrix - showing column access pattern -->
+                        <g transform="translate(30, 105)">
+                            <text x="0" y="-5" fill="#8b949e" font-family="Inter" font-size="10">Matrix in memory (row-major layout):</text>
+                            
+                            <!-- Row 0 -->
+                            <rect x="0" y="10" width="42" height="28" rx="3" fill="#f85149" opacity="0.4" stroke="#f85149"/>
+                            <text x="21" y="29" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">[0,0]</text>
+                            <rect x="46" y="10" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="92" y="10" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="138" y="10" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="184" y="10" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="230" y="10" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="276" y="10" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="322" y="10" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            
+                            <!-- Row 1 -->
+                            <rect x="0" y="42" width="42" height="28" rx="3" fill="#f85149" opacity="0.4" stroke="#f85149"/>
+                            <text x="21" y="61" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">[1,0]</text>
+                            <rect x="46" y="42" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="92" y="42" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="138" y="42" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="184" y="42" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="230" y="42" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="276" y="42" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="322" y="42" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            
+                            <!-- Row 2 -->
+                            <rect x="0" y="74" width="42" height="28" rx="3" fill="#f85149" opacity="0.4" stroke="#f85149"/>
+                            <text x="21" y="93" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">[2,0]</text>
+                            <rect x="46" y="74" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="92" y="74" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="138" y="74" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="184" y="74" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="230" y="74" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="276" y="74" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                            <rect x="322" y="74" width="42" height="28" rx="3" fill="#21262d" stroke="#30363d"/>
+                        </g>
+                        
+                        <!-- Result -->
+                        <g transform="translate(60, 210)">
+                            <rect x="0" y="0" width="65" height="35" rx="5" fill="#f85149" opacity="0.6"/>
+                            <rect x="75" y="0" width="65" height="35" rx="5" fill="#f85149" opacity="0.6"/>
+                            <rect x="150" y="0" width="65" height="35" rx="5" fill="#f85149" opacity="0.6"/>
+                            <rect x="225" y="0" width="65" height="35" rx="5" fill="#f85149" opacity="0.6"/>
+                            <text x="150" y="52" fill="#8b949e" font-family="Inter" font-size="10" text-anchor="middle">+ 4 more...</text>
+                        </g>
+                        
+                        <text x="210" y="280" fill="#f85149" font-family="Inter" font-size="16" font-weight="700" text-anchor="middle">8 transactions = 12.5% efficiency</text>
+                        
+                        <!-- Code -->
+                        <g transform="translate(30, 295)">
+                            <text x="0" y="15" fill="#f85149" font-family="monospace" font-size="10">A[threadIdx.x][col] // stride = row_width!</text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+            
+            <h3 style="color: #e6edf3; margin: 40px 0 15px; font-size: 1.15rem;">Why This Happens: DRAM Chip Architecture</h3>
+            
+            <div class="diagram-wrapper">
+                <svg viewBox="0 0 900 420" style="width: 100%; height: auto;">
+                    <rect width="100%" height="100%" fill="#0d1117"/>
+                    
+                    <text x="450" y="30" fill="#e6edf3" font-family="Inter" font-size="16" font-weight="600" text-anchor="middle">GPU Memory = Multiple DRAM Chips in Parallel</text>
+                    
+                    <!-- Memory Controller -->
+                    <rect x="50" y="60" width="140" height="80" rx="10" fill="#8957e5" opacity="0.3" stroke="#a371f7" stroke-width="2"/>
+                    <text x="120" y="95" fill="#a371f7" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">Memory</text>
+                    <text x="120" y="115" fill="#a371f7" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">Controller</text>
+                    
+                    <!-- Bus -->
+                    <rect x="200" y="85" width="650" height="30" rx="4" fill="#30363d"/>
+                    <text x="525" y="105" fill="#8b949e" font-family="Inter" font-size="11" text-anchor="middle">512-bit Memory Bus (8 × 64-bit channels)</text>
+                    
+                    <!-- DRAM Chips -->
+                    <g transform="translate(220, 140)">
+                        <rect x="0" y="0" width="70" height="120" rx="8" fill="#1f6feb" opacity="0.2" stroke="#58a6ff" stroke-width="2"/>
+                        <text x="35" y="25" fill="#58a6ff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Chip 0</text>
+                        <text x="35" y="45" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">64-bit</text>
+                        <rect x="10" y="55" width="50" height="25" rx="3" fill="#3fb950" opacity="0.5"/>
+                        <text x="35" y="72" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">Addr 0-7</text>
+                        <rect x="10" y="85" width="50" height="25" rx="3" fill="#21262d"/>
+                        <text x="35" y="102" fill="#8b949e" font-family="Inter" font-size="8" text-anchor="middle">Addr 64+</text>
+                    </g>
+                    
+                    <g transform="translate(300, 140)">
+                        <rect x="0" y="0" width="70" height="120" rx="8" fill="#1f6feb" opacity="0.2" stroke="#58a6ff" stroke-width="2"/>
+                        <text x="35" y="25" fill="#58a6ff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Chip 1</text>
+                        <text x="35" y="45" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">64-bit</text>
+                        <rect x="10" y="55" width="50" height="25" rx="3" fill="#3fb950" opacity="0.5"/>
+                        <text x="35" y="72" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">Addr 8-15</text>
+                        <rect x="10" y="85" width="50" height="25" rx="3" fill="#21262d"/>
+                    </g>
+                    
+                    <g transform="translate(380, 140)">
+                        <rect x="0" y="0" width="70" height="120" rx="8" fill="#1f6feb" opacity="0.2" stroke="#58a6ff" stroke-width="2"/>
+                        <text x="35" y="25" fill="#58a6ff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Chip 2</text>
+                        <text x="35" y="45" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">64-bit</text>
+                        <rect x="10" y="55" width="50" height="25" rx="3" fill="#3fb950" opacity="0.5"/>
+                        <text x="35" y="72" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">Addr 16-23</text>
+                        <rect x="10" y="85" width="50" height="25" rx="3" fill="#21262d"/>
+                    </g>
+                    
+                    <g transform="translate(460, 140)">
+                        <rect x="0" y="0" width="70" height="120" rx="8" fill="#1f6feb" opacity="0.2" stroke="#58a6ff" stroke-width="2"/>
+                        <text x="35" y="25" fill="#58a6ff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Chip 3</text>
+                        <text x="35" y="45" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">64-bit</text>
+                        <rect x="10" y="55" width="50" height="25" rx="3" fill="#3fb950" opacity="0.5"/>
+                        <text x="35" y="72" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">Addr 24-31</text>
+                        <rect x="10" y="85" width="50" height="25" rx="3" fill="#21262d"/>
+                    </g>
+                    
+                    <g transform="translate(540, 140)">
+                        <rect x="0" y="0" width="70" height="120" rx="8" fill="#1f6feb" opacity="0.2" stroke="#58a6ff" stroke-width="2"/>
+                        <text x="35" y="25" fill="#58a6ff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Chip 4</text>
+                        <text x="35" y="45" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">64-bit</text>
+                        <rect x="10" y="55" width="50" height="25" rx="3" fill="#3fb950" opacity="0.5"/>
+                        <text x="35" y="72" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">Addr 32-39</text>
+                        <rect x="10" y="85" width="50" height="25" rx="3" fill="#21262d"/>
+                    </g>
+                    
+                    <g transform="translate(620, 140)">
+                        <rect x="0" y="0" width="70" height="120" rx="8" fill="#1f6feb" opacity="0.2" stroke="#58a6ff" stroke-width="2"/>
+                        <text x="35" y="25" fill="#58a6ff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Chip 5</text>
+                        <text x="35" y="45" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">64-bit</text>
+                        <rect x="10" y="55" width="50" height="25" rx="3" fill="#3fb950" opacity="0.5"/>
+                        <text x="35" y="72" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">Addr 40-47</text>
+                        <rect x="10" y="85" width="50" height="25" rx="3" fill="#21262d"/>
+                    </g>
+                    
+                    <g transform="translate(700, 140)">
+                        <rect x="0" y="0" width="70" height="120" rx="8" fill="#1f6feb" opacity="0.2" stroke="#58a6ff" stroke-width="2"/>
+                        <text x="35" y="25" fill="#58a6ff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Chip 6</text>
+                        <text x="35" y="45" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">64-bit</text>
+                        <rect x="10" y="55" width="50" height="25" rx="3" fill="#3fb950" opacity="0.5"/>
+                        <text x="35" y="72" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">Addr 48-55</text>
+                        <rect x="10" y="85" width="50" height="25" rx="3" fill="#21262d"/>
+                    </g>
+                    
+                    <g transform="translate(780, 140)">
+                        <rect x="0" y="0" width="70" height="120" rx="8" fill="#1f6feb" opacity="0.2" stroke="#58a6ff" stroke-width="2"/>
+                        <text x="35" y="25" fill="#58a6ff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">Chip 7</text>
+                        <text x="35" y="45" fill="#8b949e" font-family="Inter" font-size="9" text-anchor="middle">64-bit</text>
+                        <rect x="10" y="55" width="50" height="25" rx="3" fill="#3fb950" opacity="0.5"/>
+                        <text x="35" y="72" fill="#fff" font-family="Inter" font-size="8" text-anchor="middle">Addr 56-63</text>
+                        <rect x="10" y="85" width="50" height="25" rx="3" fill="#21262d"/>
+                    </g>
+                    
+                    <!-- Explanation boxes -->
+                    <g transform="translate(50, 290)">
+                        <rect x="0" y="0" width="400" height="110" rx="10" fill="#3fb950" opacity="0.1" stroke="#3fb950"/>
+                        <text x="200" y="25" fill="#3fb950" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">✓ Coalesced Access (addresses 0-63)</text>
+                        <text x="20" y="50" fill="#8b949e" font-family="Inter" font-size="11">• All 8 chips activate simultaneously</text>
+                        <text x="20" y="70" fill="#8b949e" font-family="Inter" font-size="11">• Each chip provides 8 bytes (64 bits)</text>
+                        <text x="20" y="90" fill="#8b949e" font-family="Inter" font-size="11">• Total: 8 × 8 = 64 bytes in ONE transaction</text>
+                    </g>
+                    
+                    <g transform="translate(470, 290)">
+                        <rect x="0" y="0" width="400" height="110" rx="10" fill="#f85149" opacity="0.1" stroke="#f85149"/>
+                        <text x="200" y="25" fill="#f85149" font-family="Inter" font-size="12" font-weight="600" text-anchor="middle">✗ Strided Access (addresses 0, 512, 1024...)</text>
+                        <text x="20" y="50" fill="#8b949e" font-family="Inter" font-size="11">• Only Chip 0 is useful per transaction</text>
+                        <text x="20" y="70" fill="#8b949e" font-family="Inter" font-size="11">• Other 7 chips fetch wasted data</text>
+                        <text x="20" y="90" fill="#8b949e" font-family="Inter" font-size="11">• Need 8 separate transactions = 8× slower</text>
+                    </g>
+                </svg>
+            </div>
+            
+            <div class="insight-box info">
+                <span class="insight-icon">🚀</span>
+                <div class="insight-content">
+                    <h4 style="color: #58a6ff;">The Key Insight</h4>
+                    <p>GPU memory is <strong style="color: #a371f7;">interleaved across multiple DRAM chips</strong>. Consecutive addresses go to different chips, allowing parallel access. When threads access <strong style="color: #3fb950;">consecutive addresses</strong>, all chips work together → maximum bandwidth. When threads access <strong style="color: #f85149;">strided addresses</strong>, you're only using one chip at a time → wasted bandwidth.</p>
+                </div>
+            </div>
+            
+            <div class="insight-box success" style="margin-top: 16px;">
+                <span class="insight-icon">💾</span>
+                <div class="insight-content">
+                    <h4 style="color: #3fb950;">GPU-Storage Connection</h4>
+                    <p>This same principle applies to NVMe storage! Scattered 4KB reads become <strong style="color: #f85149;">separate I/O commands with 10-100μs latency each</strong>. Sequential reads can be <strong style="color: #3fb950;">merged into large transfers</strong>, maximizing SSD throughput. GPUDirect Storage benefits most when access patterns are coalesced.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ============================================ -->
+        <!-- 7. MEMORY REFERENCE -->
+        <!-- ============================================ -->
+        <div class="card" id="reference">
+            <div class="card-header">
+                <span class="card-number">7</span>
+                <div class="card-icon" style="background: linear-gradient(135deg, #30363d, #484f58);">📋</div>
+                <div>
+                    <h2 class="card-title" style="color: #8b949e;">GPU Memory Scope Reference</h2>
+                    <p style="color: #8b949e; margin-top: 4px;">Who can see/share each memory type (NVIDIA/CUDA-style)</p>
+                </div>
+            </div>
+            
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, rgba(88,166,255,0.15) 0%, rgba(88,166,255,0.05) 100%);">
+                            <th style="padding: 16px; text-align: left; border-bottom: 2px solid #58a6ff; color: #58a6ff; font-weight: 600; min-width: 180px;">Memory Type</th>
+                            <th style="padding: 16px; text-align: left; border-bottom: 2px solid #58a6ff; color: #58a6ff; font-weight: 600; min-width: 180px;">Scope</th>
+                            <th style="padding: 16px; text-align: left; border-bottom: 2px solid #58a6ff; color: #58a6ff; font-weight: 600;">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #21262d;">
+                            <td style="padding: 14px; color: #58a6ff; font-weight: 500;">Registers</td>
+                            <td style="padding: 14px; color: #e6edf3;">Per-thread</td>
+                            <td style="padding: 14px; color: #8b949e;">Fastest. Private to each thread. Spills go to local memory.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #21262d; background: rgba(255,255,255,0.02);">
+                            <td style="padding: 14px; color: #f0883e; font-weight: 500;">Shared Memory</td>
+                            <td style="padding: 14px; color: #e6edf3;">Per-block (CTA)</td>
+                            <td style="padding: 14px; color: #8b949e;">On-chip SRAM. Shared by threads in same block. ~100× faster than global.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #21262d;">
+                            <td style="padding: 14px; color: #a371f7; font-weight: 500;">L1 Cache</td>
+                            <td style="padding: 14px; color: #e6edf3;">Per-SM</td>
+                            <td style="padding: 14px; color: #8b949e;">Shared by warps on same SM. <span style="color: #f85149;">Not coherent across SMs.</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #21262d; background: rgba(255,255,255,0.02);">
+                            <td style="padding: 14px; color: #8b949e; font-weight: 500;">L2 Cache</td>
+                            <td style="padding: 14px; color: #e6edf3;">Device-wide</td>
+                            <td style="padding: 14px; color: #8b949e;">Shared by all SMs. Caches global memory accesses.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #21262d;">
+                            <td style="padding: 14px; color: #3fb950; font-weight: 500;">Global Memory (HBM/GDDR)</td>
+                            <td style="padding: 14px; color: #e6edf3;">Device-wide (all kernels)</td>
+                            <td style="padding: 14px; color: #8b949e;">Main GPU memory. Persistent across kernels. <strong style="color: #d29922;">Coalescing critical!</strong></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #21262d; background: rgba(255,255,255,0.02);">
+                            <td style="padding: 14px; color: #a371f7; font-weight: 500;">Unified Memory (UVM)</td>
+                            <td style="padding: 14px; color: #e6edf3;">System-wide (CPU + GPU)</td>
+                            <td style="padding: 14px; color: #8b949e;">Automatically migrates between CPU/GPU. Convenient but has overhead.</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #21262d;">
+                            <td style="padding: 14px; color: #79c0ff; font-weight: 500;">Host Pinned Memory</td>
+                            <td style="padding: 14px; color: #e6edf3;">CPU memory, GPU DMA access</td>
+                            <td style="padding: 14px; color: #8b949e;">Page-locked CPU memory. Enables fast H2D/D2H transfers.</td>
+                        </tr>
+                        <tr style="border-bottom: 2px solid #f85149; background: rgba(248,81,73,0.08);">
+                            <td style="padding: 14px; color: #f85149; font-weight: 600;">Storage (NVMe/SSD)</td>
+                            <td style="padding: 14px; color: #e6edf3;">System-wide</td>
+                            <td style="padding: 14px; color: #8b949e;">Via <span style="color: #3fb950;">GPUDirect Storage</span>. 10-100μs latency. Coalescing even more critical!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <a href="02_cpu_vs_gpu.html" class="back-link">← Back to CPU vs GPU Architecture</a>
+    </div>
+</body>
+</html>

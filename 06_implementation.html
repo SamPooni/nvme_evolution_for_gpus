@@ -402,7 +402,7 @@
             </table>
             
             <div style="background: #2a1a1a; border-left: 4px solid #ff6b6b; padding: 15px; margin-top: 20px;">
-                <strong style="color: #ff6b6b;">[!]  Storage Reality Check:</strong>
+                <strong style="color: #ff6b6b;">  Storage Reality Check:</strong>
                 <ul style="margin: 10px 0 0 20px; color: #ccc;">
                     <li><strong>NVMe is block storage</strong> - practical minimum is 4KB. Sub-4KB I/Os still transfer 4KB+ and waste bandwidth.</li>
                     <li><strong>Embeddings belong in HBM/DRAM</strong> - Only cold/overflow tiers go to SSD, and they use paged access (4KB-64KB), not byte-granular lookups.</li>
@@ -414,7 +414,7 @@
 
         <!-- Section 2: Current Solutions -->
         <div class="section">
-            <h2 class="section-title">”§ Current Implementation Options</h2>
+            <h2 class="section-title">”Current Implementation Options</h2>
 
             <div class="pattern-card">
                 <div class="pattern-header">
@@ -442,7 +442,7 @@ cf_descr.handle.fd = open(<span class="code-string">"/mnt/nvme/model.bin"</span>
 
                 <div class="grid-2" style="margin-top: 15px;">
                     <div class="highlight-box">
-                        <strong>[OK] Advantages:</strong>
+                        <strong> Advantages:</strong>
                         <ul style="margin-top: 10px; margin-left: 20px;">
                             <li>~2&times; throughput improvement</li>
                             <li>~2&times; latency reduction</li>
@@ -451,7 +451,7 @@ cf_descr.handle.fd = open(<span class="code-string">"/mnt/nvme/model.bin"</span>
                         </ul>
                     </div>
                     <div class="warning-box">
-                        <strong>[!]  Limitations:</strong>
+                        <strong>  Limitations:</strong>
                         <ul style="margin-top: 10px; margin-left: 20px;">
                             <li>Control path still CPU-bound</li>
                             <li>Not callable from CUDA kernels</li>
@@ -515,7 +515,7 @@ gpu_array = cp.empty(shape, dtype=cp.float32)
 
         <!-- Section 3: Optimization Strategies -->
         <div class="section">
-            <h2 class="section-title">"[BOLT]" Optimization Strategies</h2>
+            <h2 class="section-title">Optimization Strategies</h2>
 
             <h3 class="subsection-title">1. Prefetching & Buffering</h3>
             <div class="tip-box">
@@ -652,14 +652,14 @@ buffer[0] = <span class="code-function">async_read</span>(batch_0);  <span class
 
         <!-- Section 5: Summary -->
         <div class="section" style="background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(236,72,153,0.1));">
-            <h2 class="section-title" style="border: none;">“‹ Key Takeaways</h2>
+            <h2 class="section-title" style="border: none;">Key Takeaways</h2>
 
             <div style="display: grid; gap: 15px;">
                 <div style="display: flex; gap: 15px; align-items: start;">
                     <span style="color: #00ff88; font-size: 1.5rem;">1</span>
                     <div>
-                        <strong style="color: #fff;">NVMe was designed for CPUs, not GPUs</strong>
-                        <p style="color: #888;">Queue synchronization, interrupt handling, and memory ordering assumptions don't match GPU execution model.</p>
+                        <strong style="color: #fff;">NVMe's control plane is CPU-mediated</strong>
+                        <p style="color: #888;">Queue submission/completion, doorbells, and polling/interrupts assume host-driven orchestration that adds overhead for GPU workloads.</p>
                     </div>
                 </div>
                 <div style="display: flex; gap: 15px; align-items: start;">
@@ -686,8 +686,8 @@ buffer[0] = <span class="code-function">async_read</span>(batch_0);  <span class
                 <div style="display: flex; gap: 15px; align-items: start;">
                     <span style="color: #00ff88; font-size: 1.5rem;">5</span>
                     <div>
-                        <strong style="color: #fff;">The gap is real: TB/s interconnects vs GB/s storage</strong>
-                        <p style="color: #888;">100&times; bandwidth gap between GPU interconnects and storage means storage optimization is critical for AI workloads.</p>
+                        <strong style="color: #fff;">Pipeline engineering matters more than peak bandwidth</strong>
+                        <p style="color: #888;">The bottleneck is often end-to-end latency, staging, and control-plane overhead—not raw SSD GB/s. Format, caching, batching, and overlap are key.</p>
                     </div>
                 </div>
             </div>

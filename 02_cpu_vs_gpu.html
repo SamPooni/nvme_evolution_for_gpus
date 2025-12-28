@@ -382,12 +382,12 @@
                         <div className="page-header">
                             <div className="page-number">02</div>
                             <h1 className="page-title">CPU vs GPU I/O Workloads</h1>
-                            <p className="page-subtitle">Pages 6-15 from Micron SNIA SDC 2025</p>
+                            <p className="page-subtitle">Architecture Comparison</p>
                         </div>
 
-                        {/* Page 7: Performance Metrics */}
+                        
                         <div className="section">
-                            <h2 className="section-title">Performance Metrics Comparison (Page 7)</h2>
+                            <h2 className="section-title">Performance Metrics Comparison</h2>
                             <table className="metrics-table">
                                 <thead>
                                     <tr>
@@ -426,46 +426,1049 @@
                             </table>
                         </div>
 
-                        {/* Page 8: Threads, Warps, SM Core */}
+                        
                         <div className="section">
-                            <h2 className="section-title">GPU Threads, Warps, SM Core & Pipelining (Page 8)</h2>
+                            <h2 className="section-title">GPU Threads, Warps, SM Core & Pipelining</h2>
                             
                             <div style={{background: 'rgba(0,255,136,0.1)', border: '1px solid #00ff88', borderRadius: '8px', padding: '15px', marginBottom: '20px'}}>
                                 <strong style={{color: '#00ff88'}}>SIMT = Single Instruction, Multiple Thread</strong>
                                 <span style={{color: '#888', marginLeft: '10px'}}>&mdash; The GPU execution model where multiple threads execute the same instruction simultaneously</span>
                             </div>
                             
-                            <div className="warp-container">
-                                <div className="thread-block">
-                                    <div className="thread-block-label">Thread Block</div>
-                                    <div className="threads-grid">
-                                        {[...Array(128)].map((_, i) => (
-                                            <div key={i} className="thread"></div>
+                            <div style={{display: 'flex', justifyContent: 'center', margin: '30px 0'}}>
+                                <svg viewBox="0 0 800 400" style={{width: '100%', maxWidth: '800px'}}>
+                                    {/* Thread Block */}
+                                    <rect x="20" y="30" width="280" height="340" rx="8" fill="rgba(34,197,94,0.05)" stroke="#22c55e" strokeWidth="3"/>
+                                    <text x="160" y="20" fill="#22c55e" fontSize="13" fontWeight="bold" textAnchor="middle">Thread Block (128 threads)</text>
+                                    
+                                    {/* Warp 0 - Green */}
+                                    <rect x="35" y="50" width="250" height="65" rx="4" fill="rgba(0,255,136,0.1)" stroke="#00ff88" strokeWidth="2"/>
+                                    <text x="50" y="70" fill="#00ff88" fontSize="10" fontWeight="bold">Warp 0</text>
+                                    <text x="240" y="70" fill="#888" fontSize="9">t0  t1  t2  t3 .................... t31</text>
+                                    {/* Horizontal wavy threads */}
+                                    {[0,1,2,3,4].map((row) => (
+                                        <path key={row} d={`M 45 ${80 + row*8} Q 55 ${77 + row*8} 65 ${80 + row*8} T 85 ${80 + row*8} T 105 ${80 + row*8} T 125 ${80 + row*8} T 145 ${80 + row*8} T 165 ${80 + row*8} T 185 ${80 + row*8} T 205 ${80 + row*8} T 225 ${80 + row*8} T 245 ${80 + row*8} T 265 ${80 + row*8}`} stroke="#00ff88" strokeWidth="2" fill="none" opacity="0.8"/>
+                                    ))}
+                                    
+                                    {/* Warp 1 - Blue */}
+                                    <rect x="35" y="125" width="250" height="65" rx="4" fill="rgba(59,130,246,0.1)" stroke="#3b82f6" strokeWidth="2"/>
+                                    <text x="50" y="145" fill="#3b82f6" fontSize="10" fontWeight="bold">Warp 1</text>
+                                    <text x="240" y="145" fill="#888" fontSize="9">t0  t1  t2  t3 .................... t31</text>
+                                    {[0,1,2,3,4].map((row) => (
+                                        <path key={row} d={`M 45 ${155 + row*8} Q 55 ${152 + row*8} 65 ${155 + row*8} T 85 ${155 + row*8} T 105 ${155 + row*8} T 125 ${155 + row*8} T 145 ${155 + row*8} T 165 ${155 + row*8} T 185 ${155 + row*8} T 205 ${155 + row*8} T 225 ${155 + row*8} T 245 ${155 + row*8} T 265 ${155 + row*8}`} stroke="#3b82f6" strokeWidth="2" fill="none" opacity="0.8"/>
+                                    ))}
+                                    
+                                    {/* Warp 2 - Orange */}
+                                    <rect x="35" y="200" width="250" height="65" rx="4" fill="rgba(249,115,22,0.1)" stroke="#f97316" strokeWidth="2"/>
+                                    <text x="50" y="220" fill="#f97316" fontSize="10" fontWeight="bold">Warp 2</text>
+                                    <text x="240" y="220" fill="#888" fontSize="9">t0  t1  t2  t3 .................... t31</text>
+                                    {[0,1,2,3,4].map((row) => (
+                                        <path key={row} d={`M 45 ${230 + row*8} Q 55 ${227 + row*8} 65 ${230 + row*8} T 85 ${230 + row*8} T 105 ${230 + row*8} T 125 ${230 + row*8} T 145 ${230 + row*8} T 165 ${230 + row*8} T 185 ${230 + row*8} T 205 ${230 + row*8} T 225 ${230 + row*8} T 245 ${230 + row*8} T 265 ${230 + row*8}`} stroke="#f97316" strokeWidth="2" fill="none" opacity="0.8"/>
+                                    ))}
+                                    
+                                    {/* Warp 3 - Purple */}
+                                    <rect x="35" y="275" width="250" height="65" rx="4" fill="rgba(168,85,247,0.1)" stroke="#a855f7" strokeWidth="2"/>
+                                    <text x="50" y="295" fill="#a855f7" fontSize="10" fontWeight="bold">Warp 3</text>
+                                    <text x="240" y="295" fill="#888" fontSize="9">t0  t1  t2  t3 .................... t31</text>
+                                    {[0,1,2,3,4].map((row) => (
+                                        <path key={row} d={`M 45 ${305 + row*8} Q 55 ${302 + row*8} 65 ${305 + row*8} T 85 ${305 + row*8} T 105 ${305 + row*8} T 125 ${305 + row*8} T 145 ${305 + row*8} T 165 ${305 + row*8} T 185 ${305 + row*8} T 205 ${305 + row*8} T 225 ${305 + row*8} T 245 ${305 + row*8} T 265 ${305 + row*8}`} stroke="#a855f7" strokeWidth="2" fill="none" opacity="0.8"/>
+                                    ))}
+                                    
+                                    {/* Arrow to SM */}
+                                    <path d="M 310 200 L 370 200" stroke="#666" strokeWidth="3" markerEnd="url(#arrowGray2)"/>
+                                    <text x="340" y="190" fill="#666" fontSize="9" textAnchor="middle">schedule</text>
+                                    <defs>
+                                        <marker id="arrowGray2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                            <path d="M0,0 L0,6 L9,3 z" fill="#666"/>
+                                        </marker>
+                                    </defs>
+                                    
+                                    {/* SM / Multiprocessor */}
+                                    <rect x="380" y="30" width="400" height="340" rx="8" fill="rgba(251,191,36,0.05)" stroke="#fbbf24" strokeWidth="3"/>
+                                    <text x="580" y="20" fill="#fbbf24" fontSize="13" fontWeight="bold" textAnchor="middle">Streaming Multiprocessor (SM)</text>
+                                    
+                                    {/* CUDA Cores grid */}
+                                    <text x="470" y="60" fill="#888" fontSize="10" textAnchor="middle">CUDA Cores</text>
+                                    {[0,1,2,3,4,5].map((row) => 
+                                        [0,1,2,3,4,5,6,7].map((col) => (
+                                            <rect key={`${row}-${col}`} x={400 + col * 22} y={70 + row * 22} width="18" height="18" rx="2" fill="#22c55e" opacity="0.8"/>
+                                        ))
+                                    )}
+                                    
+                                    {/* Tensor Cores */}
+                                    <text x="680" y="60" fill="#888" fontSize="10" textAnchor="middle">Tensor Cores</text>
+                                    {[0,1,2].map((row) => 
+                                        [0,1,2,3].map((col) => (
+                                            <rect key={`t${row}-${col}`} x={610 + col * 28} y={70 + row * 28} width="24" height="24" rx="2" fill="#a855f7" opacity="0.8"/>
+                                        ))
+                                    )}
+                                    
+                                    {/* Register File */}
+                                    <rect x="400" y="215" width="360" height="45" rx="6" fill="rgba(0,212,255,0.2)" stroke="#00d4ff" strokeWidth="2"/>
+                                    <text x="580" y="243" fill="#00d4ff" fontSize="12" fontWeight="bold" textAnchor="middle">Register File (256 KB)</text>
+                                    
+                                    {/* L1 Cache */}
+                                    <rect x="400" y="270" width="170" height="40" rx="6" fill="rgba(251,191,36,0.2)" stroke="#fbbf24" strokeWidth="2"/>
+                                    <text x="485" y="295" fill="#fbbf24" fontSize="11" fontWeight="bold" textAnchor="middle">L1 Cache (128 KB)</text>
+                                    
+                                    {/* Shared Memory */}
+                                    <rect x="590" y="270" width="170" height="40" rx="6" fill="rgba(59,130,246,0.2)" stroke="#3b82f6" strokeWidth="2"/>
+                                    <text x="675" y="295" fill="#3b82f6" fontSize="11" fontWeight="bold" textAnchor="middle">Shared Memory (100 KB)</text>
+                                    
+                                    {/* Warp Scheduler */}
+                                    <rect x="400" y="320" width="360" height="40" rx="6" fill="rgba(0,255,136,0.2)" stroke="#00ff88" strokeWidth="2"/>
+                                    <text x="580" y="345" fill="#00ff88" fontSize="11" fontWeight="bold" textAnchor="middle">Warp Schedulers (4) - Issue 1 instruction/cycle per warp</text>
+                                    
+                                    {/* Caption */}
+                                    <text x="400" y="390" fill="#888" fontSize="10" textAnchor="middle">Each warp = 32 threads executing same instruction in lockstep (SIMT)</text>
+                                </svg>
+                            </div>
+                            
+                            {/* Warp Divergence Diagram */}
+                            <div style={{marginTop: '40px', marginBottom: '30px'}}>
+                                <h3 style={{color: '#f97316', marginBottom: '15px', fontSize: '1.1rem'}}>Warp Divergence: When Threads Take Different Paths</h3>
+                                <div style={{display: 'flex', justifyContent: 'center'}}>
+                                    <svg viewBox="0 0 700 420" style={{width: '100%', maxWidth: '700px'}}>
+                                        {/* Thread numbers header */}
+                                        <text x="60" y="25" fill="#888" fontSize="10" textAnchor="middle">0</text>
+                                        <text x="100" y="25" fill="#888" fontSize="10" textAnchor="middle">1</text>
+                                        <text x="140" y="25" fill="#888" fontSize="10" textAnchor="middle">2</text>
+                                        <text x="180" y="25" fill="#888" fontSize="10" textAnchor="middle">3</text>
+                                        <text x="230" y="25" fill="#888" fontSize="10" textAnchor="middle">...</text>
+                                        <text x="280" y="25" fill="#888" fontSize="10" textAnchor="middle">23</text>
+                                        <text x="330" y="25" fill="#888" fontSize="10" textAnchor="middle">24</text>
+                                        <text x="380" y="25" fill="#888" fontSize="10" textAnchor="middle">25</text>
+                                        <text x="430" y="25" fill="#888" fontSize="10" textAnchor="middle">...</text>
+                                        <text x="480" y="25" fill="#888" fontSize="10" textAnchor="middle">31</text>
+                                        
+                                        {/* All threads active - no divergence */}
+                                        <text x="30" y="60" fill="#888" fontSize="9">All</text>
+                                        <text x="30" y="72" fill="#888" fontSize="9">Active</text>
+                                        {[0,1,2,3,4,5,6,7,8,9,10,11].map((i) => (
+                                            <g key={`all-${i}`}>
+                                                <path d={`M ${55 + i*40} 40 C ${50 + i*40} 50, ${60 + i*40} 60, ${55 + i*40} 80`} stroke="#000" strokeWidth="2" fill="none"/>
+                                                <polygon points={`${55 + i*40},80 ${52 + i*40},74 ${58 + i*40},74`} fill="#000"/>
+                                            </g>
                                         ))}
+                                        
+                                        {/* Warp 1 - Blue - all active */}
+                                        <rect x="45" y="95" width="450" height="45" rx="4" fill="#93c5fd" stroke="#3b82f6" strokeWidth="2"/>
+                                        <text x="520" y="122" fill="#3b82f6" fontSize="10" fontWeight="bold">Warp 1: All 32 active</text>
+                                        {[0,1,2,3,4,5,6,7,8,9,10,11].map((i) => (
+                                            <g key={`w1-${i}`}>
+                                                <path d={`M ${60 + i*40} 100 C ${55 + i*40} 110, ${65 + i*40} 120, ${60 + i*40} 135`} stroke="#1e40af" strokeWidth="2" fill="none"/>
+                                                <polygon points={`${60 + i*40},135 ${57 + i*40},129 ${63 + i*40},129`} fill="#1e40af"/>
+                                            </g>
+                                        ))}
+                                        
+                                        {/* Warp 2 - Green - partial active (divergence example) */}
+                                        <rect x="45" y="150" width="220" height="45" rx="4" fill="#86efac" stroke="#22c55e" strokeWidth="2"/>
+                                        <rect x="265" y="150" width="230" height="45" rx="4" fill="rgba(134,239,172,0.3)" stroke="#22c55e" strokeWidth="1" strokeDasharray="4"/>
+                                        <text x="520" y="175" fill="#22c55e" fontSize="10" fontWeight="bold">Warp 2: Diverged!</text>
+                                        <text x="360" y="180" fill="#22c55e" fontSize="9" fontStyle="italic">inactive</text>
+                                        {[0,1,2,3,4,5].map((i) => (
+                                            <g key={`w2a-${i}`}>
+                                                <path d={`M ${60 + i*40} 155 C ${55 + i*40} 165, ${65 + i*40} 175, ${60 + i*40} 190`} stroke="#166534" strokeWidth="2" fill="none"/>
+                                                <polygon points={`${60 + i*40},190 ${57 + i*40},184 ${63 + i*40},184`} fill="#166534"/>
+                                            </g>
+                                        ))}
+                                        {[6,7,8,9,10,11].map((i) => (
+                                            <g key={`w2b-${i}`}>
+                                                <path d={`M ${60 + i*40} 155 C ${55 + i*40} 165, ${65 + i*40} 175, ${60 + i*40} 190`} stroke="rgba(22,101,52,0.3)" strokeWidth="2" fill="none"/>
+                                                <polygon points={`${60 + i*40},190 ${57 + i*40},184 ${63 + i*40},184`} fill="rgba(22,101,52,0.3)"/>
+                                            </g>
+                                        ))}
+                                        
+                                        {/* Warp 3 - Orange - opposite divergence */}
+                                        <rect x="45" y="205" width="220" height="45" rx="4" fill="rgba(253,186,116,0.3)" stroke="#f97316" strokeWidth="1" strokeDasharray="4"/>
+                                        <rect x="265" y="205" width="230" height="45" rx="4" fill="#fdba74" stroke="#f97316" strokeWidth="2"/>
+                                        <text x="520" y="230" fill="#f97316" fontSize="10" fontWeight="bold">Warp 3: Diverged!</text>
+                                        <text x="140" y="235" fill="#f97316" fontSize="9" fontStyle="italic">inactive</text>
+                                        {[0,1,2,3,4,5].map((i) => (
+                                            <g key={`w3a-${i}`}>
+                                                <path d={`M ${60 + i*40} 210 C ${55 + i*40} 220, ${65 + i*40} 230, ${60 + i*40} 245`} stroke="rgba(194,65,12,0.3)" strokeWidth="2" fill="none"/>
+                                                <polygon points={`${60 + i*40},245 ${57 + i*40},239 ${63 + i*40},239`} fill="rgba(194,65,12,0.3)"/>
+                                            </g>
+                                        ))}
+                                        {[6,7,8,9,10,11].map((i) => (
+                                            <g key={`w3b-${i}`}>
+                                                <path d={`M ${60 + i*40} 210 C ${55 + i*40} 220, ${65 + i*40} 230, ${60 + i*40} 245`} stroke="#c2410c" strokeWidth="2" fill="none"/>
+                                                <polygon points={`${60 + i*40},245 ${57 + i*40},239 ${63 + i*40},239`} fill="#c2410c"/>
+                                            </g>
+                                        ))}
+                                        
+                                        {/* Warp 4 - Yellow - all active */}
+                                        <rect x="45" y="260" width="450" height="45" rx="4" fill="#fde047" stroke="#eab308" strokeWidth="2"/>
+                                        <text x="520" y="287" fill="#ca8a04" fontSize="10" fontWeight="bold">Warp 4: All 32 active</text>
+                                        {[0,1,2,3,4,5,6,7,8,9,10,11].map((i) => (
+                                            <g key={`w4-${i}`}>
+                                                <path d={`M ${60 + i*40} 265 C ${55 + i*40} 275, ${65 + i*40} 285, ${60 + i*40} 300`} stroke="#854d0e" strokeWidth="2" fill="none"/>
+                                                <polygon points={`${60 + i*40},300 ${57 + i*40},294 ${63 + i*40},294`} fill="#854d0e"/>
+                                            </g>
+                                        ))}
+                                        
+                                        {/* Explanation */}
+                                        <text x="350" y="340" fill="#888" fontSize="10" textAnchor="middle">When threads in a warp take different branches (if/else),</text>
+                                        <text x="350" y="355" fill="#888" fontSize="10" textAnchor="middle">some threads become <tspan fill="#ff6b6b">inactive</tspan> while others execute.</text>
+                                        <text x="350" y="370" fill="#888" fontSize="10" textAnchor="middle">This <tspan fill="#ff6b6b" fontWeight="bold">serializes</tspan> execution and <tspan fill="#ff6b6b" fontWeight="bold">reduces parallelism</tspan>.</text>
+                                        
+                                        {/* Code example */}
+                                        <rect x="520" y="80" width="160" height="100" rx="6" fill="rgba(0,0,0,0.3)" stroke="#666"/>
+                                        <text x="530" y="100" fill="#888" fontSize="9" fontFamily="monospace">if (threadIdx.x &lt; 24)</text>
+                                        <text x="540" y="115" fill="#22c55e" fontSize="9" fontFamily="monospace">// Path A</text>
+                                        <text x="530" y="130" fill="#888" fontSize="9" fontFamily="monospace">else</text>
+                                        <text x="540" y="145" fill="#f97316" fontSize="9" fontFamily="monospace">// Path B</text>
+                                        <text x="530" y="165" fill="#666" fontSize="8">→ 2 passes needed!</text>
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            {/* Warp Scheduling with Long-Latency Operations */}
+                            <div style={{marginTop: '40px', marginBottom: '30px'}}>
+                                <h3 style={{color: '#00d4ff', marginBottom: '15px', fontSize: '1.1rem'}}>Warp Scheduling: Hiding Long-Latency Operations</h3>
+                                <div style={{display: 'flex', justifyContent: 'center'}}>
+                                    <svg viewBox="0 0 850 400" style={{width: '100%', maxWidth: '850px'}}>
+                                        {/* CUDA Cores at top */}
+                                        {[0,1,2,3,4,5,6,7].map((i) => (
+                                            <g key={`core-${i}`}>
+                                                <rect x={50 + i*55} y="20" width="45" height="30" rx="4" fill="#22c55e" stroke="#16a34a" strokeWidth="2"/>
+                                                <text x={72 + i*55} y="40" fill="#000" fontSize="9" fontWeight="bold" textAnchor="middle">Core</text>
+                                            </g>
+                                        ))}
+                                        
+                                        {/* Warp rows - showing scheduling over time */}
+                                        {/* Time labels */}
+                                        <text x="30" y="75" fill="#888" fontSize="9">t=0</text>
+                                        <text x="30" y="115" fill="#888" fontSize="9">t=1</text>
+                                        <text x="30" y="155" fill="#888" fontSize="9">t=2</text>
+                                        <text x="30" y="195" fill="#888" fontSize="9">t=3</text>
+                                        <text x="30" y="235" fill="#888" fontSize="9">t=4</text>
+                                        <text x="30" y="275" fill="#888" fontSize="9">t=5</text>
+                                        <text x="30" y="315" fill="#888" fontSize="9">t=6</text>
+                                        <text x="30" y="355" fill="#888" fontSize="9">t=7</text>
+                                        
+                                        {/* Blue warp - executing then stalled */}
+                                        <rect x="50" y="60" width="440" height="30" rx="4" fill="#93c5fd" stroke="#3b82f6" strokeWidth="2"/>
+                                        <rect x="50" y="100" width="440" height="30" rx="4" fill="#93c5fd" stroke="#3b82f6" strokeWidth="2"/>
+                                        <rect x="50" y="140" width="440" height="30" rx="4" fill="rgba(147,197,253,0.3)" stroke="#3b82f6" strokeWidth="1" strokeDasharray="4"/>
+                                        <rect x="50" y="180" width="440" height="30" rx="4" fill="rgba(147,197,253,0.3)" stroke="#3b82f6" strokeWidth="1" strokeDasharray="4"/>
+                                        <rect x="50" y="220" width="440" height="30" rx="4" fill="rgba(147,197,253,0.3)" stroke="#3b82f6" strokeWidth="1" strokeDasharray="4"/>
+                                        <rect x="50" y="260" width="440" height="30" rx="4" fill="#93c5fd" stroke="#3b82f6" strokeWidth="2"/>
+                                        
+                                        {/* Yellow warp - interleaved */}
+                                        <rect x="50" y="300" width="440" height="30" rx="4" fill="#fde047" stroke="#eab308" strokeWidth="2"/>
+                                        <rect x="50" y="340" width="440" height="30" rx="4" fill="#fde047" stroke="#eab308" strokeWidth="2"/>
+                                        
+                                        {/* Thread squiggles for active warps */}
+                                        {[0,1,2,3,4,5,6,7].map((i) => (
+                                            <g key={`t0-${i}`}>
+                                                <path d={`M ${65 + i*55} 65 C ${60 + i*55} 70, ${70 + i*55} 75, ${65 + i*55} 85`} stroke="#1e40af" strokeWidth="1.5" fill="none"/>
+                                            </g>
+                                        ))}
+                                        {[0,1,2,3,4,5,6,7].map((i) => (
+                                            <g key={`t1-${i}`}>
+                                                <path d={`M ${65 + i*55} 105 C ${60 + i*55} 110, ${70 + i*55} 115, ${65 + i*55} 125`} stroke="#1e40af" strokeWidth="1.5" fill="none"/>
+                                            </g>
+                                        ))}
+                                        {[0,1,2,3,4,5,6,7].map((i) => (
+                                            <g key={`t5-${i}`}>
+                                                <path d={`M ${65 + i*55} 265 C ${60 + i*55} 270, ${70 + i*55} 275, ${65 + i*55} 285`} stroke="#1e40af" strokeWidth="1.5" fill="none"/>
+                                            </g>
+                                        ))}
+                                        {[0,1,2,3,4,5,6,7].map((i) => (
+                                            <g key={`t6-${i}`}>
+                                                <path d={`M ${65 + i*55} 305 C ${60 + i*55} 310, ${70 + i*55} 315, ${65 + i*55} 325`} stroke="#854d0e" strokeWidth="1.5" fill="none"/>
+                                            </g>
+                                        ))}
+                                        {[0,1,2,3,4,5,6,7].map((i) => (
+                                            <g key={`t7-${i}`}>
+                                                <path d={`M ${65 + i*55} 345 C ${60 + i*55} 350, ${70 + i*55} 355, ${65 + i*55} 365`} stroke="#854d0e" strokeWidth="1.5" fill="none"/>
+                                            </g>
+                                        ))}
+                                        
+                                        {/* Long-latency operation labels */}
+                                        <text x="510" y="160" fill="#ff6b6b" fontSize="10">⏱ memory read</text>
+                                        <text x="510" y="200" fill="#ff6b6b" fontSize="10">⏱ waiting...</text>
+                                        <text x="510" y="240" fill="#ff6b6b" fontSize="10">⏱ data arrives!</text>
+                                        
+                                        {/* SM diagram on right */}
+                                        <rect x="640" y="60" width="180" height="280" rx="8" fill="rgba(100,130,180,0.2)" stroke="#6482b4" strokeWidth="2"/>
+                                        <text x="730" y="85" fill="#6482b4" fontSize="12" fontWeight="bold" textAnchor="middle">SM</text>
+                                        
+                                        <rect x="660" y="100" width="140" height="30" rx="4" fill="#fbbf24"/>
+                                        <text x="730" y="120" fill="#000" fontSize="10" fontWeight="bold" textAnchor="middle">Control</text>
+                                        
+                                        {[0,1,2,3,4].map((row) => (
+                                            <g key={`sm-row-${row}`}>
+                                                <rect x={665} y={140 + row*35} width="55" height="30" rx="3" fill="#22c55e" stroke="#16a34a"/>
+                                                <text x={692} y={160 + row*35} fill="#000" fontSize="8" fontWeight="bold" textAnchor="middle">Core</text>
+                                                <rect x={735} y={140 + row*35} width="55" height="30" rx="3" fill="#22c55e" stroke="#16a34a"/>
+                                                <text x={762} y={160 + row*35} fill="#000" fontSize="8" fontWeight="bold" textAnchor="middle">Core</text>
+                                            </g>
+                                        ))}
+                                        
+                                        <rect x="660" y="300" width="140" height="30" rx="4" fill="#f97316"/>
+                                        <text x="730" y="320" fill="#000" fontSize="10" fontWeight="bold" textAnchor="middle">Memory</text>
+                                        
+                                        {/* Legend */}
+                                        <text x="620" y="370" fill="#888" fontSize="9">Solid = Executing</text>
+                                        <text x="620" y="385" fill="#888" fontSize="9">Dashed = Stalled/Waiting</text>
+                                    </svg>
+                                </div>
+                                <p style={{textAlign: 'center', color: '#888', marginTop: '15px', fontSize: '0.9rem'}}>
+                                    When a warp issues a memory request, it <span style={{color: '#ff6b6b'}}>stalls</span>. The scheduler 
+                                    switches to another <span style={{color: '#22c55e'}}>ready warp</span> to keep cores busy.
+                                </p>
+                            </div>
+                            
+                            {/* Memory Coalescing Diagram */}
+                            <div style={{marginTop: '40px', marginBottom: '30px'}}>
+                                <h3 style={{color: '#a855f7', marginBottom: '15px', fontSize: '1.1rem'}}>Memory Coalescing: Efficient vs Inefficient Access Patterns</h3>
+                                <div style={{display: 'flex', gap: '30px', flexWrap: 'wrap', justifyContent: 'center'}}>
+                                    {/* Coalesced Access */}
+                                    <div style={{flex: '1', minWidth: '350px', maxWidth: '400px'}}>
+                                        <svg viewBox="0 0 380 280" style={{width: '100%'}}>
+                                            <text x="190" y="25" fill="#22c55e" fontSize="12" fontWeight="bold" textAnchor="middle">✓ Coalesced Access (GOOD)</text>
+                                            
+                                            {/* Threads */}
+                                            <text x="30" y="55" fill="#888" fontSize="9">Threads:</text>
+                                            {[0,1,2,3,4,5,6,7].map((i) => (
+                                                <g key={`ct-${i}`}>
+                                                    <rect x={70 + i*38} y="42" width="32" height="24" rx="3" fill="#3b82f6"/>
+                                                    <text x={86 + i*38} y="58" fill="#fff" fontSize="8" textAnchor="middle">T{i}</text>
+                                                </g>
+                                            ))}
+                                            
+                                            {/* Arrows - aligned */}
+                                            {[0,1,2,3,4,5,6,7].map((i) => (
+                                                <path key={`arr-c-${i}`} d={`M ${86 + i*38} 68 L ${86 + i*38} 90`} stroke="#22c55e" strokeWidth="2" markerEnd="url(#arrowGreen)"/>
+                                            ))}
+                                            
+                                            {/* Memory addresses - contiguous */}
+                                            <text x="30" y="115" fill="#888" fontSize="9">Memory:</text>
+                                            <rect x="70" y="95" width="304" height="30" rx="4" fill="rgba(34,197,94,0.2)" stroke="#22c55e" strokeWidth="2"/>
+                                            {[0,1,2,3,4,5,6,7].map((i) => (
+                                                <g key={`mem-c-${i}`}>
+                                                    <rect x={72 + i*38} y="97" width="34" height="26" rx="2" fill="#22c55e" opacity="0.6"/>
+                                                    <text x={89 + i*38} y="115" fill="#000" fontSize="7" textAnchor="middle">{i*4}</text>
+                                                </g>
+                                            ))}
+                                            
+                                            {/* Result */}
+                                            <text x="190" y="150" fill="#22c55e" fontSize="10" textAnchor="middle">1 memory transaction</text>
+                                            <text x="190" y="165" fill="#888" fontSize="9" textAnchor="middle">(threads access consecutive addresses)</text>
+                                            
+                                            {/* Transaction representation */}
+                                            <rect x="90" y="180" width="200" height="40" rx="6" fill="#22c55e"/>
+                                            <text x="190" y="205" fill="#000" fontSize="10" fontWeight="bold" textAnchor="middle">128-byte transaction</text>
+                                            
+                                            <text x="190" y="250" fill="#22c55e" fontSize="11" fontWeight="bold" textAnchor="middle">100% efficiency</text>
+                                            
+                                            <defs>
+                                                <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                                                    <path d="M0,0 L0,8 L8,4 z" fill="#22c55e"/>
+                                                </marker>
+                                            </defs>
+                                        </svg>
+                                    </div>
+                                    
+                                    {/* Strided/Scattered Access */}
+                                    <div style={{flex: '1', minWidth: '350px', maxWidth: '400px'}}>
+                                        <svg viewBox="0 0 380 280" style={{width: '100%'}}>
+                                            <text x="190" y="25" fill="#ff6b6b" fontSize="12" fontWeight="bold" textAnchor="middle">✗ Strided Access (BAD)</text>
+                                            
+                                            {/* Threads */}
+                                            <text x="30" y="55" fill="#888" fontSize="9">Threads:</text>
+                                            {[0,1,2,3,4,5,6,7].map((i) => (
+                                                <g key={`st-${i}`}>
+                                                    <rect x={70 + i*38} y="42" width="32" height="24" rx="3" fill="#3b82f6"/>
+                                                    <text x={86 + i*38} y="58" fill="#fff" fontSize="8" textAnchor="middle">T{i}</text>
+                                                </g>
+                                            ))}
+                                            
+                                            {/* Arrows - scattered */}
+                                            <path d="M 86 68 L 86 90" stroke="#ff6b6b" strokeWidth="2" markerEnd="url(#arrowRed)"/>
+                                            <path d="M 124 68 L 162 90" stroke="#ff6b6b" strokeWidth="2" markerEnd="url(#arrowRed)"/>
+                                            <path d="M 162 68 L 238 90" stroke="#ff6b6b" strokeWidth="2" markerEnd="url(#arrowRed)"/>
+                                            <path d="M 200 68 L 314 90" stroke="#ff6b6b" strokeWidth="2" markerEnd="url(#arrowRed)"/>
+                                            
+                                            {/* Memory addresses - scattered */}
+                                            <text x="30" y="115" fill="#888" fontSize="9">Memory:</text>
+                                            <rect x="70" y="95" width="304" height="30" rx="4" fill="rgba(255,107,107,0.1)" stroke="#ff6b6b" strokeWidth="2"/>
+                                            <rect x="72" y="97" width="34" height="26" rx="2" fill="#ff6b6b" opacity="0.6"/>
+                                            <text x="89" y="115" fill="#000" fontSize="7" textAnchor="middle">0</text>
+                                            <rect x="148" y="97" width="34" height="26" rx="2" fill="#ff6b6b" opacity="0.6"/>
+                                            <text x="165" y="115" fill="#000" fontSize="7" textAnchor="middle">64</text>
+                                            <rect x="224" y="97" width="34" height="26" rx="2" fill="#ff6b6b" opacity="0.6"/>
+                                            <text x="241" y="115" fill="#000" fontSize="7" textAnchor="middle">128</text>
+                                            <rect x="300" y="97" width="34" height="26" rx="2" fill="#ff6b6b" opacity="0.6"/>
+                                            <text x="317" y="115" fill="#000" fontSize="7" textAnchor="middle">192</text>
+                                            
+                                            {/* Result */}
+                                            <text x="190" y="150" fill="#ff6b6b" fontSize="10" textAnchor="middle">8 memory transactions!</text>
+                                            <text x="190" y="165" fill="#888" fontSize="9" textAnchor="middle">(each thread in different cache line)</text>
+                                            
+                                            {/* Multiple transactions */}
+                                            {[0,1,2,3].map((i) => (
+                                                <rect key={`tx-${i}`} x={80 + i*55} y="180" width="45" height="25" rx="4" fill="#ff6b6b" opacity="0.7"/>
+                                            ))}
+                                            <text x="190" y="225" fill="#ff6b6b" fontSize="9" textAnchor="middle">+ 4 more transactions...</text>
+                                            
+                                            <text x="190" y="250" fill="#ff6b6b" fontSize="11" fontWeight="bold" textAnchor="middle">12.5% efficiency</text>
+                                            
+                                            <defs>
+                                                <marker id="arrowRed" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                                                    <path d="M0,0 L0,8 L8,4 z" fill="#ff6b6b"/>
+                                                </marker>
+                                            </defs>
+                                        </svg>
                                     </div>
                                 </div>
                                 
-                                <div className="arrow">=</div>
-                                
-                                <div className="warp-group">
-                                    {['Warp 0', 'Warp 1', 'Warp 2', 'Warp 3'].map((label, idx) => (
-                                        <div key={idx} className="timeline-row">
-                                            <span className="warp-label">{label}</span>
-                                            <div className="warp-row">
-                                                {[...Array(32)].map((_, i) => (
-                                                    <div key={i} className="thread" style={{width: '8px', height: '8px'}}></div>
+                                <div style={{background: 'rgba(168,85,247,0.1)', border: '1px solid #a855f7', borderRadius: '8px', padding: '15px', marginTop: '20px'}}>
+                                    <strong style={{color: '#a855f7'}}>Why This Matters for GPU-Storage:</strong>
+                                    <p style={{color: '#888', marginTop: '10px'}}>
+                                        Storage access patterns have even more impact than memory coalescing. When threads access 
+                                        <span style={{color: '#ff6b6b'}}> scattered storage locations</span>, each access may become a separate NVMe command 
+                                        with 10-100μs latency. Coalesced sequential reads can be <span style={{color: '#22c55e'}}>batched into larger I/O operations</span>, 
+                                        dramatically improving throughput.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            {/* CUDA Hierarchy Diagram */}
+                            <div style={{marginTop: '40px', marginBottom: '30px'}}>
+                                <h3 style={{color: '#00d4ff', marginBottom: '15px', fontSize: '1.1rem'}}>CUDA Execution Hierarchy: Grid → Blocks → Threads → Warps</h3>
+                                <div style={{display: 'flex', justifyContent: 'center'}}>
+                                    <svg viewBox="0 0 850 420" style={{width: '100%', maxWidth: '850px'}}>
+                                        {/* Host Side */}
+                                        <rect x="10" y="20" width="100" height="380" rx="6" fill="rgba(59,130,246,0.1)" stroke="#3b82f6" strokeWidth="2"/>
+                                        <text x="60" y="45" fill="#3b82f6" fontSize="12" fontWeight="bold" textAnchor="middle">Host (CPU)</text>
+                                        
+                                        {/* Kernel Launch */}
+                                        <rect x="25" y="80" width="70" height="50" rx="4" fill="#fbbf24" stroke="#fbbf24" strokeWidth="2"/>
+                                        <text x="60" y="100" fill="#000" fontSize="10" fontWeight="bold" textAnchor="middle">Kernel</text>
+                                        <text x="60" y="115" fill="#000" fontSize="9" textAnchor="middle">Launch</text>
+                                        
+                                        {/* Arrow to Device */}
+                                        <path d="M 95 105 L 140 105" stroke="#fbbf24" strokeWidth="2" markerEnd="url(#arrKernel)"/>
+                                        <defs>
+                                            <marker id="arrKernel" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                                <path d="M0,0 L0,6 L9,3 z" fill="#fbbf24"/>
+                                            </marker>
+                                        </defs>
+                                        
+                                        {/* Device Side */}
+                                        <rect x="130" y="20" width="300" height="380" rx="6" fill="rgba(0,255,136,0.05)" stroke="#00ff88" strokeWidth="2"/>
+                                        <text x="280" y="45" fill="#00ff88" fontSize="12" fontWeight="bold" textAnchor="middle">Device (GPU)</text>
+                                        
+                                        {/* Grid */}
+                                        <rect x="145" y="60" width="270" height="170" rx="6" fill="rgba(0,255,136,0.1)" stroke="#00ff88" strokeWidth="2"/>
+                                        <text x="280" y="80" fill="#00ff88" fontSize="11" fontWeight="bold" textAnchor="middle">Grid (Kernel Instance)</text>
+                                        
+                                        {/* Thread Blocks in Grid - 2x3 arrangement */}
+                                        {[0,1].map((row) => 
+                                            [0,1,2].map((col) => (
+                                                <g key={`block-${row}-${col}`}>
+                                                    <rect x={160 + col*85} y={90 + row*65} width="75" height="55" rx="4" 
+                                                        fill={row === 0 && col === 0 ? "rgba(251,191,36,0.4)" : "rgba(34,197,94,0.2)"} 
+                                                        stroke={row === 0 && col === 0 ? "#fbbf24" : "#22c55e"} strokeWidth="2"/>
+                                                    <text x={197 + col*85} y={108 + row*65} fill={row === 0 && col === 0 ? "#fbbf24" : "#22c55e"} fontSize="9" fontWeight="bold" textAnchor="middle">Block({col},{row})</text>
+                                                    {/* Mini threads inside - horizontal rows */}
+                                                    {[0,1,2].map((tr) => (
+                                                        <rect key={`t-${tr}`} x={165 + col*85} y={115 + row*65 + tr*10} width="60" height="7" rx="2" 
+                                                            fill={row === 0 && col === 0 ? "#fbbf24" : "#22c55e"} opacity="0.5"/>
+                                                    ))}
+                                                </g>
+                                            ))
+                                        )}
+                                        
+                                        {/* Expanded Block Detail */}
+                                        <rect x="145" y="245" width="270" height="145" rx="6" fill="rgba(251,191,36,0.1)" stroke="#fbbf24" strokeWidth="2"/>
+                                        <text x="280" y="265" fill="#fbbf24" fontSize="10" fontWeight="bold" textAnchor="middle">Block(0,0): 128 Threads = 4 Warps</text>
+                                        
+                                        {/* Warps inside block - HORIZONTAL with 32 threads each */}
+                                        {[0,1,2,3].map((w) => (
+                                            <g key={`warp-${w}`}>
+                                                <rect x={155} y={275 + w*26} width="250" height="22" rx="3" 
+                                                    fill={w === 0 ? "rgba(0,255,136,0.2)" : w === 1 ? "rgba(59,130,246,0.2)" : w === 2 ? "rgba(249,115,22,0.2)" : "rgba(168,85,247,0.2)"} 
+                                                    stroke={w === 0 ? "#00ff88" : w === 1 ? "#3b82f6" : w === 2 ? "#f97316" : "#a855f7"} strokeWidth="1"/>
+                                                <text x={168} y={290 + w*26} fill={w === 0 ? "#00ff88" : w === 1 ? "#3b82f6" : w === 2 ? "#f97316" : "#a855f7"} fontSize="8" fontWeight="bold">W{w}</text>
+                                                {/* 32 threads as horizontal bars */}
+                                                {[...Array(32)].map((_, t) => (
+                                                    <rect key={t} x={188 + t*6.5} y={278 + w*26} width="5" height="16" rx="1" 
+                                                        fill={w === 0 ? "#00ff88" : w === 1 ? "#3b82f6" : w === 2 ? "#f97316" : "#a855f7"} opacity="0.7"/>
                                                 ))}
-                                            </div>
-                                            <span style={{fontSize: '0.8rem', color: '#888'}}>32 Threads</span>
-                                        </div>
-                                    ))}
+                                            </g>
+                                        ))}
+                                        <text x="280" y="385" fill="#666" fontSize="8" textAnchor="middle">t0 t1 t2 ................................. t31</text>
+                                        
+                                        {/* Arrow to SMs */}
+                                        <path d="M 430 200 L 480 200" stroke="#666" strokeWidth="2" markerEnd="url(#arrToSM)"/>
+                                        <text x="455" y="190" fill="#666" fontSize="9" textAnchor="middle">schedule</text>
+                                        <defs>
+                                            <marker id="arrToSM" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                                <path d="M0,0 L0,6 L9,3 z" fill="#666"/>
+                                            </marker>
+                                        </defs>
+                                        
+                                        {/* SMs */}
+                                        <rect x="490" y="20" width="350" height="380" rx="6" fill="rgba(251,191,36,0.05)" stroke="#fbbf24" strokeWidth="2"/>
+                                        <text x="665" y="45" fill="#fbbf24" fontSize="12" fontWeight="bold" textAnchor="middle">Streaming Multiprocessors (SMs)</text>
+                                        
+                                        {/* SM 0 with blocks */}
+                                        <rect x="505" y="60" width="155" height="130" rx="6" fill="rgba(251,191,36,0.1)" stroke="#fbbf24" strokeWidth="2"/>
+                                        <text x="582" y="80" fill="#fbbf24" fontSize="10" fontWeight="bold" textAnchor="middle">SM 0</text>
+                                        <rect x="515" y="90" width="55" height="35" rx="3" fill="rgba(251,191,36,0.4)" stroke="#fbbf24" strokeWidth="2"/>
+                                        <text x="542" y="112" fill="#fff" fontSize="8" textAnchor="middle">B(0,0)</text>
+                                        <rect x="580" y="90" width="55" height="35" rx="3" fill="rgba(34,197,94,0.3)" stroke="#22c55e" strokeWidth="1"/>
+                                        <text x="607" y="112" fill="#888" fontSize="8" textAnchor="middle">B(1,0)</text>
+                                        <text x="582" y="150" fill="#888" fontSize="8" textAnchor="middle">Cores | Registers | Shared</text>
+                                        <rect x="515" y="160" width="130" height="18" rx="3" fill="rgba(0,212,255,0.2)" stroke="#00d4ff" strokeWidth="1"/>
+                                        <text x="580" y="173" fill="#00d4ff" fontSize="7" textAnchor="middle">256KB Registers | 128KB L1/Shared</text>
+                                        
+                                        {/* SM 1 */}
+                                        <rect x="675" y="60" width="155" height="130" rx="6" fill="rgba(251,191,36,0.1)" stroke="#fbbf24" strokeWidth="2"/>
+                                        <text x="752" y="80" fill="#fbbf24" fontSize="10" fontWeight="bold" textAnchor="middle">SM 1</text>
+                                        <rect x="685" y="90" width="55" height="35" rx="3" fill="rgba(34,197,94,0.3)" stroke="#22c55e" strokeWidth="1"/>
+                                        <text x="712" y="112" fill="#888" fontSize="8" textAnchor="middle">B(2,0)</text>
+                                        <rect x="750" y="90" width="55" height="35" rx="3" fill="rgba(34,197,94,0.3)" stroke="#22c55e" strokeWidth="1"/>
+                                        <text x="777" y="112" fill="#888" fontSize="8" textAnchor="middle">B(0,1)</text>
+                                        <text x="752" y="150" fill="#888" fontSize="8" textAnchor="middle">Cores | Registers | Shared</text>
+                                        <rect x="685" y="160" width="130" height="18" rx="3" fill="rgba(0,212,255,0.2)" stroke="#00d4ff" strokeWidth="1"/>
+                                        <text x="750" y="173" fill="#00d4ff" fontSize="7" textAnchor="middle">256KB Registers | 128KB L1/Shared</text>
+                                        
+                                        {/* Warp Scheduler Detail */}
+                                        <rect x="505" y="205" width="325" height="185" rx="6" fill="rgba(0,212,255,0.05)" stroke="#00d4ff" strokeWidth="2"/>
+                                        <text x="667" y="225" fill="#00d4ff" fontSize="10" fontWeight="bold" textAnchor="middle">Warp Scheduler (per SM)</text>
+                                        
+                                        {/* Warp states */}
+                                        <rect x="520" y="240" width="130" height="22" rx="3" fill="rgba(0,255,136,0.3)" stroke="#00ff88" strokeWidth="2"/>
+                                        <text x="585" y="255" fill="#00ff88" fontSize="9" textAnchor="middle">W0: EXECUTING</text>
+                                        <rect x="520" y="267" width="130" height="22" rx="3" fill="rgba(255,107,107,0.2)" stroke="#ff6b6b" strokeWidth="1"/>
+                                        <text x="585" y="282" fill="#ff6b6b" fontSize="9" textAnchor="middle">W1: STALLED (mem)</text>
+                                        <rect x="520" y="294" width="130" height="22" rx="3" fill="rgba(0,255,136,0.2)" stroke="#00ff88" strokeWidth="1"/>
+                                        <text x="585" y="309" fill="#00ff88" fontSize="9" textAnchor="middle">W2: READY</text>
+                                        <rect x="520" y="321" width="130" height="22" rx="3" fill="rgba(251,191,36,0.2)" stroke="#fbbf24" strokeWidth="1"/>
+                                        <text x="585" y="336" fill="#fbbf24" fontSize="9" textAnchor="middle">W3: WAITING (sync)</text>
+                                        
+                                        {/* Execution arrow */}
+                                        <path d="M 660 280 L 690 280" stroke="#00ff88" strokeWidth="2" markerEnd="url(#arrExec3)"/>
+                                        <defs>
+                                            <marker id="arrExec3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                                <path d="M0,0 L0,6 L9,3 z" fill="#00ff88"/>
+                                            </marker>
+                                        </defs>
+                                        
+                                        {/* CUDA Cores executing */}
+                                        <rect x="700" y="245" width="120" height="90" rx="4" fill="rgba(34,197,94,0.1)" stroke="#22c55e" strokeWidth="2"/>
+                                        <text x="760" y="262" fill="#22c55e" fontSize="9" fontWeight="bold" textAnchor="middle">CUDA Cores</text>
+                                        {[0,1,2,3].map((r) => 
+                                            [0,1,2,3,4,5].map((c) => (
+                                                <rect key={`core-${r}-${c}`} x={710 + c*17} y={270 + r*14} width="14" height="10" rx="2" fill="#22c55e" opacity={r === 0 ? 1 : 0.3}/>
+                                            ))
+                                        )}
+                                        <text x="760" y="330" fill="#888" fontSize="7" textAnchor="middle">32 threads/warp/cycle</text>
+                                        
+                                        {/* Key message */}
+                                        <text x="667" y="365" fill="#00d4ff" fontSize="8" textAnchor="middle">Scheduler hides latency by switching warps</text>
+                                        <text x="667" y="380" fill="#ff6b6b" fontSize="8" textAnchor="middle">If ALL warps stall on I/O → SM idles!</text>
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            {/* GPU Memory Hierarchy */}
+                            <div style={{marginTop: '40px', marginBottom: '30px'}}>
+                                <h3 style={{color: '#f97316', marginBottom: '15px', fontSize: '1.1rem'}}>GPU Memory Hierarchy & Latency</h3>
+                                <div style={{display: 'flex', justifyContent: 'center'}}>
+                                    <svg viewBox="0 0 750 480" style={{width: '100%', maxWidth: '750px'}}>
+                                        {/* Left side - Latency labels */}
+                                        <text x="15" y="165" fill="#c9a227" fontSize="10" fontWeight="bold">≈1 cycle</text>
+                                        <text x="15" y="105" fill="#c9a227" fontSize="10" fontWeight="bold">≈5 cycles</text>
+                                        <text x="15" y="355" fill="#c9a227" fontSize="10" fontWeight="bold">≈500 cycles</text>
+                                        <text x="15" y="415" fill="#c9a227" fontSize="10" fontWeight="bold">≈5 cycles</text>
+                                        
+                                        {/* Grid container - light blue */}
+                                        <rect x="100" y="30" width="550" height="440" rx="8" fill="#a8c8e8" stroke="#6482b4" strokeWidth="3"/>
+                                        <text x="375" y="55" fill="#000" fontSize="14" fontWeight="bold" textAnchor="middle">Grid</text>
+                                        
+                                        {/* Block (0, 0) - yellow/orange */}
+                                        <rect x="130" y="70" width="230" height="260" rx="6" fill="#f5a623" stroke="#c9840a" strokeWidth="2"/>
+                                        <text x="245" y="95" fill="#000" fontSize="12" fontWeight="bold" textAnchor="middle">Block (0, 0)</text>
+                                        
+                                        {/* Shared Memory / L1 in Block 0 */}
+                                        <rect x="145" y="105" width="200" height="35" rx="4" fill="#f97316"/>
+                                        <text x="245" y="128" fill="#000" fontSize="10" fontWeight="bold" textAnchor="middle">Shared Memory / L1 cache</text>
+                                        
+                                        {/* Arrows from shared to registers */}
+                                        <text x="190" y="155" fill="#000" fontSize="12">↕</text>
+                                        <text x="290" y="155" fill="#000" fontSize="12">↕</text>
+                                        
+                                        {/* Registers in Block 0 */}
+                                        <rect x="150" y="165" width="80" height="30" rx="4" fill="#f97316"/>
+                                        <text x="190" y="185" fill="#000" fontSize="9" fontWeight="bold" textAnchor="middle">Registers</text>
+                                        <rect x="250" y="165" width="80" height="30" rx="4" fill="#f97316"/>
+                                        <text x="290" y="185" fill="#000" fontSize="9" fontWeight="bold" textAnchor="middle">Registers</text>
+                                        
+                                        {/* Arrows from registers to threads */}
+                                        <text x="190" y="210" fill="#000" fontSize="12">↕</text>
+                                        <text x="290" y="210" fill="#000" fontSize="12">↕</text>
+                                        
+                                        {/* Threads in Block 0 */}
+                                        <rect x="150" y="220" width="80" height="50" rx="4" fill="#90EE90" stroke="#228B22" strokeWidth="1"/>
+                                        <text x="190" y="240" fill="#000" fontSize="9" fontWeight="bold" textAnchor="middle">Thread</text>
+                                        <text x="190" y="255" fill="#000" fontSize="9" fontWeight="bold" textAnchor="middle">(0, 0)</text>
+                                        <rect x="250" y="220" width="80" height="50" rx="4" fill="#90EE90" stroke="#228B22" strokeWidth="1"/>
+                                        <text x="290" y="240" fill="#000" fontSize="9" fontWeight="bold" textAnchor="middle">Thread</text>
+                                        <text x="290" y="255" fill="#000" fontSize="9" fontWeight="bold" textAnchor="middle">(1, 0)</text>
+                                        
+                                        {/* Arrows from threads to global */}
+                                        <text x="190" y="290" fill="#000" fontSize="12">↕</text>
+                                        <text x="290" y="290" fill="#000" fontSize="12">↕</text>
+                                        
+                                        {/* Block (1, 0) - yellow/orange */}
+                                        <rect x="390" y="70" width="230" height="260" rx="6" fill="#f5a623" stroke="#c9840a" strokeWidth="2"/>
+                                        <text x="505" y="95" fill="#000" fontSize="12" fontWeight="bold" textAnchor="middle">Block (1, 0)</text>
+                                        
+                                        {/* Shared Memory / L1 in Block 1 */}
+                                        <rect x="405" y="105" width="200" height="35" rx="4" fill="#f97316"/>
+                                        <text x="505" y="128" fill="#000" fontSize="10" fontWeight="bold" textAnchor="middle">Shared Memory / L1 cache</text>
+                                        
+                                        {/* Arrows from shared to registers */}
+                                        <text x="450" y="155" fill="#000" fontSize="12">↕</text>
+                                        <text x="550" y="155" fill="#000" fontSize="12">↕</text>
+                                        
+                                        {/* Registers in Block 1 */}
+                                        <rect x="410" y="165" width="80" height="30" rx="4" fill="#f97316"/>
+                                        <text x="450" y="185" fill="#000" fontSize="9" fontWeight="bold" textAnchor="middle">Registers</text>
+                                        <rect x="510" y="165" width="80" height="30" rx="4" fill="#f97316"/>
+                                        <text x="550" y="185" fill="#000" fontSize="9" fontWeight="bold" textAnchor="middle">Registers</text>
+                                        
+                                        {/* Arrows from registers to threads */}
+                                        <text x="450" y="210" fill="#000" fontSize="12">↕</text>
+                                        <text x="550" y="210" fill="#000" fontSize="12">↕</text>
+                                        
+                                        {/* Threads in Block 1 */}
+                                        <rect x="410" y="220" width="80" height="50" rx="4" fill="#90EE90" stroke="#228B22" strokeWidth="1"/>
+                                        <text x="450" y="240" fill="#000" fontSize="9" fontWeight="bold" textAnchor="middle">Thread</text>
+                                        <text x="450" y="255" fill="#000" fontSize="9" fontWeight="bold" textAnchor="middle">(0, 0)</text>
+                                        <rect x="510" y="220" width="80" height="50" rx="4" fill="#90EE90" stroke="#228B22" strokeWidth="1"/>
+                                        <text x="550" y="240" fill="#000" fontSize="9" fontWeight="bold" textAnchor="middle">Thread</text>
+                                        <text x="550" y="255" fill="#000" fontSize="9" fontWeight="bold" textAnchor="middle">(1, 0)</text>
+                                        
+                                        {/* Arrows from threads to global */}
+                                        <text x="450" y="290" fill="#000" fontSize="12">↕</text>
+                                        <text x="550" y="290" fill="#000" fontSize="12">↕</text>
+                                        
+                                        {/* Global Memory - spans both blocks */}
+                                        <rect x="130" y="340" width="490" height="50" rx="6" fill="#f97316"/>
+                                        <text x="375" y="372" fill="#000" fontSize="13" fontWeight="bold" textAnchor="middle">Global Memory</text>
+                                        
+                                        {/* Constant Memory */}
+                                        <rect x="130" y="400" width="490" height="50" rx="6" fill="#f97316"/>
+                                        <text x="375" y="432" fill="#000" fontSize="13" fontWeight="bold" textAnchor="middle">Constant Memory</text>
+                                        
+                                        {/* Host box */}
+                                        <rect x="20" y="340" width="70" height="50" rx="4" fill="#a8c8e8" stroke="#6482b4" strokeWidth="2"/>
+                                        <text x="55" y="372" fill="#000" fontSize="11" fontWeight="bold" textAnchor="middle">Host</text>
+                                        
+                                        {/* Arrows from Host to memories */}
+                                        <path d="M 90 355 L 125 355" stroke="#000" strokeWidth="2" markerEnd="url(#arrHead)" markerStart="url(#arrTail)"/>
+                                        <path d="M 90 415 L 125 415" stroke="#000" strokeWidth="2" markerEnd="url(#arrHead)" markerStart="url(#arrTail)"/>
+                                        
+                                        <defs>
+                                            <marker id="arrHead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                                                <path d="M0,0 L0,8 L8,4 z" fill="#000"/>
+                                            </marker>
+                                            <marker id="arrTail" markerWidth="8" markerHeight="8" refX="1" refY="4" orient="auto">
+                                                <path d="M8,0 L8,8 L0,4 z" fill="#000"/>
+                                            </marker>
+                                        </defs>
+                                    </svg>
                                 </div>
                                 
-                                <div className="arrow">&rarr;</div>
+                                {/* Storage latency callout */}
+                                <div style={{background: 'rgba(255,107,107,0.15)', border: '2px solid #ff6b6b', borderRadius: '10px', padding: '20px', marginTop: '20px'}}>
+                                    <div style={{display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap'}}>
+                                        <div style={{flex: '1', minWidth: '250px'}}>
+                                            <strong style={{color: '#ff6b6b', fontSize: '1.1rem'}}>The Storage Gap</strong>
+                                            <p style={{color: '#888', marginTop: '10px'}}>
+                                                Even HBM global memory at ~500 cycles is considered "slow" for GPU. 
+                                                NVMe storage at <strong style={{color: '#ff6b6b'}}>10,000-100,000+ cycles</strong> is 
+                                                orders of magnitude worse. This is why:
+                                            </p>
+                                        </div>
+                                        <div style={{display: 'flex', gap: '15px', flexWrap: 'wrap'}}>
+                                            <div style={{background: 'rgba(0,0,0,0.3)', padding: '15px', borderRadius: '8px', textAlign: 'center'}}>
+                                                <div style={{color: '#00ff88', fontSize: '1.5rem', fontWeight: '700'}}>Prefetch</div>
+                                                <div style={{color: '#888', fontSize: '0.8rem'}}>Load data ahead</div>
+                                            </div>
+                                            <div style={{background: 'rgba(0,0,0,0.3)', padding: '15px', borderRadius: '8px', textAlign: 'center'}}>
+                                                <div style={{color: '#fbbf24', fontSize: '1.5rem', fontWeight: '700'}}>Batch</div>
+                                                <div style={{color: '#888', fontSize: '0.8rem'}}>Amortize overhead</div>
+                                            </div>
+                                            <div style={{background: 'rgba(0,0,0,0.3)', padding: '15px', borderRadius: '8px', textAlign: 'center'}}>
+                                                <div style={{color: '#3b82f6', fontSize: '1.5rem', fontWeight: '700'}}>Overlap</div>
+                                                <div style={{color: '#888', fontSize: '0.8rem'}}>I/O + Compute</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* SM-Centric Memory Hierarchy View */}
+                            <div style={{marginTop: '40px', marginBottom: '30px'}}>
+                                <h3 style={{color: '#22c55e', marginBottom: '15px', fontSize: '1.1rem'}}>SM-Centric View: Memory Hierarchy Across All SMs</h3>
+                                <div style={{display: 'flex', justifyContent: 'center'}}>
+                                    <svg viewBox="0 0 800 380" style={{width: '100%', maxWidth: '800px'}}>
+                                        
+                                        {/* SM-0 */}
+                                        <rect x="50" y="30" width="180" height="180" rx="8" fill="#22c55e" stroke="#16a34a" strokeWidth="3"/>
+                                        <text x="140" y="55" fill="#fff" fontSize="14" fontWeight="bold" textAnchor="middle">SM-0</text>
+                                        
+                                        {/* Registers in SM-0 */}
+                                        <rect x="70" y="70" width="140" height="45" rx="4" fill="#fef3c7" stroke="#d4a" strokeWidth="1"/>
+                                        <text x="140" y="98" fill="#000" fontSize="12" fontWeight="bold" textAnchor="middle">Registers</text>
+                                        
+                                        {/* Arrows */}
+                                        <text x="105" y="130" fill="#fff" fontSize="14">↕</text>
+                                        <text x="165" y="130" fill="#fff" fontSize="14">↕</text>
+                                        
+                                        {/* L1 and SMEM in SM-0 */}
+                                        <rect x="70" y="140" width="60" height="50" rx="4" fill="#fef9c3" stroke="#ca8a04" strokeWidth="1"/>
+                                        <text x="100" y="170" fill="#000" fontSize="11" fontWeight="bold" textAnchor="middle">L1</text>
+                                        <rect x="150" y="140" width="60" height="50" rx="4" fill="#fef9c3" stroke="#ca8a04" strokeWidth="1"/>
+                                        <text x="180" y="170" fill="#000" fontSize="11" fontWeight="bold" textAnchor="middle">SMEM</text>
+                                        
+                                        {/* SM-1 */}
+                                        <rect x="270" y="30" width="180" height="180" rx="8" fill="#22c55e" stroke="#16a34a" strokeWidth="3"/>
+                                        <text x="360" y="55" fill="#fff" fontSize="14" fontWeight="bold" textAnchor="middle">SM-1</text>
+                                        
+                                        {/* Registers in SM-1 */}
+                                        <rect x="290" y="70" width="140" height="45" rx="4" fill="#fef3c7" stroke="#d4a" strokeWidth="1"/>
+                                        <text x="360" y="98" fill="#000" fontSize="12" fontWeight="bold" textAnchor="middle">Registers</text>
+                                        
+                                        {/* Arrows */}
+                                        <text x="325" y="130" fill="#fff" fontSize="14">↕</text>
+                                        <text x="385" y="130" fill="#fff" fontSize="14">↕</text>
+                                        
+                                        {/* L1 and SMEM in SM-1 */}
+                                        <rect x="290" y="140" width="60" height="50" rx="4" fill="#fef9c3" stroke="#ca8a04" strokeWidth="1"/>
+                                        <text x="320" y="170" fill="#000" fontSize="11" fontWeight="bold" textAnchor="middle">L1</text>
+                                        <rect x="370" y="140" width="60" height="50" rx="4" fill="#fef9c3" stroke="#ca8a04" strokeWidth="1"/>
+                                        <text x="400" y="170" fill="#000" fontSize="11" fontWeight="bold" textAnchor="middle">SMEM</text>
+                                        
+                                        {/* Ellipsis */}
+                                        <text x="490" y="130" fill="#888" fontSize="24" fontWeight="bold">○ ○ ○</text>
+                                        
+                                        {/* SM-N */}
+                                        <rect x="560" y="30" width="180" height="180" rx="8" fill="#22c55e" stroke="#16a34a" strokeWidth="3"/>
+                                        <text x="650" y="55" fill="#fff" fontSize="14" fontWeight="bold" textAnchor="middle">SM-N</text>
+                                        
+                                        {/* Registers in SM-N */}
+                                        <rect x="580" y="70" width="140" height="45" rx="4" fill="#fef3c7" stroke="#d4a" strokeWidth="1"/>
+                                        <text x="650" y="98" fill="#000" fontSize="12" fontWeight="bold" textAnchor="middle">Registers</text>
+                                        
+                                        {/* Arrows */}
+                                        <text x="615" y="130" fill="#fff" fontSize="14">↕</text>
+                                        <text x="675" y="130" fill="#fff" fontSize="14">↕</text>
+                                        
+                                        {/* L1 and SMEM in SM-N */}
+                                        <rect x="580" y="140" width="60" height="50" rx="4" fill="#fef9c3" stroke="#ca8a04" strokeWidth="1"/>
+                                        <text x="610" y="170" fill="#000" fontSize="11" fontWeight="bold" textAnchor="middle">L1</text>
+                                        <rect x="660" y="140" width="60" height="50" rx="4" fill="#fef9c3" stroke="#ca8a04" strokeWidth="1"/>
+                                        <text x="690" y="170" fill="#000" fontSize="11" fontWeight="bold" textAnchor="middle">SMEM</text>
+                                        
+                                        {/* Connectors from SMs to L2 */}
+                                        <path d="M 140 210 L 140 250" stroke="#666" strokeWidth="2"/>
+                                        <path d="M 360 210 L 360 250" stroke="#666" strokeWidth="2"/>
+                                        <path d="M 650 210 L 650 250" stroke="#666" strokeWidth="2"/>
+                                        
+                                        {/* Arrows pointing down */}
+                                        <text x="136" y="245" fill="#666" fontSize="14">↓</text>
+                                        <text x="356" y="245" fill="#666" fontSize="14">↓</text>
+                                        <text x="646" y="245" fill="#666" fontSize="14">↓</text>
+                                        
+                                        {/* L2 Cache - gray bar */}
+                                        <rect x="50" y="255" width="690" height="40" rx="4" fill="#9ca3af" stroke="#6b7280" strokeWidth="2"/>
+                                        <text x="395" y="282" fill="#000" fontSize="14" fontWeight="bold" textAnchor="middle">L2</text>
+                                        
+                                        {/* Arrow from L2 to Global */}
+                                        <path d="M 395 295 L 395 315" stroke="#666" strokeWidth="2"/>
+                                        <text x="391" y="315" fill="#666" fontSize="14">↓</text>
+                                        
+                                        {/* Global Memory - blue bar */}
+                                        <rect x="50" y="320" width="690" height="45" rx="4" fill="#3b82f6" stroke="#2563eb" strokeWidth="2"/>
+                                        <text x="395" y="350" fill="#fff" fontSize="14" fontWeight="bold" textAnchor="middle">Global Memory</text>
+                                        
+                                        {/* Latency annotations */}
+                                        <text x="10" y="95" fill="#c9a227" fontSize="9" fontWeight="bold">~1 cyc</text>
+                                        <text x="10" y="170" fill="#c9a227" fontSize="9" fontWeight="bold">~5 cyc</text>
+                                        <text x="755" y="280" fill="#c9a227" fontSize="9" fontWeight="bold">~100 cyc</text>
+                                        <text x="755" y="350" fill="#c9a227" fontSize="9" fontWeight="bold">~500 cyc</text>
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            {/* Comprehensive Grid-to-SM Mapping */}
+                            <div style={{marginTop: '40px', marginBottom: '30px'}}>
+                                <h3 style={{color: '#3b82f6', marginBottom: '15px', fontSize: '1.1rem'}}>Complete Picture: Grid → SMs → Blocks → Threads</h3>
+                                <div style={{display: 'flex', justifyContent: 'center'}}>
+                                    <svg viewBox="0 0 850 480" style={{width: '100%', maxWidth: '850px'}}>
+                                        {/* GRID label */}
+                                        <text x="30" y="30" fill="#3b82f6" fontSize="16" fontWeight="bold">GRID</text>
+                                        
+                                        {/* Grid background - light blue */}
+                                        <rect x="20" y="40" width="810" height="430" rx="8" fill="#bfdbfe" stroke="#3b82f6" strokeWidth="2"/>
+                                        
+                                        {/* SM-0 - gray background */}
+                                        <rect x="40" y="60" width="580" height="180" rx="6" fill="#d1d5db" stroke="#9ca3af" strokeWidth="2"/>
+                                        <text x="330" y="80" fill="#000" fontSize="12" fontWeight="bold" textAnchor="middle">SM-0</text>
+                                        
+                                        {/* Shared Memory bar in SM-0 */}
+                                        <rect x="55" y="90" width="550" height="30" rx="4" fill="#f97316"/>
+                                        <text x="330" y="112" fill="#000" fontSize="11" fontWeight="bold" textAnchor="middle">Shared Memory</text>
+                                        
+                                        {/* Block 0 in SM-0 */}
+                                        <rect x="60" y="130" width="130" height="100" rx="4" fill="none" stroke="#666" strokeWidth="2" strokeDasharray="5"/>
+                                        
+                                        {/* Registers for Block 0 */}
+                                        <rect x="70" y="140" width="50" height="25" rx="3" fill="#f97316"/>
+                                        <text x="95" y="157" fill="#000" fontSize="8" fontWeight="bold" textAnchor="middle">Registers</text>
+                                        <rect x="130" y="140" width="50" height="25" rx="3" fill="#f97316"/>
+                                        <text x="155" y="157" fill="#000" fontSize="8" fontWeight="bold" textAnchor="middle">Registers</text>
+                                        
+                                        {/* Arrows */}
+                                        <text x="92" y="175" fill="#000" fontSize="10">↕</text>
+                                        <text x="152" y="175" fill="#000" fontSize="10">↕</text>
+                                        
+                                        {/* Threads for Block 0 */}
+                                        <rect x="70" y="180" width="50" height="40" rx="3" fill="#fef08a" stroke="#ca8a04" strokeWidth="1"/>
+                                        <text x="95" y="195" fill="#000" fontSize="7" fontWeight="bold" textAnchor="middle">Thread</text>
+                                        <text x="95" y="205" fill="#000" fontSize="7" textAnchor="middle">0</text>
+                                        <text x="95" y="215" fill="#666" fontSize="6" textAnchor="middle">SP-0</text>
+                                        
+                                        <text x="123" y="200" fill="#666" fontSize="8">...</text>
+                                        
+                                        <rect x="130" y="180" width="50" height="40" rx="3" fill="#fef08a" stroke="#ca8a04" strokeWidth="1"/>
+                                        <text x="155" y="195" fill="#000" fontSize="7" fontWeight="bold" textAnchor="middle">Thread</text>
+                                        <text x="155" y="205" fill="#000" fontSize="7" textAnchor="middle">m-1</text>
+                                        <text x="155" y="215" fill="#666" fontSize="6" textAnchor="middle">SP-m-1</text>
+                                        
+                                        <text x="125" y="235" fill="#666" fontSize="9" fontWeight="bold" textAnchor="middle">Block 0</text>
+                                        
+                                        {/* Block 1 in SM-0 */}
+                                        <rect x="210" y="130" width="130" height="100" rx="4" fill="none" stroke="#666" strokeWidth="2" strokeDasharray="5"/>
+                                        
+                                        {/* Registers for Block 1 */}
+                                        <rect x="220" y="140" width="50" height="25" rx="3" fill="#f97316"/>
+                                        <text x="245" y="157" fill="#000" fontSize="8" fontWeight="bold" textAnchor="middle">Registers</text>
+                                        <rect x="280" y="140" width="50" height="25" rx="3" fill="#f97316"/>
+                                        <text x="305" y="157" fill="#000" fontSize="8" fontWeight="bold" textAnchor="middle">Registers</text>
+                                        
+                                        {/* Arrows */}
+                                        <text x="242" y="175" fill="#000" fontSize="10">↕</text>
+                                        <text x="302" y="175" fill="#000" fontSize="10">↕</text>
+                                        
+                                        {/* Threads for Block 1 */}
+                                        <rect x="220" y="180" width="50" height="40" rx="3" fill="#fef08a" stroke="#ca8a04" strokeWidth="1"/>
+                                        <text x="245" y="195" fill="#000" fontSize="7" fontWeight="bold" textAnchor="middle">Thread</text>
+                                        <text x="245" y="205" fill="#000" fontSize="7" textAnchor="middle">0</text>
+                                        <text x="245" y="215" fill="#666" fontSize="6" textAnchor="middle">SP-m</text>
+                                        
+                                        <text x="273" y="200" fill="#666" fontSize="8">...</text>
+                                        
+                                        <rect x="280" y="180" width="50" height="40" rx="3" fill="#fef08a" stroke="#ca8a04" strokeWidth="1"/>
+                                        <text x="305" y="195" fill="#000" fontSize="7" fontWeight="bold" textAnchor="middle">Thread</text>
+                                        <text x="305" y="205" fill="#000" fontSize="7" textAnchor="middle">m-1</text>
+                                        <text x="305" y="215" fill="#666" fontSize="6" textAnchor="middle">SP-2m-1</text>
+                                        
+                                        <text x="275" y="235" fill="#666" fontSize="9" fontWeight="bold" textAnchor="middle">Block 1</text>
+                                        
+                                        {/* Ellipsis between blocks */}
+                                        <text x="355" y="180" fill="#666" fontSize="14">...</text>
+                                        
+                                        {/* Block n in SM-0 */}
+                                        <rect x="400" y="130" width="130" height="100" rx="4" fill="none" stroke="#666" strokeWidth="2" strokeDasharray="5"/>
+                                        
+                                        {/* Registers for Block n */}
+                                        <rect x="410" y="140" width="50" height="25" rx="3" fill="#f97316"/>
+                                        <text x="435" y="157" fill="#000" fontSize="8" fontWeight="bold" textAnchor="middle">Registers</text>
+                                        <rect x="470" y="140" width="50" height="25" rx="3" fill="#f97316"/>
+                                        <text x="495" y="157" fill="#000" fontSize="8" fontWeight="bold" textAnchor="middle">Registers</text>
+                                        
+                                        {/* Arrows */}
+                                        <text x="432" y="175" fill="#000" fontSize="10">↕</text>
+                                        <text x="492" y="175" fill="#000" fontSize="10">↕</text>
+                                        
+                                        {/* Threads for Block n */}
+                                        <rect x="410" y="180" width="50" height="40" rx="3" fill="#fef08a" stroke="#ca8a04" strokeWidth="1"/>
+                                        <text x="435" y="195" fill="#000" fontSize="7" fontWeight="bold" textAnchor="middle">Thread</text>
+                                        <text x="435" y="205" fill="#000" fontSize="7" textAnchor="middle">0</text>
+                                        <text x="435" y="215" fill="#666" fontSize="5" textAnchor="middle">SP-(n-1)m</text>
+                                        
+                                        <text x="463" y="200" fill="#666" fontSize="8">...</text>
+                                        
+                                        <rect x="470" y="180" width="50" height="40" rx="3" fill="#fef08a" stroke="#ca8a04" strokeWidth="1"/>
+                                        <text x="495" y="195" fill="#000" fontSize="7" fontWeight="bold" textAnchor="middle">Thread</text>
+                                        <text x="495" y="205" fill="#000" fontSize="7" textAnchor="middle">m-1</text>
+                                        <text x="495" y="215" fill="#666" fontSize="5" textAnchor="middle">SP-nm-1</text>
+                                        
+                                        <text x="465" y="235" fill="#666" fontSize="9" fontWeight="bold" textAnchor="middle">Block n</text>
+                                        
+                                        {/* SM-k - green background */}
+                                        <rect x="640" y="60" width="170" height="180" rx="6" fill="#86efac" stroke="#22c55e" strokeWidth="2"/>
+                                        <text x="725" y="80" fill="#000" fontSize="12" fontWeight="bold" textAnchor="middle">SM-k</text>
+                                        
+                                        {/* Shared Memory in SM-k */}
+                                        <rect x="655" y="90" width="140" height="25" rx="4" fill="#f97316"/>
+                                        <text x="725" y="108" fill="#000" fontSize="9" fontWeight="bold" textAnchor="middle">Shared Memory</text>
+                                        
+                                        {/* Registers in SM-k */}
+                                        <rect x="660" y="125" width="55" height="25" rx="3" fill="#f97316"/>
+                                        <text x="687" y="142" fill="#000" fontSize="8" fontWeight="bold" textAnchor="middle">Registers</text>
+                                        <rect x="725" y="125" width="55" height="25" rx="3" fill="#f97316"/>
+                                        <text x="752" y="142" fill="#000" fontSize="8" fontWeight="bold" textAnchor="middle">Registers</text>
+                                        
+                                        {/* Threads in SM-k */}
+                                        <rect x="660" y="165" width="55" height="35" rx="3" fill="#fef08a" stroke="#ca8a04" strokeWidth="1"/>
+                                        <rect x="725" y="165" width="55" height="35" rx="3" fill="#fef08a" stroke="#ca8a04" strokeWidth="1"/>
+                                        
+                                        {/* Dashed block outlines in SM-k */}
+                                        <rect x="655" y="120" width="65" height="90" rx="3" fill="none" stroke="#666" strokeWidth="1" strokeDasharray="3"/>
+                                        <rect x="720" y="120" width="65" height="90" rx="3" fill="none" stroke="#666" strokeWidth="1" strokeDasharray="3"/>
+                                        
+                                        {/* Arrows from SMs to Global Memory */}
+                                        <path d="M 125 240 L 125 275" stroke="#000" strokeWidth="2"/>
+                                        <path d="M 275 240 L 275 275" stroke="#000" strokeWidth="2"/>
+                                        <path d="M 465 240 L 465 275" stroke="#000" strokeWidth="2"/>
+                                        <path d="M 725 240 L 725 275" stroke="#000" strokeWidth="2"/>
+                                        
+                                        {/* Arrow heads */}
+                                        <text x="121" y="270" fill="#000" fontSize="12">↓</text>
+                                        <text x="271" y="270" fill="#000" fontSize="12">↓</text>
+                                        <text x="461" y="270" fill="#000" fontSize="12">↓</text>
+                                        <text x="721" y="270" fill="#000" fontSize="12">↓</text>
+                                        
+                                        {/* Global Memory */}
+                                        <rect x="40" y="280" width="770" height="50" rx="6" fill="#f97316"/>
+                                        <text x="425" y="312" fill="#000" fontSize="14" fontWeight="bold" textAnchor="middle">Global Memory</text>
+                                        
+                                        {/* Arrows to Constant Memory */}
+                                        <path d="M 200 330 L 200 350" stroke="#000" strokeWidth="2"/>
+                                        <path d="M 425 330 L 425 350" stroke="#000" strokeWidth="2"/>
+                                        <path d="M 650 330 L 650 350" stroke="#000" strokeWidth="2"/>
+                                        
+                                        {/* Constant Memory */}
+                                        <rect x="40" y="350" width="770" height="50" rx="6" fill="#f97316"/>
+                                        <text x="425" y="382" fill="#000" fontSize="14" fontWeight="bold" textAnchor="middle">Constant Memory</text>
+                                        
+                                        {/* Host */}
+                                        <rect x="350" y="420" width="150" height="40" rx="6" fill="#bfdbfe" stroke="#3b82f6" strokeWidth="2"/>
+                                        <text x="425" y="447" fill="#000" fontSize="12" fontWeight="bold" textAnchor="middle">HOST</text>
+                                        
+                                        {/* Arrows from memories to host */}
+                                        <path d="M 425 400 L 425 420" stroke="#000" strokeWidth="2" markerEnd="url(#arrowBoth)"/>
+                                        <text x="421" y="415" fill="#000" fontSize="12">↕</text>
+                                    </svg>
+                                </div>
                                 
-                                <div className="multiprocessor">
-                                    <div style={{color: '#fbbf24', marginBottom: '10px'}}>Multiprocessor (SM)</div>
-                                    <div style={{fontSize: '0.85rem', color: '#888'}}>Executes warps in parallel</div>
+                                <div style={{background: 'rgba(59,130,246,0.1)', border: '1px solid #3b82f6', borderRadius: '8px', padding: '15px', marginTop: '15px'}}>
+                                    <strong style={{color: '#3b82f6'}}>Key Concepts:</strong>
+                                    <ul style={{color: '#888', marginTop: '10px', marginLeft: '20px'}}>
+                                        <li><span style={{color: '#fbbf24'}}>Threads</span> execute on Streaming Processors (SP/CUDA Cores) within an SM</li>
+                                        <li><span style={{color: '#f97316'}}>Registers</span> are private to each thread (~1 cycle access)</li>
+                                        <li><span style={{color: '#f97316'}}>Shared Memory</span> is shared among all threads in an SM (~5 cycles)</li>
+                                        <li>Multiple <span style={{color: '#666'}}>Blocks</span> can run concurrently on the same SM (resource permitting)</li>
+                                        <li><span style={{color: '#f97316'}}>Global/Constant Memory</span> is accessible by all threads across all SMs (~500 cycles)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            {/* GPU Memory Scope Reference Table */}
+                            <div style={{marginTop: '40px', marginBottom: '30px'}}>
+                                <h3 style={{color: '#a855f7', marginBottom: '15px', fontSize: '1.1rem'}}>GPU Memory Scope Reference (NVIDIA/CUDA-style)</h3>
+                                <div style={{overflowX: 'auto'}}>
+                                    <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem'}}>
+                                        <thead>
+                                            <tr style={{background: 'rgba(168,85,247,0.2)'}}>
+                                                <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #a855f7', color: '#a855f7'}}>Memory / Storage</th>
+                                                <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #a855f7', color: '#a855f7'}}>Scope (who can access)</th>
+                                                <th style={{padding: '12px', textAlign: 'left', borderBottom: '2px solid #a855f7', color: '#a855f7'}}>Lifetime / Visibility Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr style={{borderBottom: '1px solid #333'}}>
+                                                <td style={{padding: '10px', color: '#00ff88', fontWeight: '600'}}>Registers</td>
+                                                <td style={{padding: '10px', color: '#888'}}>Per-thread</td>
+                                                <td style={{padding: '10px', color: '#888'}}>Private to a thread. Spills go to "local memory" (in DRAM, cached).</td>
+                                            </tr>
+                                            <tr style={{borderBottom: '1px solid #333', background: 'rgba(255,255,255,0.02)'}}>
+                                                <td style={{padding: '10px', color: '#fbbf24', fontWeight: '600'}}>Local memory (spills / thread-local arrays)</td>
+                                                <td style={{padding: '10px', color: '#888'}}>Per-thread address space, physically in <span style={{color: '#f97316'}}>HBM/GDDR</span> (via L2/L1)</td>
+                                                <td style={{padding: '10px', color: '#888'}}>Not a separate physical memory. Other threads can't directly address your "local" variables.</td>
+                                            </tr>
+                                            <tr style={{borderBottom: '1px solid #333'}}>
+                                                <td style={{padding: '10px', color: '#f97316', fontWeight: '600'}}>Shared memory (scratchpad)</td>
+                                                <td style={{padding: '10px', color: '#888'}}><span style={{color: '#fbbf24'}}>Per-block (CTA)</span> on one SM at a time</td>
+                                                <td style={{padding: '10px', color: '#888'}}>Shared by threads in the same block. Exists for the duration of the block. Not visible to other blocks.</td>
+                                            </tr>
+                                            <tr style={{borderBottom: '1px solid #333', background: 'rgba(255,255,255,0.02)'}}>
+                                                <td style={{padding: '10px', color: '#3b82f6', fontWeight: '600'}}>L1 data cache</td>
+                                                <td style={{padding: '10px', color: '#888'}}>Per-SM</td>
+                                                <td style={{padding: '10px', color: '#888'}}>Shared by warps running on the same SM. <span style={{color: '#ff6b6b'}}>Not coherently shared across SMs.</span></td>
+                                            </tr>
+                                            <tr style={{borderBottom: '1px solid #333'}}>
+                                                <td style={{padding: '10px', color: '#3b82f6', fontWeight: '600'}}>Read-only / texture cache path</td>
+                                                <td style={{padding: '10px', color: '#888'}}>Per-SM</td>
+                                                <td style={{padding: '10px', color: '#888'}}>Caching for read-only accesses; still per-SM in scope.</td>
+                                            </tr>
+                                            <tr style={{borderBottom: '1px solid #333', background: 'rgba(255,255,255,0.02)'}}>
+                                                <td style={{padding: '10px', color: '#00d4ff', fontWeight: '600'}}>Constant memory (constant cache)</td>
+                                                <td style={{padding: '10px', color: '#888'}}><span style={{color: '#fbbf24'}}>Device-wide data</span>, per-SM cached</td>
+                                                <td style={{padding: '10px', color: '#888'}}>All threads can read the same constant memory region; cache is per-SM and optimized for warp broadcast. Writes are host-side.</td>
+                                            </tr>
+                                            <tr style={{borderBottom: '1px solid #333'}}>
+                                                <td style={{padding: '10px', color: '#9ca3af', fontWeight: '600'}}>L2 cache</td>
+                                                <td style={{padding: '10px', color: '#888'}}><span style={{color: '#22c55e'}}>Device-wide (all SMs)</span></td>
+                                                <td style={{padding: '10px', color: '#888'}}>Shared across all SMs. Caches global memory and other traffic. Still a cache (lines can be evicted).</td>
+                                            </tr>
+                                            <tr style={{borderBottom: '1px solid #333', background: 'rgba(255,255,255,0.02)'}}>
+                                                <td style={{padding: '10px', color: '#f97316', fontWeight: '600'}}>Global memory (HBM/GDDR device DRAM)</td>
+                                                <td style={{padding: '10px', color: '#888'}}><span style={{color: '#22c55e'}}>Device-wide (all SMs, all kernels)</span></td>
+                                                <td style={{padding: '10px', color: '#888'}}>This is what CUDA calls "global memory." Persistent across kernels until freed.</td>
+                                            </tr>
+                                            <tr style={{borderBottom: '1px solid #333'}}>
+                                                <td style={{padding: '10px', color: '#a855f7', fontWeight: '600'}}>Unified / Managed memory (UVM)</td>
+                                                <td style={{padding: '10px', color: '#888'}}>System-wide virtual address space (CPU + GPU)</td>
+                                                <td style={{padding: '10px', color: '#888'}}>Physically migrates between CPU DRAM and GPU DRAM (and can oversubscribe). Visibility depends on synchronization.</td>
+                                            </tr>
+                                            <tr style={{borderBottom: '1px solid #333', background: 'rgba(255,255,255,0.02)'}}>
+                                                <td style={{padding: '10px', color: '#a855f7', fontWeight: '600'}}>Host pinned memory (page-locked)</td>
+                                                <td style={{padding: '10px', color: '#888'}}><span style={{color: '#3b82f6'}}>CPU memory</span>, GPU can DMA access</td>
+                                                <td style={{padding: '10px', color: '#888'}}>Enables faster H2D/D2H and sometimes "zero-copy" reads by GPU (still high latency vs DRAM on GPU).</td>
+                                            </tr>
+                                            <tr style={{borderBottom: '1px solid #333'}}>
+                                                <td style={{padding: '10px', color: '#22c55e', fontWeight: '600'}}>Peer GPU memory (NVLink/PCIe P2P)</td>
+                                                <td style={{padding: '10px', color: '#888'}}>Another GPU's global memory (if P2P enabled)</td>
+                                                <td style={{padding: '10px', color: '#888'}}>GPU can access remote GPU DRAM; higher latency than local HBM/GDDR.</td>
+                                            </tr>
+                                            <tr style={{borderBottom: '2px solid #ff6b6b', background: 'rgba(255,107,107,0.1)'}}>
+                                                <td style={{padding: '10px', color: '#ff6b6b', fontWeight: '600'}}>Storage (NVMe/SSD)</td>
+                                                <td style={{padding: '10px', color: '#888'}}>System-wide</td>
+                                                <td style={{padding: '10px', color: '#888'}}>Not GPU memory, but relevant for data/IO; can be accessed via <span style={{color: '#00ff88'}}>GPUDirect Storage</span> in some stacks.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div style={{background: 'rgba(255,107,107,0.1)', border: '1px solid #ff6b6b', borderRadius: '8px', padding: '15px', marginTop: '20px'}}>
+                                    <strong style={{color: '#ff6b6b'}}>One subtle but important point:</strong>
+                                    <p style={{color: '#888', marginTop: '10px'}}>
+                                        "Shared across SMs" applies to L2 + device DRAM, but <strong style={{color: '#fbbf24'}}>coherence/visibility</strong> still depends on memory model + synchronization. 
+                                        In practice: assume <span style={{color: '#ff6b6b'}}>L1 is not coherent across SMs</span>, and <strong style={{color: '#22c55e'}}>global visibility</strong> comes from 
+                                        L2/DRAM plus proper sync (kernel boundaries, atomics, fences, etc.).
+                                    </p>
                                 </div>
                             </div>
 
@@ -473,7 +1476,7 @@
                                 <div className="schedule-box">
                                     <div className="schedule-title cpu">CPU Core &ndash; Low Latency Processor</div>
                                     <div className="timeline">
-                                        {['T�', 'T�‚', 'T�ƒ', 'T�„'].map((t, idx) => (
+                                        {['T1', 'T2', 'T3', 'T4'].map((t, idx) => (
                                             <div key={idx} className="timeline-row">
                                                 <span className="timeline-label">{t}</span>
                                                 <div className="timeline-bar">
@@ -521,7 +1524,7 @@
                                 <div className="schedule-box">
                                     <div className="schedule-title gpu">GPU SM &ndash; High Throughput Processor</div>
                                     <div className="timeline">
-                                        {['W�', 'W�‚', 'W�ƒ', 'W�„'].map((w, idx) => (
+                                        {['W1', 'W2', 'W3', 'W4'].map((w, idx) => (
                                             <div key={idx} className="timeline-row">
                                                 <span className="timeline-label">{w}</span>
                                                 <div className="timeline-bar">
@@ -557,9 +1560,9 @@
                             </div>
                         </div>
 
-                        {/* Page 9: SIMT Architecture */}
+                        
                         <div className="section">
-                            <h2 className="section-title">GPUs SIMT Architecture (Page 9)</h2>
+                            <h2 className="section-title">GPUs SIMT Architecture</h2>
                             
                             <div style={{marginBottom: '20px', lineHeight: '1.8'}}>
                                 <p>&bull; GPUs execute groups of threads known as <strong style={{color: '#00ff88'}}>warps/waves</strong> in <strong style={{color: '#fbbf24'}}>SIMT (Single Instruction, Multiple Thread)</strong> fashion.</p>
@@ -586,7 +1589,7 @@
                             <div className="key-point">
                                 <strong>Key Insight:</strong> When warps are submitted to NVMe SSDs, they get scattered across multiple SQ/CQ pairs to enable parallel execution and allow GPUs to operate on Next Warp. <br/>
                                 <span style={{color: '#ff6b6b', marginTop: '10px', display: 'block'}}>
-                                    [!]  NVMe SQ/CQ pairs design needs to align better with GPU scheduling
+                                      NVMe SQ/CQ pairs design needs to align better with GPU scheduling
                                 </span>
                             </div>
                         </div>
@@ -676,6 +1679,47 @@
                             </div>
                         </div>
 
+                        {/* Interactive Animation Link */}
+                        <div className="section" style={{background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(0,212,255,0.1) 100%)', border: '2px solid #00ff88', borderRadius: '16px', padding: '30px', textAlign: 'center'}}>
+                            <h2 className="section-title" style={{color: '#00ff88'}}>Interactive Animation: See It In Action</h2>
+                            <p style={{color: '#888', marginBottom: '20px', maxWidth: '600px', margin: '0 auto 20px'}}>
+                                Watch how thread blocks are assigned to SMs and how the warp scheduler hides latency by switching between warps. See what happens when all warps stall on I/O!
+                            </p>
+                            <a 
+                                href="cuda_animation.html" 
+                                style={{
+                                    display: 'inline-block',
+                                    padding: '15px 40px',
+                                    background: 'linear-gradient(135deg, #00ff88, #00d4ff)',
+                                    color: '#000',
+                                    textDecoration: 'none',
+                                    borderRadius: '10px',
+                                    fontWeight: '700',
+                                    fontSize: '1.1rem',
+                                    transition: 'transform 0.3s, box-shadow 0.3s',
+                                    boxShadow: '0 4px 20px rgba(0,255,136,0.3)'
+                                }}
+                                onMouseOver={(e) => { e.target.style.transform = 'scale(1.05)'; e.target.style.boxShadow = '0 6px 30px rgba(0,255,136,0.5)'; }}
+                                onMouseOut={(e) => { e.target.style.transform = 'scale(1)'; e.target.style.boxShadow = '0 4px 20px rgba(0,255,136,0.3)'; }}
+                            >
+                                ▶ Launch Animation
+                            </a>
+                            <div style={{marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '30px', flexWrap: 'wrap'}}>
+                                <div style={{textAlign: 'center'}}>
+                                    <div style={{fontSize: '2rem'}}>📦</div>
+                                    <div style={{color: '#888', fontSize: '0.85rem'}}>Block Assignment</div>
+                                </div>
+                                <div style={{textAlign: 'center'}}>
+                                    <div style={{fontSize: '2rem'}}>⚡</div>
+                                    <div style={{color: '#888', fontSize: '0.85rem'}}>Warp Scheduling</div>
+                                </div>
+                                <div style={{textAlign: 'center'}}>
+                                    <div style={{fontSize: '2rem'}}>🔄</div>
+                                    <div style={{color: '#888', fontSize: '0.85rem'}}>Latency Hiding</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="nav-buttons">
                             <a href="01_motivation.html" className="nav-btn">&larr; Previous: Motivation</a>
                             <a href="03_sync_problem.html" className="nav-btn">Next: Thread Sync Crisis &rarr;</a>
@@ -687,5 +1731,3 @@
 
         ReactDOM.render(<App />, document.getElementById('root'));
     </script>
-</body>
-</html>
