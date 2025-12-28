@@ -6,281 +6,449 @@
     <title>Expert Storage Guide - 30 Years of Storage Wisdom for GPU-NVMe</title>
     <style>
         :root {
-            --bg-void: #030308;
-            --bg-deep: #0a0a12;
-            --bg-surface: #12121c;
-            --bg-elevated: #1a1a28;
-            --text-primary: #e4e4ed;
-            --text-secondary: #9494a8;
-            --text-muted: #5c5c72;
-            --accent-cyber: #00ffaa;
-            --accent-electric: #00d4ff;
-            --accent-plasma: #a855f7;
-            --accent-solar: #fbbf24;
-            --accent-ember: #ff6b6b;
-            --gradient-cyber: linear-gradient(135deg, #00ffaa 0%, #00d4ff 100%);
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent-blue: #4a9eff;
+            --accent-green: #4ade80;
+            --accent-yellow: #fbbf24;
+            --accent-red: #f87171;
+            --accent-purple: #a78bfa;
+            --accent-cyan: #22d3ee;
+            --border-color: #2a2a3a;
+            --code-bg: #1e1e2e;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-void);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.7;
+            padding: 40px 20px;
         }
-
-        .nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 64px;
-            background: rgba(3, 3, 8, 0.9);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 40px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .nav-header a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .nav-header a:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border-radius: 16px;
+            margin-bottom: 50px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .hero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .section {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: var(--accent-blue);
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0 40px;
-            z-index: 100;
+            gap: 12px;
         }
-
-        .nav a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .nav a:hover { color: var(--accent-cyber); }
-        .nav-title { color: var(--text-primary); font-weight: 600; }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 100px 24px 80px;
-        }
-
-        .page-header {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-
-        .page-number {
-            font-size: 6rem;
-            font-weight: 900;
-            line-height: 1;
-            background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: -30px;
-        }
-
-        .page-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: var(--gradient-cyber);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 16px;
-        }
-
-        .page-subtitle {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .section {
-            background: var(--bg-surface);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 20px;
-            padding: 40px;
-            margin-bottom: 32px;
-        }
-
-        .section-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--accent-solar);
-            margin-bottom: 24px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(251, 191, 36, 0.2);
-        }
-
-        .subsection-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--accent-cyber);
-            margin: 24px 0 12px;
-        }
-
-        h2 { color: var(--accent-solar); margin: 32px 0 16px; }
-        h3 { color: var(--accent-cyber); margin: 24px 0 12px; }
-        h4 { color: var(--accent-electric); margin: 20px 0 10px; }
-
-        p { color: var(--text-secondary); margin-bottom: 16px; }
         
-        ul, ol { color: var(--text-secondary); margin: 16px 0 16px 24px; }
-        li { margin-bottom: 8px; }
-
-        a { color: var(--accent-electric); }
-        a:hover { color: var(--accent-cyber); }
-
-        strong { color: var(--text-primary); }
-        em { color: var(--accent-plasma); font-style: normal; }
-
-        .code-block, pre {
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 12px;
+        .subsection-title {
+            font-size: 1.4rem;
+            margin: 30px 0 20px 0;
+            color: var(--accent-green);
+            border-left: 4px solid var(--accent-green);
+            padding-left: 15px;
+        }
+        
+        .sub-subsection {
+            font-size: 1.15rem;
+            margin: 25px 0 15px 0;
+            color: var(--accent-yellow);
+        }
+        
+        p {
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+        
+        .info-box {
+            padding: 20px 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .info-box.veteran {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 165, 0, 0.1));
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .info-box.warning {
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 4px solid var(--accent-yellow);
+        }
+        
+        .info-box.success {
+            background: rgba(74, 222, 128, 0.1);
+            border-left: 4px solid var(--accent-green);
+        }
+        
+        .info-box.critical {
+            background: rgba(248, 113, 113, 0.1);
+            border-left: 4px solid var(--accent-red);
+        }
+        
+        .info-box.insight {
+            background: rgba(74, 158, 255, 0.1);
+            border-left: 4px solid var(--accent-blue);
+        }
+        
+        pre {
+            background: var(--code-bg);
+            border-radius: 10px;
             padding: 20px;
-            margin: 16px 0;
             overflow-x: auto;
-            font-family: 'JetBrains Mono', 'Consolas', monospace;
-            font-size: 0.85rem;
-            line-height: 1.6;
-            white-space: pre;
-            color: #e6edf3;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
         }
-
+        
         code {
-            background: rgba(255,255,255,0.1);
-            padding: 2px 6px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .inline-code {
+            background: var(--bg-tertiary);
+            padding: 2px 8px;
             border-radius: 4px;
-            font-family: 'JetBrains Mono', 'Consolas', monospace;
-            font-size: 0.9em;
-            color: var(--accent-cyber);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+            color: var(--accent-cyan);
         }
-
-        pre code {
-            background: none;
-            padding: 0;
-            color: inherit;
-        }
-
+        
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
-            background: var(--bg-elevated);
-            border-radius: 12px;
-            overflow: hidden;
+            font-size: 0.95rem;
         }
-
-        th {
-            background: rgba(0, 255, 170, 0.1);
-            color: var(--accent-cyber);
+        
+        th, td {
             padding: 14px 16px;
             text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            background: var(--bg-tertiary);
+            color: var(--accent-blue);
             font-weight: 600;
-            border-bottom: 2px solid rgba(0, 255, 170, 0.2);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
         }
-
-        td {
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            color: var(--text-secondary);
+        
+        tr:hover {
+            background: var(--bg-tertiary);
         }
-
-        tr:hover { background: rgba(255,255,255,0.02); }
-
-        .info-box, .warning-box, .note-box {
-            padding: 20px 24px;
+        
+        .good { color: var(--accent-green); font-weight: 600; }
+        .medium { color: var(--accent-yellow); font-weight: 600; }
+        .poor { color: var(--accent-red); font-weight: 600; }
+        
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+        
+        .card {
+            background: var(--bg-tertiary);
             border-radius: 12px;
-            margin: 20px 0;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-
-        .warning-box {
-            background: rgba(255, 107, 107, 0.1);
-            border-left: 4px solid var(--accent-ember);
+        
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
-
-        .info-box {
-            background: rgba(0, 212, 255, 0.1);
-            border-left: 4px solid var(--accent-electric);
-        }
-
-        .note-box, .success-box {
-            background: rgba(0, 255, 170, 0.1);
-            border-left: 4px solid var(--accent-cyber);
-        }
-
-        .nav-footer {
+        
+        .card-header {
             display: flex;
             justify-content: space-between;
-            margin-top: 48px;
-            padding-top: 32px;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            align-items: flex-start;
+            margin-bottom: 15px;
         }
-
-        .nav-btn {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 20px;
-            background: var(--bg-surface);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            color: var(--text-primary);
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .nav-btn:hover {
-            border-color: var(--accent-cyber);
-            background: var(--bg-elevated);
+        
+        .card-title {
+            font-size: 1.1rem;
             color: var(--text-primary);
         }
-
-        .expert-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: linear-gradient(135deg, #ff6b6b 0%, #fbbf24 100%);
-            color: #000;
-            padding: 6px 14px;
-            border-radius: 20px;
+        
+        .card-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 16px;
         }
-
-        /* Emoji fixes */
-        .emoji { font-style: normal; }
-
+        
+        .badge-production { background: rgba(74, 222, 128, 0.2); color: var(--accent-green); }
+        .badge-experimental { background: rgba(251, 191, 36, 0.2); color: var(--accent-yellow); }
+        .badge-critical { background: rgba(248, 113, 113, 0.2); color: var(--accent-red); }
+        .badge-expert { background: rgba(167, 139, 250, 0.2); color: var(--accent-purple); }
+        
+        .card-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+        
+        .card-specs {
+            list-style: none;
+        }
+        
+        .card-specs li {
+            padding: 6px 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .card-specs li:last-child {
+            border-bottom: none;
+        }
+        
+        .architecture-diagram {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 25px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+        }
+        
+        .comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+        
+        .comparison-side {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .toc {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        
+        .toc h3 {
+            color: var(--accent-blue);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        
+        .toc a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: block;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        
+        .toc a:hover {
+            background: var(--bg-secondary);
+            color: var(--accent-cyan);
+            border-left-color: var(--accent-cyan);
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .metric-card {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+        
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            margin: 25px 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border-color);
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+            padding-left: 20px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 6px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+        }
+        
+        .timeline-date {
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+        
+        .timeline-title {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin: 5px 0;
+        }
+        
+        .timeline-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
         @media (max-width: 768px) {
-            .nav { padding: 0 20px; }
-            .container { padding: 80px 16px 60px; }
-            .section { padding: 24px; }
-            .page-title { font-size: 1.8rem; }
-            .nav-footer { flex-direction: column; gap: 12px; }
+            .hero h1 { font-size: 2rem; }
+            .section { padding: 25px; }
+            .cards-grid { grid-template-columns: 1fr; }
         }
-</style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    </style>
 </head>
 <body>
     <div class="container">
         <nav class="nav-header">
-            <a href="index.html">â† Home</a>
+            <a href="index.html">&larr; Home</a>
             <span style="color: var(--text-secondary);">Expert Storage Guide</span>
-            <a href="11_ml_frameworks.html">ML Frameworks â†’</a>
+            <a href="11_ml_frameworks.html">ML Frameworks &rarr;</a>
         </nav>
 
         <div class="hero">
-            <span class="hero-badge">ðŸ† 30 Years of Storage Expertise</span>
+            <span class="hero-badge">† 35 Years of Storage Expertise</span>
             <h1>Expert Storage Guide for GPU-NVMe Integration</h1>
             <p>Hard-won lessons from SCSI to SAS to NVMe. What actually matters for AI workloads, 
             and the mistakes I've seen companies make repeatedly over three decades.</p>
         </div>
 
         <div class="toc">
-            <h3>ðŸ“‘ Expert Topics Covered</h3>
+            <h3>“‘ Expert Topics Covered</h3>
             <div class="toc-grid">
                 <a href="#ml-frameworks">ML Framework Storage Patterns</a>
                 <a href="#distributed-training">Distributed Training I/O</a>
@@ -295,10 +463,10 @@
 
         <!-- Critical: Data Placement Truth Table -->
         <section class="section" style="border: 2px solid #ff6b6b;">
-            <h2 class="section-title" style="color: #ff6b6b;">âš ï¸ Critical: Where Data Actually Belongs</h2>
+            <h2 class="section-title" style="color: #ff6b6b;">[!]  Critical: Where Data Actually Belongs</h2>
             
             <div class="info-box veteran">
-                <strong>ðŸŽ–ï¸ The #1 Mistake:</strong> Treating SSDs like they're fast RAM. They're not. 
+                <strong>🎖️ The #1 Mistake:</strong> Treating SSDs like they're fast RAM. They're not. 
                 This table shows what goes where. Get this wrong and no amount of GDS or optimization will save you.
             </div>
 
@@ -383,30 +551,30 @@
                     <tr style="border-bottom: 1px solid #333;">
                         <td style="padding: 12px;">Local NVMe SSD</td>
                         <td style="padding: 12px;">4KB+ (practical)</td>
-                        <td style="padding: 12px; color: #ff6b6b;">70-150 µs</td>
+                        <td style="padding: 12px; color: #ff6b6b;">70-150 &micro;s</td>
                         <td style="padding: 12px;">6-14 GB/s</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #333;">
                         <td style="padding: 12px;">NVMe-oF (RDMA)</td>
                         <td style="padding: 12px;">4KB+</td>
-                        <td style="padding: 12px; color: #ff6b6b;">120-200 µs</td>
+                        <td style="padding: 12px; color: #ff6b6b;">120-200 &micro;s</td>
                         <td style="padding: 12px;">25-100 GB/s (fabric)</td>
                     </tr>
                 </tbody>
             </table>
 
             <div class="info-box" style="background: #1a2a1a; border-left: 4px solid #00ff88;">
-                <strong style="color: #00ff88;">✓ Key Insight:</strong> The gap between HBM (~100ns) and NVMe (~100µs) is 
+                <strong style="color: #00ff88;">[OK]  Key Insight:</strong> The gap between HBM (~100ns) and NVMe (~100&micro;s) is 
                 <strong>1000x</strong>. No software optimization bridges this. Design your data placement correctly first.
             </div>
         </section>
 
         <!-- Section 1: ML Framework Storage Patterns -->
         <section class="section" id="ml-frameworks">
-            <h2 class="section-title">ðŸ§  ML Framework Storage Patterns</h2>
+            <h2 class="section-title">§  ML Framework Storage Patterns</h2>
             
             <div class="info-box veteran">
-                <strong>ðŸŽ–ï¸ 30-Year Veteran Insight:</strong> Every ML framework thinks it's special. They're not. 
+                <strong>🎖️ 35-Year Veteran Insight:</strong> Every ML framework thinks it's special. They're not. 
                 Underneath the Python wrappers, they all do the same thing: stream large sequential reads for training data, 
                 random reads for inference, and massive checkpoint writes. The storage doesn't care if it's PyTorch or TensorFlow.
                 What matters is understanding <em>when</em> they access storage and <em>how much</em> they buffer.
@@ -455,9 +623,9 @@ loader = DataLoader(
 )</code></pre>
 
             <div class="info-box warning">
-                <strong>âš ï¸ Critical PyTorch Pitfall:</strong> Using <code class="inline-code">num_workers > 0</code> with GDS 
+                <strong>[!]  Critical PyTorch Pitfall:</strong> Using <code class="inline-code">num_workers > 0</code> with GDS 
                 will silently fall back to CPU bounce buffers. Each worker creates a new process without GPU context inheritance.
-                I've seen teams wonder why their "GDS-enabled" training was still slow — this was why.
+                I've seen teams wonder why their "GDS-enabled" training was still slow &mdash; this was why.
             </div>
 
             <h3 class="subsection-title">TensorFlow Storage Patterns</h3>
@@ -576,9 +744,9 @@ STORAGE_FORMAT_GUIDE = {
             <h3 class="subsection-title">DeepSpeed Storage Patterns</h3>
             
             <div class="info-box critical">
-                <strong>ðŸš¨ DeepSpeed is Critical for LLM Training:</strong> If you're training models > 10B parameters, 
+                <strong>🚨 DeepSpeed is Critical for LLM Training:</strong> If you're training models > 10B parameters, 
                 you're almost certainly using DeepSpeed or FSDP. DeepSpeed's ZeRO stages fundamentally change storage 
-                access patterns — understanding this is non-negotiable.
+                access patterns &mdash; understanding this is non-negotiable.
             </div>
 
             <pre><code><span style="color: #6a9955;"># DeepSpeed ZeRO-3 with NVMe offload configuration</span>
@@ -685,7 +853,7 @@ python pretrain_gpt.py \
     --split 98,1,1                  <span style="color: #6a9955;"># Train/valid/test split</span></code></pre>
 
             <div class="info-box insight">
-                <strong>💡 Megatron Storage Secret:</strong> Megatron's <code class="inline-code">mmap</code> implementation 
+                <strong>’¡ Megatron Storage Secret:</strong> Megatron's <code class="inline-code">mmap</code> implementation 
                 is actually brilliant for NVMe. It lets the kernel's page cache and readahead do the buffering, which works 
                 well for sequential training access. But for inference with random access patterns, you want 
                 <code class="inline-code">O_DIRECT</code> to bypass the page cache.
@@ -695,10 +863,10 @@ python pretrain_gpt.py \
 
         <!-- Section 2: Distributed Training Storage -->
         <section class="section" id="distributed-training">
-            <h2 class="section-title">🌐 Distributed Training Storage Patterns</h2>
+            <h2 class="section-title">Œ Distributed Training Storage Patterns</h2>
             
             <div class="info-box veteran">
-                <strong>ðŸŽ–ï¸ Hard-Won Lesson:</strong> In 35 years, I've watched storage become the #1 bottleneck 
+                <strong>🎖️ Hard-Won Lesson:</strong> In 35 years, I've watched storage become the #1 bottleneck 
                 as compute scaled. In the 90s, CPUs waited on disk. In the 2010s, we "fixed" it with SSDs. 
                 Now with 8-GPU nodes doing 10 PFLOPS, storage is the bottleneck again. 
                 The patterns below are battle-tested solutions.
@@ -709,21 +877,21 @@ python pretrain_gpt.py \
             <div class="architecture-diagram">
 <span style="color: var(--accent-cyan);">Data Parallel Training - Storage Access Pattern</span>
 
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                          SHARED STORAGE (NVMe-oF or Parallel FS)           â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
-â”‚  â”‚  Shard 0    â”‚  Shard 1    â”‚  Shard 2    â”‚  Shard 3    â”‚  Shard N    â”‚   â”‚
-â”‚  â”‚  (GPU 0)    â”‚  (GPU 1)    â”‚  (GPU 2)    â”‚  (GPU 3)    â”‚  (GPU N)    â”‚   â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜   â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”‚â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-          â”‚             â”‚             â”‚             â”‚             â”‚
-          â–¼             â–¼             â–¼             â–¼             â–¼
-    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-    â”‚  GPU 0  â”‚   â”‚  GPU 1  â”‚   â”‚  GPU 2  â”‚   â”‚  GPU 3  â”‚   â”‚  GPU N  â”‚
-    â”‚ Worker  â”‚   â”‚ Worker  â”‚   â”‚ Worker  â”‚   â”‚ Worker  â”‚   â”‚ Worker  â”‚
-    â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜   â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜
-         â”‚             â”‚             â”‚             â”‚             â”‚
-         â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ AllReduce (NVLink/IB) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
++ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
+-                          SHARED STORAGE (NVMe-oF or Parallel FS)           -
+-  + -  -  -  -  -  -  -  -  -  -  -  -  - + -  -  -  -  -  -  -  -  -  -  -  -  - + -  -  -  -  -  -  -  -  -  -  -  -  - + -  -  -  -  -  -  -  -  -  -  -  -  - + -  -  -  -  -  -  -  -  -  -  -  -  - |   -
+-  -  Shard 0    -  Shard 1    -  Shard 2    -  Shard 3    -  Shard N    -   -
+-  -  (GPU 0)    -  (GPU 1)    -  (GPU 2)    -  (GPU 3)    -  (GPU N)    -   -
+-  - -  -  -  -  -  - + -  -  -  -  -  - �´ -  -  -  -  -  - + -  -  -  -  -  - �´ -  -  -  -  -  - + -  -  -  -  -  - �´ -  -  -  -  -  - + -  -  -  -  -  - �´ -  -  -  -  -  - + -  -  -  -  -  - |   -
+- -  -  -  -  -  -  -  -  - - -  -  -  -  -  -  -  -  -  -  -  -  - - -  -  -  -  -  -  -  -  -  -  -  -  - - -  -  -  -  -  -  -  -  -  -  -  -  - - -  -  -  -  -  -  -  -  -  -  -  -  - - -  -  -  -  -  -  -  -  -  - |
+          -             -             -             -             -
+          dash;¼             dash;¼             dash;¼             dash;¼             dash;¼
+    + -  -  -  -  -  -  -  -  - |   + -  -  -  -  -  -  -  -  - |   + -  -  -  -  -  -  -  -  - |   + -  -  -  -  -  -  -  -  - |   + -  -  -  -  -  -  -  -  - |
+    -  GPU 0  -   -  GPU 1  -   -  GPU 2  -   -  GPU 3  -   -  GPU N  -
+    - Worker  -   - Worker  -   - Worker  -   - Worker  -   - Worker  -
+    - -  -  -  - + -  -  -  - |   - -  -  -  - + -  -  -  - |   - -  -  -  - + -  -  -  - |   - -  -  -  - + -  -  -  - |   - -  -  -  - + -  -  -  - |
+         -             -             -             -             -
+         - -  -  -  -  -  -  -  -  -  -  -  -  AllReduce (NVLink/IB)  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
 
 <span style="color: var(--accent-yellow);">Key Storage Insight:</span> Each GPU reads DIFFERENT data (no overlap)
 - Perfect for parallel file systems - no lock contention
@@ -763,18 +931,18 @@ python pretrain_gpt.py \
 Recommended directory structure:
 
 /data/
-  â”œâ”€â”€ shard_manifest.json      # Maps file â†’ shard assignment
-  â”œâ”€â”€ epoch_0/
-  â”‚   â”œâ”€â”€ rank_0/
-  â”‚   â”‚   â”œâ”€â”€ batch_0000.bin   # Pre-sharded for rank 0
-  â”‚   â”‚   â”œâ”€â”€ batch_0001.bin
-  â”‚   â”‚   â””â”€â”€ ...
-  â”‚   â”œâ”€â”€ rank_1/
-  â”‚   â”‚   â”œâ”€â”€ batch_0000.bin
-  â”‚   â”‚   â””â”€â”€ ...
-  â”‚   â””â”€â”€ ...
-  â””â”€â”€ epoch_1/
-      â””â”€â”€ ... (reshuffled)
+  + -  -  shard_manifest.json      # Maps file &rarr; shard assignment
+  + -  -  epoch_0/
+  -   + -  -  rank_0/
+  -   -   + -  -  batch_0000.bin   # Pre-sharded for rank 0
+  -   -   + -  -  batch_0001.bin
+  -   -   - -  -  ...
+  -   + -  -  rank_1/
+  -   -   + -  -  batch_0000.bin
+  -   -   - -  -  ...
+  -   - -  -  ...
+  - -  -  epoch_1/
+      - -  -  ... (reshuffled)
 
 Benefits:
 - No cross-rank I/O contention
@@ -787,20 +955,20 @@ Benefits:
             <div class="architecture-diagram">
 <span style="color: var(--accent-cyan);">Tensor Parallel - Checkpoint Storage Challenge</span>
 
-                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                    â”‚          Full Model Layer         â”‚
-                    â”‚    Weight Matrix: [H × 4H]        â”‚
-                    â”‚    e.g., 12288 × 49152 = 2.4GB    â”‚
-                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                    â”‚
-              â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-              â–¼                     â–¼                     â–¼
-   â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-   â”‚   GPU 0 Shard    â”‚  â”‚   GPU 1 Shard    â”‚  â”‚   GPU 2 Shard    â”‚
-   â”‚  [H × 4H/TP]     â”‚  â”‚  [H × 4H/TP]     â”‚  â”‚  [H × 4H/TP]     â”‚
-   â”‚   12288 × 16384  â”‚  â”‚   12288 × 16384  â”‚  â”‚   12288 × 16384  â”‚
-   â”‚     ~800 MB      â”‚  â”‚     ~800 MB      â”‚  â”‚     ~800 MB      â”‚
-   â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                    + -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
+                    -          Full Model Layer         -
+                    -    Weight Matrix: [H &times; 4H]        -
+                    -    e.g., 12288 &times; 49152 = 2.4GB    -
+                    - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
+                                    -
+              + -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - �¼ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
+              dash;¼                     dash;¼                     dash;¼
+   + -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |  + -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |  + -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
+   -   GPU 0 Shard    -  -   GPU 1 Shard    -  -   GPU 2 Shard    -
+   -  [H &times; 4H/TP]     -  -  [H &times; 4H/TP]     -  -  [H &times; 4H/TP]     -
+   -   12288 &times; 16384  -  -   12288 &times; 16384  -  -   12288 &times; 16384  -
+   -     ~800 MB      -  -     ~800 MB      -  -     ~800 MB      -
+   - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |  - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |  - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
 
 <span style="color: var(--accent-red);">Checkpoint Challenge:</span>
 - Save sharded? Fast but requires same TP degree to load
@@ -933,35 +1101,35 @@ CHECKPOINT_FREQUENCY_GUIDE = {
                     <tr>
                         <td><strong>FSDP Full State</strong></td>
                         <td>Single consolidated file</td>
-                        <td class="good">1× model size</td>
+                        <td class="good">1&times; model size</td>
                         <td class="poor">Slow (gather required)</td>
                         <td>Inference export</td>
                     </tr>
                     <tr>
                         <td><strong>FSDP Sharded State</strong></td>
                         <td>One file per rank</td>
-                        <td class="good">1× model size total</td>
+                        <td class="good">1&times; model size total</td>
                         <td class="good">Fast parallel load</td>
                         <td>Training resume</td>
                     </tr>
                     <tr>
                         <td><strong>DeepSpeed Universal</strong></td>
                         <td>Sharded + metadata</td>
-                        <td class="medium">~1.1× (metadata overhead)</td>
+                        <td class="medium">~1.1&times; (metadata overhead)</td>
                         <td class="good">Any topology load</td>
                         <td>Cross-cluster migration</td>
                     </tr>
                     <tr>
                         <td><strong>Megatron Distributed</strong></td>
-                        <td>TP×PP files</td>
-                        <td class="good">1× model size</td>
+                        <td>TP&times;PP files</td>
+                        <td class="good">1&times; model size</td>
                         <td class="medium">Requires same topology</td>
                         <td>Large-scale training</td>
                     </tr>
                     <tr>
                         <td><strong>Safetensors</strong></td>
                         <td>Sharded safetensors</td>
-                        <td class="good">1× model size</td>
+                        <td class="good">1&times; model size</td>
                         <td class="good">Memory-mapped load</td>
                         <td>HuggingFace ecosystem</td>
                     </tr>
@@ -972,10 +1140,10 @@ CHECKPOINT_FREQUENCY_GUIDE = {
 
         <!-- Section 3: Production Monitoring Stack -->
         <section class="section" id="monitoring">
-            <h2 class="section-title">📊 Production Monitoring Stack</h2>
+            <h2 class="section-title">“Š Production Monitoring Stack</h2>
             
             <div class="info-box veteran">
-                <strong>ðŸŽ–ï¸ Monitoring Truth:</strong> In 35 years, every production outage I've seen could have been 
+                <strong>🎖️ Monitoring Truth:</strong> In 35 years, every production outage I've seen could have been 
                 prevented by proper monitoring. The dashboards below are what I wish I had in 1995 when 
                 explaining to executives why their RAID array died. Today's GPU-storage systems are more complex 
                 but the principle is the same: measure everything, alert early.
@@ -995,7 +1163,7 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: <span style="color: #ce9178;">"NVMe P99 read latency > 500µs"</span>
+          summary: <span style="color: #ce9178;">"NVMe P99 read latency > 500&micro;s"</span>
           description: <span style="color: #ce9178;">"Drive {{ $labels.device }} showing high latency. Check for thermal throttling or wear."</span>
       
       - alert: NVMeCriticalWear
@@ -1252,8 +1420,8 @@ dcgmi group -c storage_monitoring
 dcgmi group -g 1 -a 0,1,2,3,4,5,6,7  <span style="color: #6a9955;"># Add GPUs 0-7</span>
 
 <span style="color: #6a9955;"># Key fields for storage correlation</span>
-<span style="color: #6a9955;"># DCGM_FI_DEV_PCIE_TX_THROUGHPUT - PCIe TX (GPU â†’ storage for writes)</span>
-<span style="color: #6a9955;"># DCGM_FI_DEV_PCIE_RX_THROUGHPUT - PCIe RX (storage â†’ GPU for reads)</span>
+<span style="color: #6a9955;"># DCGM_FI_DEV_PCIE_TX_THROUGHPUT - PCIe TX (GPU &rarr; storage for writes)</span>
+<span style="color: #6a9955;"># DCGM_FI_DEV_PCIE_RX_THROUGHPUT - PCIe RX (storage &rarr; GPU for reads)</span>
 <span style="color: #6a9955;"># DCGM_FI_DEV_PCIE_REPLAY_COUNTER - PCIe errors (indicates link issues)</span>
 <span style="color: #6a9955;"># DCGM_FI_DEV_GPU_UTIL - GPU utilization (low = data starvation)</span>
 <span style="color: #6a9955;"># DCGM_FI_DEV_MEM_COPY_UTIL - Memory copy utilization</span>
@@ -1291,17 +1459,17 @@ rx = nvml.nvmlDeviceGetPcieThroughput(handle, nvml.NVML_PCIE_UTIL_RX_BYTES)
 print(f<span style="color: #ce9178;">"PCIe TX: {tx / 1e9:.2f} GB/s"</span>)
 print(f<span style="color: #ce9178;">"PCIe RX: {rx / 1e9:.2f} GB/s"</span>)
 
-<span style="color: #6a9955;"># If RX is low during training â†’ storage bottleneck</span>
-<span style="color: #6a9955;"># If GPU util is low + RX is low â†’ data loading issue</span></code></pre>
+<span style="color: #6a9955;"># If RX is low during training &rarr; storage bottleneck</span>
+<span style="color: #6a9955;"># If GPU util is low + RX is low &rarr; data loading issue</span></code></pre>
 
         </section>
 
         <!-- Section 3.5: Debugging & Tracing Tools -->
         <section class="section" id="debugging-tools">
-            <h2 class="section-title">🔍 Debugging & Tracing Tools</h2>
+            <h2 class="section-title">” Debugging & Tracing Tools</h2>
             
             <div class="info-box veteran">
-                <strong>ðŸŽ–ï¸ Debug Like a Pro:</strong> When GPU training stalls and you don't know why, these tools 
+                <strong>🎖️ Debug Like a Pro:</strong> When GPU training stalls and you don't know why, these tools 
                 are your friends. I've diagnosed more storage issues with blktrace and bpftrace than with any 
                 fancy monitoring dashboard. Low-level visibility wins.
             </div>
@@ -1500,8 +1668,8 @@ seq_read: (g=0): rw=read, bs=(R) 128KiB-128KiB, (W) 128KiB-128KiB
 Run status group 0 (all jobs):
    READ: bw=<span style="color: #4ec9b0;">6847MiB/s</span> (7179MB/s), 1711MiB/s-1712MiB/s (1795MB/s-1795MB/s), io=<span style="color: #4ec9b0;">200GiB</span> (215GB), run=30001-30001msec
 
-<span style="color: #6a9955;"># ✓ GOOD: 6.8 GB/s sequential read (close to spec 7.0 GB/s)</span>
-<span style="color: #6a9955;"># ✗ BAD:  &lt;5 GB/s would indicate thermal throttling or link issues</span></code></pre>
+<span style="color: #6a9955;"># [OK]  GOOD: 6.8 GB/s sequential read (close to spec 7.0 GB/s)</span>
+<span style="color: #6a9955;"># [OK]  BAD:  &lt;5 GB/s would indicate thermal throttling or link issues</span></code></pre>
 
             <pre><code><span style="color: #6a9955;"># ============================================</span>
 <span style="color: #6a9955;"># 4K Random Read IOPS (should see 1M+ IOPS)</span>
@@ -1526,8 +1694,8 @@ rand_read: (groupid=0, jobs=4): err= 0: pid=12345: Sat Dec 21 10:30:45 2024
   lat (usec)   : 50=0.01%, 100=72.31%, 250=27.52%, 500=0.15%, 750=0.01%
   lat (usec)   : 1000=0.01%
 
-<span style="color: #6a9955;"># ✓ GOOD: 1.05M IOPS, 92µs average latency, P99=174µs</span>
-<span style="color: #6a9955;"># ✗ BAD:  &lt;800K IOPS or P99 &gt;500µs indicates issues</span></code></pre>
+<span style="color: #6a9955;"># [OK]  GOOD: 1.05M IOPS, 92&micro;s average latency, P99=174&micro;s</span>
+<span style="color: #6a9955;"># [OK]  BAD:  &lt;800K IOPS or P99 &gt;500&micro;s indicates issues</span></code></pre>
 
             <pre><code><span style="color: #6a9955;"># ============================================</span>
 <span style="color: #6a9955;"># Checkpoint Write Pattern (sustained writes)</span>
@@ -1547,9 +1715,9 @@ checkpoint: (groupid=0, jobs=4): err= 0
      | 70.00th=[ 1876], 80.00th=[ 2147], 90.00th=[ 2638], 95.00th=[ 3163],
      | 99.00th=[ 4621], <span style="color: #ff6b6b;">99.50th=[ 6587]</span>, 99.90th=[10945], 99.95th=[13698]
 
-<span style="color: #6a9955;"># âš ï¸ NOTE: Sustained write latency increases over time due to GC</span>
-<span style="color: #6a9955;"># ✓ GOOD: 4.8 GB/s sustained, P99 ~4.6ms</span>
-<span style="color: #6a9955;"># ✗ BAD:  P99 &gt;20ms indicates GC pressure - check WAF!</span></code></pre>
+<span style="color: #6a9955;"># [!]  NOTE: Sustained write latency increases over time due to GC</span>
+<span style="color: #6a9955;"># [OK]  GOOD: 4.8 GB/s sustained, P99 ~4.6ms</span>
+<span style="color: #6a9955;"># [OK]  BAD:  P99 &gt;20ms indicates GC pressure - check WAF!</span></code></pre>
 
             <pre><code><span style="color: #6a9955;"># ============================================</span>
 <span style="color: #6a9955;"># Mixed Read/Write (AI Training Simulation)</span>
@@ -1568,8 +1736,8 @@ training: (groupid=0, jobs=8): err= 0
     clat percentiles (usec):
      | 50.00th=[  734], 90.00th=[ 1254], 95.00th=[ 1614], 99.00th=[ 2868]
 
-<span style="color: #6a9955;"># ✓ GOOD: Read ~3 GB/s, Write 327 MB/s (90/10 mix)</span>
-<span style="color: #6a9955;"># ✓ GOOD: Read latency P99 &lt;1ms during mixed workload</span>
+<span style="color: #6a9955;"># [OK]  GOOD: Read ~3 GB/s, Write 327 MB/s (90/10 mix)</span>
+<span style="color: #6a9955;"># [OK]  GOOD: Read latency P99 &lt;1ms during mixed workload</span>
 <span style="color: #6a9955;"># Matches typical training batch loading pattern</span></code></pre>
 
             <pre><code><span style="color: #6a9955;"># ============================================</span>
@@ -1586,9 +1754,9 @@ gds_like: (groupid=0, jobs=4): err= 0
   cpu          : usr=1.23%, sys=8.45%, ctx=23456, majf=0, minf=1284
   IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.2%, 16=0.4%, 32=12.3%, >=64=86.9%
 
-<span style="color: #6a9955;"># ✓ GOOD: 6.2 GB/s with io_uring SQPOLL</span>
-<span style="color: #6a9955;"># ✓ GOOD: Low CPU overhead (sys=8.45%)</span>
-<span style="color: #6a9955;"># ✓ GOOD: Submission latency ~1.8µs (slat)</span>
+<span style="color: #6a9955;"># [OK]  GOOD: 6.2 GB/s with io_uring SQPOLL</span>
+<span style="color: #6a9955;"># [OK]  GOOD: Low CPU overhead (sys=8.45%)</span>
+<span style="color: #6a9955;"># [OK]  GOOD: Submission latency ~1.8&micro;s (slat)</span>
 <span style="color: #6a9955;"># This is close to what GDS achieves for pure NVMe</span></code></pre>
 
             <h4 style="color: #ff6b6b; margin: 25px 0 15px 0;">What Bad Output Looks Like (Red Flags)</h4>
@@ -1631,32 +1799,32 @@ $ echo 1 > /sys/bus/pci/devices/0000:01:00.0/remove
 $ echo 1 > /sys/bus/pci/rescan</code></pre>
 
             <div class="info-box">
-                <strong>💡 Debug Decision Tree:</strong>
+                <strong>’¡ Debug Decision Tree:</strong>
                 <ul style="margin-top: 10px; margin-bottom: 0;">
-                    <li><strong>High latency spikes?</strong> â†’ blktrace + btt for latency breakdown</li>
-                    <li><strong>Low throughput?</strong> â†’ fio baseline to check SSD health</li>
-                    <li><strong>Random vs sequential?</strong> â†’ blkparse pattern analysis</li>
-                    <li><strong>Which process?</strong> â†’ bpftrace by-process I/O</li>
-                    <li><strong>GDS not working?</strong> â†’ uprobe cuFile functions</li>
-                    <li><strong>Power state issues?</strong> â†’ nvme get-feature 0x0c</li>
+                    <li><strong>High latency spikes?</strong> &rarr; blktrace + btt for latency breakdown</li>
+                    <li><strong>Low throughput?</strong> &rarr; fio baseline to check SSD health</li>
+                    <li><strong>Random vs sequential?</strong> &rarr; blkparse pattern analysis</li>
+                    <li><strong>Which process?</strong> &rarr; bpftrace by-process I/O</li>
+                    <li><strong>GDS not working?</strong> &rarr; uprobe cuFile functions</li>
+                    <li><strong>Power state issues?</strong> &rarr; nvme get-feature 0x0c</li>
                 </ul>
             </div>
         </section>
 
         <!-- Section 4: Virtualization & Multi-tenancy -->
         <section class="section" id="virtualization">
-            <h2 class="section-title">ðŸ”’ Virtualization & Multi-tenancy</h2>
+            <h2 class="section-title">”’ Virtualization & Multi-tenancy</h2>
             
             <div class="info-box veteran">
-                <strong>ðŸŽ–ï¸ Virtualization Reality Check:</strong> I've been doing storage virtualization since VMware ESX 2.0. 
-                The promise is typically "transparent performance." The reality is often "hidden overhead." 
+                <strong>🎖️ Virtualization Reality Check:</strong> I've been doing storage virtualization since VMware ESX 2.0. 
+                The promise is always "transparent performance." The reality is always "hidden overhead." 
                 GPU passthrough adds another layer of complexity. Here's what actually works.
             </div>
 
             <h3 class="subsection-title">IOMMU Configuration for GPU Passthrough</h3>
             
             <p>IOMMU (Input-Output Memory Management Unit) is <strong>mandatory</strong> for secure GPU passthrough. 
-            Without it, a VM's GPU could access any host memory — a massive security hole.</p>
+            Without it, a VM's GPU could access any host memory &mdash; a massive security hole.</p>
 
             <pre><code><span style="color: #6a9955;"># Enable IOMMU in GRUB (Intel)</span>
 <span style="color: #6a9955;"># /etc/default/grub</span>
@@ -1684,7 +1852,7 @@ dmesg | grep -i iommu
 <span style="color: #6a9955;"># IOMMU Group 13: 41:00.0 3D controller [0302]: NVIDIA H100 [10de:2330]</span>
 <span style="color: #6a9955;"># IOMMU Group 14: 61:00.0 3D controller [0302]: NVIDIA H100 [10de:2330]</span>
 
-<span style="color: #6a9955;"># If GPUs share IOMMU group with other devices â†’ ACS override needed</span>
+<span style="color: #6a9955;"># If GPUs share IOMMU group with other devices &rarr; ACS override needed</span>
 <span style="color: #6a9955;"># WARNING: This reduces security isolation</span>
 GRUB_CMDLINE_LINUX="intel_iommu=on pcie_acs_override=downstream,multifunction"</code></pre>
 
@@ -1724,7 +1892,7 @@ lspci -k -s 41:00.0
             <h3 class="subsection-title">SR-IOV for NVMe Virtualization</h3>
             
             <div class="info-box warning">
-                <strong>âš ï¸ SR-IOV NVMe Reality:</strong> SR-IOV (Single Root I/O Virtualization) for NVMe is still 
+                <strong>[!]  SR-IOV NVMe Reality:</strong> SR-IOV (Single Root I/O Virtualization) for NVMe is still 
                 emerging. Most enterprise SSDs don't support it yet. Samsung PM1735/PM1743 and some Intel Optane 
                 drives have SR-IOV, but it's not universal. Plan accordingly.
             </div>
@@ -1757,7 +1925,7 @@ nvme virt-mgmt /dev/nvme0 -c 2 -r 0 -n 2 -a 8  <span style="color: #6a9955;"># A
 
             <h3 class="subsection-title">PASID (Process Address Space ID)</h3>
             
-            <p>PASID enables multiple process address spaces on a single PCIe device — critical for 
+            <p>PASID enables multiple process address spaces on a single PCIe device &mdash; critical for 
             shared GPU access and CXL.</p>
 
             <pre><code><span style="color: #6a9955;"># PASID configuration for advanced GPU sharing</span>
@@ -1785,40 +1953,40 @@ cat /sys/class/iommu/*/intel-iommu/cap
             <div class="architecture-diagram">
 <span style="color: var(--accent-cyan);">Multi-Tenant GPU-Storage Architecture</span>
 
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                           Kubernetes Cluster                           â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚                                                                        â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚    Tenant A Pod     â”‚  â”‚    Tenant B Pod     â”‚  â”‚  Tenant C Pod  â”‚  â”‚
-â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚  â”‚ â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â” â”‚  â”‚
-â”‚  â”‚  â”‚ GPU 0 (VFIO)  â”‚  â”‚  â”‚  â”‚ GPU 2 (VFIO)  â”‚  â”‚  â”‚ â”‚GPU 4 (MIG) â”‚ â”‚  â”‚
-â”‚  â”‚  â”‚ GPU 1 (VFIO)  â”‚  â”‚  â”‚  â”‚ GPU 3 (VFIO)  â”‚  â”‚  â”‚ â”‚  2g.20gb   â”‚ â”‚  â”‚
-â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚  â”‚ â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”˜ â”‚  â”‚
-â”‚  â”‚          â”‚          â”‚  â”‚          â”‚          â”‚  â”‚       â”‚        â”‚  â”‚
-â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”  â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”  â”‚  â”‚ â”Œâ”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â” â”‚  â”‚
-â”‚  â”‚  â”‚NVMe VF 0,1    â”‚  â”‚  â”‚  â”‚NVMe VF 2,3    â”‚  â”‚  â”‚ â”‚NVMe NS 5   â”‚ â”‚  â”‚
-â”‚  â”‚  â”‚(SR-IOV)       â”‚  â”‚  â”‚  â”‚(SR-IOV)       â”‚  â”‚  â”‚ â”‚(Namespace) â”‚ â”‚  â”‚
-â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚  â”‚ â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜ â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚                                                                        â”‚
-â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
-â”‚                         Physical Hardware                              â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
-â”‚  â”‚                    NVMe SSDs with SR-IOV                       â”‚   â”‚
-â”‚  â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”       â”‚   â”‚
-â”‚  â”‚  â”‚  VF 0    â”‚  â”‚  VF 1    â”‚  â”‚  VF 2    â”‚  â”‚  VF 3    â”‚  ...  â”‚   â”‚
-â”‚  â”‚  â”‚  1 TB    â”‚  â”‚  1 TB    â”‚  â”‚  1 TB    â”‚  â”‚  1 TB    â”‚       â”‚   â”‚
-â”‚  â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜       â”‚   â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
++ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
+-                           Kubernetes Cluster                           -
++ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - �¤
+-                                                                        -
+-  + -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |  + -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |  + -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |  -
+-  -    Tenant A Pod     -  -    Tenant B Pod     -  -  Tenant C Pod  -  -
+-  -  + -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |  -  -  + -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |  -  - + -  -  -  -  -  -  -  -  -  -  -  - | -  -
+-  -  - GPU 0 (VFIO)  -  -  -  - GPU 2 (VFIO)  -  -  - -GPU 4 (MIG) - -  -
+-  -  - GPU 1 (VFIO)  -  -  -  - GPU 3 (VFIO)  -  -  - -  2g.20gb   - -  -
+-  -  - -  -  -  -  -  -  - + -  -  -  -  -  -  - |  -  -  - -  -  -  -  -  -  - + -  -  -  -  -  -  - |  -  - - -  -  -  -  - + -  -  -  -  -  - | -  -
+-  -          -          -  -          -          -  -       -        -  -
+-  -  + -  -  -  -  -  -  - dash;¼ -  -  -  -  -  -  - |  -  -  + -  -  -  -  -  -  - dash;¼ -  -  -  -  -  -  - |  -  - + -  -  -  -  - dash;¼ -  -  -  -  -  - | -  -
+-  -  -NVMe VF 0,1    -  -  -  -NVMe VF 2,3    -  -  - -NVMe NS 5   - -  -
+-  -  -(SR-IOV)       -  -  -  -(SR-IOV)       -  -  - -(Namespace) - -  -
+-  -  - -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |  -  -  - -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |  -  - - -  -  -  -  -  -  -  -  -  -  -  - | -  -
+-  - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |  - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |  - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |  -
+-                                                                        -
++ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - �¤
+-                         Physical Hardware                              -
+-  + -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |   -
+-  -                    NVMe SSDs with SR-IOV                       -   -
+-  -  + -  -  -  -  -  -  -  -  -  - |  + -  -  -  -  -  -  -  -  -  - |  + -  -  -  -  -  -  -  -  -  - |  + -  -  -  -  -  -  -  -  -  - |       -   -
+-  -  -  VF 0    -  -  VF 1    -  -  VF 2    -  -  VF 3    -  ...  -   -
+-  -  -  1 TB    -  -  1 TB    -  -  1 TB    -  -  1 TB    -       -   -
+-  -  - -  -  -  -  -  -  -  -  -  - |  - -  -  -  -  -  -  -  -  -  - |  - -  -  -  -  -  -  -  -  -  - |  - -  -  -  -  -  -  -  -  -  - |       -   -
+-  - -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |   -
+- -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
 
 <span style="color: var(--accent-green);">Isolation Mechanisms:</span>
-• IOMMU: Memory isolation between VMs/containers
-• VFIO: Secure device passthrough
-• SR-IOV: Hardware-level NVMe partitioning
-• NVMe Namespaces: Logical storage isolation
-• MIG (Multi-Instance GPU): GPU partitioning for smaller workloads
+&bull; IOMMU: Memory isolation between VMs/containers
+&bull; VFIO: Secure device passthrough
+&bull; SR-IOV: Hardware-level NVMe partitioning
+&bull; NVMe Namespaces: Logical storage isolation
+&bull; MIG (Multi-Instance GPU): GPU partitioning for smaller workloads
             </div>
 
             <table>
@@ -1873,7 +2041,7 @@ cat /sys/class/iommu/*/intel-iommu/cap
             <h3 class="subsection-title">QoS and Noisy Neighbor Mitigation</h3>
             
             <div class="info-box warning">
-                <strong>âš ï¸ Multi-tenant Challenge:</strong> A single tenant's checkpoint storm can saturate shared NVMe bandwidth, causing latency spikes for all tenants. Without proper QoS, "noisy neighbor" effects can increase P99 latency 10-50×.
+                <strong>[!]  Multi-tenant Challenge:</strong> A single tenant's checkpoint storm can saturate shared NVMe bandwidth, causing latency spikes for all tenants. Without proper QoS, "noisy neighbor" effects can increase P99 latency 10-50&times;.
             </div>
 
             <pre><code><span style="color: #6a9955;"># NVMe WRR (Weighted Round Robin) arbitration for tenant QoS</span>
@@ -1941,12 +2109,12 @@ nvme set-feature /dev/nvme0 -f 1 -v 0x07050301  <span style="color: #6a9955;"># 
             </table>
 
             <div class="info-box production">
-                <strong>ðŸ­ Production Pattern:</strong> For GPU clusters with mixed training/inference:
+                <strong>[PROD] Production Pattern:</strong> For GPU clusters with mixed training/inference:
                 <ol style="margin: 10px 0; padding-left: 20px;">
                     <li>Dedicate SSDs to high-priority inference (no sharing)</li>
                     <li>Use NVMe WRR with per-tenant queues for training pool</li>
                     <li>Stagger checkpoint times across training jobs (reduces burst contention)</li>
-                    <li>Monitor per-tenant latency via eBPF and alert on P99 > 2× baseline</li>
+                    <li>Monitor per-tenant latency via eBPF and alert on P99 > 2&times; baseline</li>
                     <li>Reserve 20% SSD capacity headroom to prevent GC-induced latency spikes</li>
                 </ol>
             </div>
@@ -1955,10 +2123,10 @@ nvme set-feature /dev/nvme0 -f 1 -v 0x07050301  <span style="color: #6a9955;"># 
 
         <!-- Section 5: Advanced NVMe Features -->
         <section class="section" id="nvme-advanced">
-            <h2 class="section-title">âš¡ Advanced NVMe Features</h2>
+            <h2 class="section-title">"[BOLT]" Advanced NVMe Features</h2>
             
             <div class="info-box veteran">
-                <strong>ðŸŽ–ï¸ NVMe Evolution:</strong> I chaired storage standards meetings when NVMe was being designed. 
+                <strong>🎖️ NVMe Evolution:</strong> I chaired storage standards meetings when NVMe was being designed. 
                 The original spec was simple: queues, commands, completions. Now it's grown to include 
                 management interfaces, persistent memory regions, and controller memory buffers. 
                 Here's what matters for GPU integration.
@@ -1966,7 +2134,7 @@ nvme set-feature /dev/nvme0 -f 1 -v 0x07050301  <span style="color: #6a9955;"># 
 
             <h3 class="subsection-title">NVMe-MI (Management Interface)</h3>
             
-            <p>NVMe-MI provides out-of-band management for NVMe devices — critical for large-scale deployments 
+            <p>NVMe-MI provides out-of-band management for NVMe devices &mdash; critical for large-scale deployments 
             where you need to monitor/manage storage without host OS involvement.</p>
 
             <pre><code><span style="color: #6a9955;"># NVMe-MI commands for GPU-storage infrastructure management</span>
@@ -2026,7 +2194,7 @@ nvme id-ctrl /dev/nvme0 -H | grep -A 10 "Persistent Memory"
 <span style="color: #6a9955;"># PMR provides:</span>
 <span style="color: #6a9955;"># - Memory-mapped access (no command queue overhead)</span>
 <span style="color: #6a9955;"># - Persistent across power cycles (if battery-backed)</span>
-<span style="color: #6a9955;"># - Low latency (~500ns vs ~5µs for regular NVMe)</span>
+<span style="color: #6a9955;"># - Low latency (~500ns vs ~5&micro;s for regular NVMe)</span>
 
 <span style="color: #6a9955;"># Enable PMR</span>
 nvme set-feature /dev/nvme0 -f 0x0E -v 1  <span style="color: #6a9955;"># Enable PMR</span>
@@ -2054,8 +2222,8 @@ nvme set-feature /dev/nvme0 -f 0x0E -v 1  <span style="color: #6a9955;"># Enable
 <span style="color: #6a9955;"># This would bypass NVMe command queues entirely</span></code></pre>
 
             <div class="info-box insight">
-                <strong>💡 PMR Potential for GPUs:</strong> If PMR could be exposed to GPUs via BAR mapping, 
-                you'd get ~500ns access to persistent storage — 10× faster than regular NVMe commands. 
+                <strong>’¡ PMR Potential for GPUs:</strong> If PMR could be exposed to GPUs via BAR mapping, 
+                you'd get ~500ns access to persistent storage &mdash; 10&times; faster than regular NVMe commands. 
                 This is what CXL.mem promises but PMR exists today. The challenge is getting GPU drivers 
                 to recognize and use PMR regions.
             </div>
@@ -2099,7 +2267,7 @@ nvme id-ctrl /dev/nvme0 -H | grep -A 15 "Controller Memory Buffer"
         
         <span style="color: #6a9955;"># Allocate SQ in CMB</span>
         self.sq_offset = <span style="color: #b5cea8;">0</span>
-        self.sq_size = <span style="color: #b5cea8;">64</span> * <span style="color: #b5cea8;">1024</span>  <span style="color: #6a9955;"># 1024 entries × 64B</span>
+        self.sq_size = <span style="color: #b5cea8;">64</span> * <span style="color: #b5cea8;">1024</span>  <span style="color: #6a9955;"># 1024 entries &times; 64B</span>
         
         <span style="color: #6a9955;"># Allocate PRP pool in CMB</span>
         self.prp_offset = self.sq_size
@@ -2218,14 +2386,14 @@ __global__ <span style="color: #4ec9b0;">void</span> gpu_submit_nvme_read(
         SQ_DEPTH
     );
     
-    <span style="color: #6a9955;">// Data path: GPU â†’ CMB (P2P write)</span>
+    <span style="color: #6a9955;">// Data path: GPU &rarr; CMB (P2P write)</span>
     <span style="color: #6a9955;">// SSD reads command from CMB (internal)</span>
     <span style="color: #6a9955;">// SSD DMAs data to GPU memory (P2P read)</span>
     <span style="color: #6a9955;">// Zero CPU involvement in data path!</span>
 }</code></pre>
 
             <div class="info-box warning">
-                <strong>âš ï¸ CMB + GPU Reality Check:</strong>
+                <strong>[!]  CMB + GPU Reality Check:</strong>
                 <ul style="margin-top: 10px; margin-left: 20px;">
                     <li><strong>CMB sizes are small:</strong> Typically 64KB-4MB. Can't hold many queues + PRP lists.</li>
                     <li><strong>P2P BAR mapping:</strong> Requires IOMMU configuration and matching PCIe topology.</li>
@@ -2248,10 +2416,10 @@ Region 0: Memory at f0000000 (64-bit, non-prefetchable) [size=16K]  <span style=
 Region 4: Memory at f0010000 (64-bit, prefetchable) [size=4M]       <span style="color: #6a9955;"># CMB!</span>
 
 <span style="color: #6a9955;"># Performance comparison</span>
-<span style="color: #6a9955;"># Traditional (via host memory):  GPU â†’ Host RAM â†’ SSD</span>
-<span style="color: #6a9955;">#   Latency: ~15-25µs for command submission</span>
-<span style="color: #6a9955;"># CMB P2P:                        GPU â†’ CMB (SSD memory)</span>
-<span style="color: #6a9955;">#   Latency: ~3-8µs for command submission</span>
+<span style="color: #6a9955;"># Traditional (via host memory):  GPU &rarr; Host RAM &rarr; SSD</span>
+<span style="color: #6a9955;">#   Latency: ~15-25&micro;s for command submission</span>
+<span style="color: #6a9955;"># CMB P2P:                        GPU &rarr; CMB (SSD memory)</span>
+<span style="color: #6a9955;">#   Latency: ~3-8&micro;s for command submission</span>
 <span style="color: #6a9955;"># Savings: 50-70% command submission latency reduction</span></code></pre>
 
             <table>
@@ -2301,10 +2469,10 @@ Region 4: Memory at f0010000 (64-bit, prefetchable) [size=4M]       <span style=
 
         <!-- Section 5.5: Write Amplification & Checkpoint Storms -->
         <section class="section" id="write-amplification">
-            <h2 class="section-title">ðŸ“ Write Amplification & Checkpoint Storms</h2>
+            <h2 class="section-title">“ Write Amplification & Checkpoint Storms</h2>
             
             <div class="info-box veteran">
-                <strong>ðŸŽ–ï¸ The Hidden Performance Killer:</strong> I've seen AI training clusters lose 50% write 
+                <strong>🎖️ The Hidden Performance Killer:</strong> I've seen AI training clusters lose 50% write 
                 performance over 6 months with no obvious cause. The culprit? SSD garbage collection fighting 
                 with checkpoint storms. Understanding write amplification is critical for sustained performance.
             </div>
@@ -2312,7 +2480,7 @@ Region 4: Memory at f0010000 (64-bit, prefetchable) [size=4M]       <span style=
             <h3 class="subsection-title">What is Write Amplification?</h3>
             
             <p>Write Amplification Factor (WAF) measures how much more data the SSD writes internally versus 
-            what the host requested. A WAF of 3× means writing 100GB causes 300GB of NAND writes.</p>
+            what the host requested. A WAF of 3&times; means writing 100GB causes 300GB of NAND writes.</p>
             
             <pre><code><span style="color: #6a9955;"># Calculate Write Amplification from SMART data</span>
 <span style="color: #c586c0;">import</span> subprocess
@@ -2360,21 +2528,21 @@ Region 4: Memory at f0010000 (64-bit, prefetchable) [size=4M]       <span style=
             <pre><code><span style="color: #6a9955;"># Checkpoint storm timeline (what happens inside the SSD)</span>
 <span style="color: #ce9178;">"""
 Time     Event                          SSD Internal State
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - 
 0s       Training iteration 1000        GC: Idle, WAF: 1.0
          Checkpoint triggered!          
 0.1s     100GB write burst starts       GC: Active (blocks filling)
 1.5s     Checkpoint complete            GC: Heavy (moving valid pages)
          
 2s       Training resumes               GC: Still running in background
-5s       GC completes                   WAF for this burst: 2.5×
+5s       GC completes                   WAF for this burst: 2.5&times;
          
 ...      Training continues             GC: Idle
          
 600s     Checkpoint triggered!          GC: Conflict begins
          Another 100GB burst            
-600.1s   Write burst + GC collision     LATENCY SPIKE! 50msâ†’500ms
-601s     Training stalls waiting        WAF: 4× (GC competing with writes)
+600.1s   Write burst + GC collision     LATENCY SPIKE! 50ms&rarr;500ms
+601s     Training stalls waiting        WAF: 4&times; (GC competing with writes)
 """</span>
 
 <span style="color: #6a9955;"># Detecting checkpoint-induced latency spikes</span>
@@ -2396,7 +2564,7 @@ Time     Event                          SSD Internal State
         
         <span style="color: #6a9955;"># Alert on spike during checkpoint window</span>
         <span style="color: #c586c0;">if</span> lat > <span style="color: #b5cea8;">100000</span> <span style="color: #c586c0;">and</span> samples[-<span style="color: #b5cea8;">1</span>][<span style="color: #ce9178;">'near_checkpoint'</span>]:
-            print(f<span style="color: #ce9178;">"âš ï¸ Checkpoint storm detected! P99 lat: {lat/1000:.1f}ms"</span>)
+            print(f<span style="color: #ce9178;">"[!]  Checkpoint storm detected! P99 lat: {lat/1000:.1f}ms"</span>)
         
         time.sleep(<span style="color: #b5cea8;">1</span>)</code></pre>
 
@@ -2420,8 +2588,8 @@ Time     Event                          SSD Internal State
                     </tr>
                     <tr>
                         <td><strong>ZNS (Zoned Namespaces)</strong></td>
-                        <td>Sequential-only zones, minimal GC</td>
-                        <td>Up to 4×</td>
+                        <td>Sequential-only zones, no GC</td>
+                        <td>Up to 4&times;</td>
                         <td class="warning">Medium</td>
                     </tr>
                     <tr>
@@ -2439,7 +2607,7 @@ Time     Event                          SSD Internal State
                     <tr>
                         <td><strong>FDP (Flexible Data Placement)</strong></td>
                         <td>Application-guided placement</td>
-                        <td>Up to 3×</td>
+                        <td>Up to 3&times;</td>
                         <td class="warning">Medium</td>
                     </tr>
                 </tbody>
@@ -2484,7 +2652,7 @@ Time     Event                          SSD Internal State
     status = <span style="color: #ce9178;">'GOOD'</span> <span style="color: #c586c0;">if</span> op_percent >= <span style="color: #b5cea8;">25</span> <span style="color: #c586c0;">else</span> (<span style="color: #ce9178;">'WARNING'</span> <span style="color: #c586c0;">if</span> op_percent >= <span style="color: #b5cea8;">15</span> <span style="color: #c586c0;">else</span> <span style="color: #ce9178;">'CRITICAL'</span>)
     
     print(f<span style="color: #ce9178;">"Over-provisioning: {op_percent:.1f}% ({status})"</span>)
-    print(f<span style="color: #ce9178;">"Recommendation: Keep â‰¥25% free for checkpoint-heavy workloads"</span>)
+    print(f<span style="color: #ce9178;">"Recommendation: Keep &ge;25% free for checkpoint-heavy workloads"</span>)
     
     <span style="color: #c586c0;">return</span> op_percent</code></pre>
 
@@ -2630,7 +2798,7 @@ zns_mgr = ZNSCheckpointManager(<span style="color: #ce9178;">'/dev/nvme0n1'</spa
     zone_slba = zns_mgr.allocate_zone_for_checkpoint(len(ckpt_data))
     <span style="color: #c586c0;">if</span> zone_slba <span style="color: #c586c0;">is not</span> <span style="color: #569cd6;">None</span>:
         zns_mgr.write_checkpoint(ckpt_data, zone_slba)
-        print(f<span style="color: #ce9178;">"Checkpoint saved to zone 0x{zone_slba:x}, WAF~1.0 (near-optimal!)"</span>)</code></pre>
+        print(f<span style="color: #ce9178;">"Checkpoint saved to zone 0x{zone_slba:x}, WAF=1.0 (optimal!)"</span>)</code></pre>
 
             <h3 class="subsection-title">FDP (Flexible Data Placement) Working Examples</h3>
             
@@ -2735,7 +2903,7 @@ RUHID  3: Empty</code></pre>
 }</code></pre>
 
             <div class="info-box">
-                <strong>ðŸŽ¯ ZNS vs FDP Decision Matrix:</strong>
+                <strong>🎯 ZNS vs FDP Decision Matrix:</strong>
                 <table class="comparison-table" style="margin-top: 15px;">
                     <thead>
                         <tr>
@@ -2798,9 +2966,9 @@ RUHID  3: Empty</code></pre>
     
     print(f<span style="color: #ce9178;">"""
 SSD Endurance Analysis:
-â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+-----------------------------------------
 Daily host writes:     {daily_writes_tb:.2f} TB
-Write amplification:   {waf}×
+Write amplification:   {waf}&times;
 Daily NAND writes:     {daily_nand_writes_tb:.2f} TB
 SSD TBW rating:        {ssd_tbw_rating} TB
 
@@ -2820,9 +2988,9 @@ estimate_ssd_lifespan(
 <span style="color: #6a9955;"># Output: ~2.9 years lifespan at this workload</span></code></pre>
 
             <div class="info-box warning">
-                <strong>âš ï¸ Checkpoint Storm Warning Signs:</strong>
+                <strong>[!]  Checkpoint Storm Warning Signs:</strong>
                 <ul style="margin-top: 10px; margin-bottom: 0;">
-                    <li>P99 write latency spikes 10× during checkpoint windows</li>
+                    <li>P99 write latency spikes 10&times; during checkpoint windows</li>
                     <li>WAF steadily increasing over weeks (check monthly)</li>
                     <li>Available spare capacity dropping faster than expected</li>
                     <li>Training throughput degrades after 50% SSD capacity used</li>
@@ -2832,11 +3000,11 @@ estimate_ssd_lifespan(
 
         <!-- Section 6: Power & Thermal Management -->
         <section class="section" id="power-management">
-            <h2 class="section-title">ðŸ”Œ Power & Thermal Management</h2>
+            <h2 class="section-title">”Œ Power & Thermal Management</h2>
             
             <div class="info-box veteran">
-                <strong>ðŸŽ–ï¸ Thermal War Stories:</strong> I've seen million-dollar storage arrays fail because 
-                someone blocked an air vent. GPU-storage systems are thermal nightmares — 700W GPUs next to 
+                <strong>🎖️ Thermal War Stories:</strong> I've seen million-dollar storage arrays fail because 
+                someone blocked an air vent. GPU-storage systems are thermal nightmares &mdash; 700W GPUs next to 
                 25W SSDs that thermal throttle at 70Â°C. Here's how to not melt your infrastructure.
             </div>
 
@@ -2846,11 +3014,11 @@ estimate_ssd_lifespan(
 
 <span style="color: #6a9955;"># List supported power states</span>
 nvme id-ctrl /dev/nvme0 | grep -A 20 "ps "
-<span style="color: #6a9955;"># ps 0: max_power: 25W, entry_lat: 0µs, exit_lat: 0µs (operational)</span>
-<span style="color: #6a9955;"># ps 1: max_power: 18W, entry_lat: 0µs, exit_lat: 0µs (operational)</span>
-<span style="color: #6a9955;"># ps 2: max_power: 12W, entry_lat: 0µs, exit_lat: 0µs (operational)</span>
-<span style="color: #6a9955;"># ps 3: max_power: 5mW, entry_lat: 1000µs, exit_lat: 2000µs (non-op)</span>
-<span style="color: #6a9955;"># ps 4: max_power: 3mW, entry_lat: 5000µs, exit_lat: 10000µs (non-op)</span>
+<span style="color: #6a9955;"># ps 0: max_power: 25W, entry_lat: 0&micro;s, exit_lat: 0&micro;s (operational)</span>
+<span style="color: #6a9955;"># ps 1: max_power: 18W, entry_lat: 0&micro;s, exit_lat: 0&micro;s (operational)</span>
+<span style="color: #6a9955;"># ps 2: max_power: 12W, entry_lat: 0&micro;s, exit_lat: 0&micro;s (operational)</span>
+<span style="color: #6a9955;"># ps 3: max_power: 5mW, entry_lat: 1000&micro;s, exit_lat: 2000&micro;s (non-op)</span>
+<span style="color: #6a9955;"># ps 4: max_power: 3mW, entry_lat: 5000&micro;s, exit_lat: 10000&micro;s (non-op)</span>
 
 <span style="color: #6a9955;"># For GPU workloads: DISABLE low power states</span>
 <span style="color: #6a9955;"># The exit latency (10ms for PS4) will kill performance</span>
@@ -2950,32 +3118,32 @@ nvme set-feature /dev/nvme0 -f 0x10 -v 353  <span style="color: #6a9955;"># TMT2
 Physical Layout Matters:
 
 BAD:
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  GPU (700W)  â”‚  NVMe  â”‚  â† NVMe getting blasted by GPU exhaust
-â”‚              â”‚ (70Â°C) â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
++ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
+-  GPU (700W)  -  NVMe  -  &larr; NVMe getting blasted by GPU exhaust
+-              - (70Â°C) -
+- -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
 
 GOOD:
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  NVMe  â”‚              â”‚
-â”‚ (45Â°C) â”‚   GPU (700W) â”‚  â† Airflow direction matters
-â”‚        â”‚              â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
++ -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
+-  NVMe  -              -
+- (45Â°C) -   GPU (700W) -  &larr; Airflow direction matters
+-        -              -
+- -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - |
 
-• SSDs should be UPSTREAM of GPU airflow
-• Minimum 2 slots spacing if possible
-• Use NVMe heatsinks (they actually help)
-• Monitor ambient temp in server room
+&bull; SSDs should be UPSTREAM of GPU airflow
+&bull; Minimum 2 slots spacing if possible
+&bull; Use NVMe heatsinks (they actually help)
+&bull; Monitor ambient temp in server room
 """</span></code></pre>
 
         </section>
 
         <!-- Section 6.5: Filesystem Configuration for GPU Workloads -->
         <section class="section" id="filesystem-config">
-            <h2 class="section-title">📁 Filesystem Configuration for GPU Workloads</h2>
+            <h2 class="section-title">“ Filesystem Configuration for GPU Workloads</h2>
             
             <div class="info-box veteran">
-                <strong>ðŸŽ–ï¸ Filesystem War Stories:</strong> I've seen 40% performance left on the table because 
+                <strong>🎖️ Filesystem War Stories:</strong> I've seen 40% performance left on the table because 
                 someone used default mkfs options. For GPU workloads with large sequential I/O, stripe alignment 
                 and journal configuration make a massive difference. Here's what actually works.
             </div>
@@ -3047,7 +3215,7 @@ mkfs.xfs -f \
 <span style="color: #6a9955;"># CRITICAL: stripe unit (su) and stripe width (sw) must match RAID</span>
 mkfs.xfs -f \
     -b size=4096 \
-    -d su=256k,sw=8 \                     <span style="color: #6a9955;"># 256KB stripe unit × 8 drives = 2MB stripe</span>
+    -d su=256k,sw=8 \                     <span style="color: #6a9955;"># 256KB stripe unit &times; 8 drives = 2MB stripe</span>
     -l su=256k,size=2g,lazy-count=1 \     <span style="color: #6a9955;"># Log also stripe-aligned</span>
     -i maxpct=1 \                         <span style="color: #6a9955;"># 1% inodes for very large files</span>
     /dev/md0
@@ -3071,7 +3239,7 @@ mkfs.xfs -f \
 xfs_info /dev/md0
 <span style="color: #6a9955;"># Look for: sunit=X blks, swidth=Y blks</span>
 <span style="color: #6a9955;"># sunit should equal su/blocksize = 262144/4096 = 64 blks</span>
-<span style="color: #6a9955;"># swidth should equal sw × sunit = 8 × 64 = 512 blks</span></code></pre>
+<span style="color: #6a9955;"># swidth should equal sw &times; sunit = 8 &times; 64 = 512 blks</span></code></pre>
 
             <h3 class="subsection-title">ext4 mkfs Parameters for GPU Workloads</h3>
             
@@ -3089,7 +3257,7 @@ mkfs.ext4 -F \
 <span style="color: #6a9955;"># RAID0 array with stripe alignment</span>
 mkfs.ext4 -F \
     -b 4096 \
-    -E stride=64,stripe-width=512 \       <span style="color: #6a9955;"># stride=su/bs, stripe-width=stride×disks</span>
+    -E stride=64,stripe-width=512 \       <span style="color: #6a9955;"># stride=su/bs, stripe-width=stride&times;disks</span>
     -E lazy_itable_init=0,lazy_journal_init=0 \
     -i 1048576 \                          <span style="color: #6a9955;"># One inode per 1MB</span>
     -J size=2048 \                        <span style="color: #6a9955;"># 2GB journal for large writes</span>
@@ -3097,7 +3265,7 @@ mkfs.ext4 -F \
 
 <span style="color: #6a9955;"># Calculation for ext4 stride:</span>
 <span style="color: #6a9955;"># stride = chunk_size / block_size = 262144 / 4096 = 64</span>
-<span style="color: #6a9955;"># stripe-width = stride × number_of_data_disks = 64 × 8 = 512</span></code></pre>
+<span style="color: #6a9955;"># stripe-width = stride &times; number_of_data_disks = 64 &times; 8 = 512</span></code></pre>
 
             <h3 class="subsection-title">Mount Options for GPU Workloads</h3>
             
@@ -3151,7 +3319,7 @@ xfs_io -c "extsize 4194304" /mnt/nvme  <span style="color: #6a9955;"># 4MB exten
 <span style="color: #6a9955;"># Check: "Filesystem [/mnt/nvme] supports GDS: yes"</span></code></pre>
 
             <div class="info-box warning">
-                <strong>âš ï¸ Common Filesystem Mistakes:</strong>
+                <strong>[!]  Common Filesystem Mistakes:</strong>
                 <ul style="margin-top: 10px; margin-bottom: 0;">
                     <li><strong>Wrong stripe alignment:</strong> 40% performance loss if su/sw don't match RAID</li>
                     <li><strong>Default inode ratio:</strong> Wastes space for large file workloads</li>
@@ -3164,10 +3332,10 @@ xfs_io -c "extsize 4194304" /mnt/nvme  <span style="color: #6a9955;"># 4MB exten
 
         <!-- Section 7: Cloud Provider Specifics -->
         <section class="section" id="cloud-deployments">
-            <h2 class="section-title">â˜ï¸ Cloud Provider Specifics</h2>
+            <h2 class="section-title"> Cloud Provider Specifics</h2>
             
             <div class="info-box veteran">
-                <strong>ðŸŽ–ï¸ Cloud Reality:</strong> Cloud providers abstract away the hardware, which means 
+                <strong>🎖️ Cloud Reality:</strong> Cloud providers abstract away the hardware, which means 
                 you lose control over NVMe configuration, IOMMU settings, and firmware versions. 
                 Here's what you can actually control and how to work around the limitations.
             </div>
@@ -3176,10 +3344,10 @@ xfs_io -c "extsize 4194304" /mnt/nvme  <span style="color: #6a9955;"># 4MB exten
             
             <pre><code><span style="color: #6a9955;"># AWS P5/P4d instance storage characteristics</span>
 
-<span style="color: #6a9955;"># P5.48xlarge (H100 × 8)</span>
-<span style="color: #6a9955;"># - Instance storage: 8 × 3.84 TB NVMe (30.72 TB total)</span>
+<span style="color: #6a9955;"># P5.48xlarge (H100 &times; 8)</span>
+<span style="color: #6a9955;"># - Instance storage: 8 &times; 3.84 TB NVMe (30.72 TB total)</span>
 <span style="color: #6a9955;"># - Storage bandwidth: ~200 GB/s aggregate</span>
-<span style="color: #6a9955;"># - GDS: Supported with NVIDIA driver â‰¥ 525</span>
+<span style="color: #6a9955;"># - GDS: Supported with NVIDIA driver &ge; 525</span>
 
 <span style="color: #6a9955;"># Optimal AWS P5 storage configuration</span>
 
@@ -3215,7 +3383,7 @@ sudo modprobe nvidia_fs
             
             <pre><code><span style="color: #6a9955;"># Azure ND H100 v5 series</span>
 
-<span style="color: #6a9955;"># Standard_ND96isr_H100_v5 (H100 × 8)</span>
+<span style="color: #6a9955;"># Standard_ND96isr_H100_v5 (H100 &times; 8)</span>
 <span style="color: #6a9955;"># - Temp storage: 7.5 TB NVMe</span>
 <span style="color: #6a9955;"># - InfiniBand: 400 Gb/s NDR</span>
 
@@ -3243,10 +3411,10 @@ blobfuse2 mount /mnt/blob \
 
             <h3 class="subsection-title">GCP A3/A2 Configuration</h3>
             
-            <pre><code><span style="color: #6a9955;"># GCP A3 (H100 × 8) and A2 (A100 × 16) instances</span>
+            <pre><code><span style="color: #6a9955;"># GCP A3 (H100 &times; 8) and A2 (A100 &times; 16) instances</span>
 
-<span style="color: #6a9955;"># a3-highgpu-8g (H100 × 8)</span>
-<span style="color: #6a9955;"># - Local SSD: Up to 6 TB (24 × 375 GB partitions)</span>
+<span style="color: #6a9955;"># a3-highgpu-8g (H100 &times; 8)</span>
+<span style="color: #6a9955;"># - Local SSD: Up to 6 TB (24 &times; 375 GB partitions)</span>
 <span style="color: #6a9955;"># - Network: 200 Gbps</span>
 
 <span style="color: #6a9955;"># GCP local SSD setup for GPU workloads</span>
@@ -3296,7 +3464,7 @@ gcsfuse --implicit-dirs \
                 <tbody>
                     <tr>
                         <td><strong>Local NVMe</strong></td>
-                        <td class="good">8 × 3.84 TB</td>
+                        <td class="good">8 &times; 3.84 TB</td>
                         <td class="medium">~7.5 TB</td>
                         <td class="good">Up to 6 TB</td>
                     </tr>
@@ -3325,10 +3493,10 @@ gcsfuse --implicit-dirs \
 
         <!-- Section 8: Next-Gen Hardware Planning -->
         <section class="section" id="next-gen">
-            <h2 class="section-title">ðŸ”® Next-Gen Hardware Planning</h2>
+            <h2 class="section-title">”® Next-Gen Hardware Planning</h2>
             
             <div class="info-box veteran">
-                <strong>ðŸŽ–ï¸ Planning Advice:</strong> In 35 years, I've learned that hardware announcements 
+                <strong>🎖️ Planning Advice:</strong> In 35 years, I've learned that hardware announcements 
                 are 50% real and 50% marketing. Blackwell is real, but B200 NVLink configurations won't ship 
                 until 2025. Plan for what's available, architect for what's coming.
             </div>
@@ -3368,12 +3536,12 @@ gcsfuse --implicit-dirs \
             </table>
 
             <div class="info-box warning">
-                <strong>âš ï¸ Blackwell Storage Planning:</strong> With Blackwell's 192 GB HBM, model weights fit more comfortably in GPU memory, reducing weight-loading pressure. The main storage bottleneck shifts to checkpoint writes (192 GB per GPU × N GPUs) and dataset prefetch. Plan for multi-SSD RAID or parallel filesystem to achieve 20+ GB/s aggregate throughput per node.
+                <strong>[!]  Blackwell Storage Planning:</strong> With Blackwell's 192 GB HBM, model weights fit more comfortably in GPU memory, reducing weight-loading pressure. The main storage bottleneck shifts to checkpoint writes (192 GB per GPU &times; N GPUs) and dataset prefetch. Plan for multi-SSD RAID or parallel filesystem to achieve 20+ GB/s aggregate throughput per node.
             </div>
 
             <h3 class="subsection-title">AMD MI325X and MI400 Series</h3>
             
-            <pre><code><span style="color: #6a9955;"># AMD MI325X (Available) and MI400 (expected 2026, subject to change) planning</span>
+            <pre><code><span style="color: #6a9955;"># AMD MI325X (Available) and MI400 (expected 2026) planning</span>
 
 <span style="color: #6a9955;"># MI325X specifications (shipping 2024)</span>
 MI325X = {
@@ -3389,7 +3557,7 @@ MI325X = {
 <span style="color: #6a9955;"># - Less reliance on NVMe offload</span>
 <span style="color: #6a9955;"># - Checkpointing becomes main storage bottleneck</span>
 
-<span style="color: #6a9955;"># MI400 (CDNA 4, expected 2026, subject to change)</span>
+<span style="color: #6a9955;"># MI400 (CDNA 4, expected 2026)</span>
 <span style="color: #6a9955;"># - Expected 288-384 GB HBM4</span>
 <span style="color: #6a9955;"># - CXL 3.0 support likely</span>
 <span style="color: #6a9955;"># - UALink interconnect (alternative to NVLink)</span>
@@ -3440,21 +3608,21 @@ MI325X = {
             </div>
 
             <div class="info-box success">
-                <strong>âœ… Planning Recommendations:</strong>
+                <strong>[OK] Planning Recommendations:</strong>
                 <ul style="margin-top: 10px; padding-left: 20px;">
                     <li>2024: Deploy Gen5 NVMe RAID arrays (8+ SSDs per GPU node)</li>
                     <li>2025: Evaluate CXL memory for training memory expansion</li>
                     <li>2026: Plan Gen6 NVMe refresh, consider CXL-attached storage</li>
-                    <li>Design infrastructure with 4× current bandwidth headroom</li>
+                    <li>Design infrastructure with 4&times; current bandwidth headroom</li>
                 </ul>
             </div>
 
         </section>
 
         <nav class="nav-header" style="margin-top: 50px;">
-            <a href="09_production_reality.html">â† Production Reality</a>
+            <a href="09_production_reality.html">&larr; Production Reality</a>
             <span style="color: var(--text-secondary);">Expert Storage Guide</span>
-            <a href="11_ml_frameworks.html">ML Frameworks â†’</a>
+            <a href="11_ml_frameworks.html">ML Frameworks &rarr;</a>
         </nav>
 
     </div>

@@ -3,899 +3,1426 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>07 - Solutions Architecture | GPU-NVMe Technology Roadmap</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>Solutions Architecture - GPU-NVMe Storage</title>
     <style>
-        :root {
-            --bg-void: #030308;
-            --bg-deep: #0a0a12;
-            --bg-surface: #12121c;
-            --bg-elevated: #1a1a28;
-            --text-primary: #e4e4ed;
-            --text-secondary: #9494a8;
-            --text-muted: #5c5c72;
-            --accent-cyber: #00ffaa;
-            --accent-electric: #00d4ff;
-            --accent-plasma: #a855f7;
-            --accent-solar: #fbbf24;
-            --accent-ember: #ff6b6b;
-            --gradient-cyber: linear-gradient(135deg, #00ffaa 0%, #00d4ff 100%);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-void);
-            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
             line-height: 1.7;
         }
-
+        
         .nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 64px;
-            background: rgba(3, 3, 8, 0.9);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(10, 10, 15, 0.95);
+            padding: 15px 30px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            padding: 0 40px;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: sticky;
+            top: 0;
             z-index: 100;
+            backdrop-filter: blur(10px);
         }
-
-        .nav a {
-            color: var(--text-secondary);
+        
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+        
+        .nav-links a {
+            color: #888;
             text-decoration: none;
             font-size: 0.9rem;
-            font-weight: 500;
-            transition: color 0.2s;
+            transition: color 0.3s;
         }
-
-        .nav a:hover { color: var(--accent-cyber); }
-        .nav-title { color: var(--text-primary); font-weight: 600; }
-
+        
+        .nav-links a:hover, .nav-links a.active {
+            color: #00ff88;
+        }
+        
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 100px 24px 80px;
+            padding: 40px 30px;
         }
-
-        .page-header {
+        
+        .hero {
             text-align: center;
-            margin-bottom: 80px;
+            padding: 60px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 50px;
         }
-
-        .page-number {
-            font-size: 8rem;
-            font-weight: 900;
-            line-height: 1;
-            background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: -40px;
-        }
-
-        .page-title {
+        
+        .hero h1 {
             font-size: 3rem;
-            font-weight: 700;
-            background: var(--gradient-cyber);
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 16px;
+            background-clip: text;
         }
-
-        .page-subtitle {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            max-width: 700px;
+        
+        .hero p {
+            font-size: 1.3rem;
+            color: #888;
+            max-width: 800px;
             margin: 0 auto;
         }
-
+        
         .section {
-            background: var(--bg-surface);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 20px;
-            padding: 48px;
-            margin-bottom: 40px;
+            margin-bottom: 60px;
         }
-
+        
         .section-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent-solar);
-            margin-bottom: 32px;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #fff;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
-
+        
         .section-title::before {
             content: '';
-            width: 4px;
-            height: 28px;
-            background: var(--accent-solar);
-            border-radius: 2px;
+            width: 5px;
+            height: 35px;
+            background: linear-gradient(180deg, #00ff88, #00d4ff);
+            border-radius: 3px;
         }
-
-        /* ============ TIMELINE ============ */
-        .timeline-container {
-            position: relative;
-            padding: 40px 0;
+        
+        .subsection-title {
+            font-size: 1.4rem;
+            margin: 30px 0 20px;
+            color: #00d4ff;
         }
-
-        .timeline-line {
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: linear-gradient(180deg, 
-                var(--accent-cyber) 0%, 
-                var(--accent-electric) 25%,
-                var(--accent-plasma) 50%,
-                var(--accent-solar) 75%,
-                var(--accent-ember) 100%
-            );
-            transform: translateX(-50%);
-            border-radius: 2px;
+        
+        /* Problem-Solution Matrix */
+        .solution-matrix {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95rem;
         }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 60px;
-            display: flex;
-            align-items: flex-start;
+        
+        .solution-matrix th {
+            background: rgba(0, 255, 136, 0.15);
+            color: #00ff88;
+            padding: 15px;
+            text-align: left;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-weight: 600;
         }
-
-        .timeline-item:nth-child(odd) {
-            flex-direction: row;
+        
+        .solution-matrix td {
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.02);
+            vertical-align: top;
         }
-
-        .timeline-item:nth-child(even) {
-            flex-direction: row-reverse;
-        }
-
-        .timeline-content {
-            width: 45%;
-            background: var(--bg-elevated);
-            border-radius: 16px;
-            padding: 28px;
-            border: 1px solid rgba(255,255,255,0.05);
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        .timeline-content:hover {
-            transform: translateY(-4px);
-            border-color: rgba(0, 255, 170, 0.3);
-            box-shadow: 0 10px 40px rgba(0, 255, 170, 0.1);
-        }
-
-        .timeline-item:nth-child(odd) .timeline-content {
-            margin-right: auto;
-        }
-
-        .timeline-item:nth-child(even) .timeline-content {
-            margin-left: auto;
-        }
-
-        .timeline-dot {
-            position: absolute;
-            left: 50%;
-            top: 28px;
-            width: 20px;
-            height: 20px;
-            background: var(--bg-void);
-            border: 4px solid var(--accent-cyber);
-            border-radius: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-        }
-
-        .timeline-item:nth-child(2) .timeline-dot { border-color: var(--accent-electric); }
-        .timeline-item:nth-child(3) .timeline-dot { border-color: var(--accent-plasma); }
-        .timeline-item:nth-child(4) .timeline-dot { border-color: var(--accent-solar); }
-        .timeline-item:nth-child(5) .timeline-dot { border-color: var(--accent-ember); }
-        .timeline-item:nth-child(6) .timeline-dot { border-color: #f472b6; }
-
-        .timeline-year {
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-        }
-
-        .timeline-item:nth-child(1) .timeline-year { color: var(--accent-cyber); }
-        .timeline-item:nth-child(2) .timeline-year { color: var(--accent-electric); }
-        .timeline-item:nth-child(3) .timeline-year { color: var(--accent-plasma); }
-        .timeline-item:nth-child(4) .timeline-year { color: var(--accent-solar); }
-        .timeline-item:nth-child(5) .timeline-year { color: var(--accent-ember); }
-        .timeline-item:nth-child(6) .timeline-year { color: #f472b6; }
-
-        .timeline-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 12px;
-        }
-
-        .timeline-desc {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-        }
-
-        .timeline-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .timeline-tag {
-            font-size: 0.75rem;
-            padding: 4px 10px;
-            border-radius: 20px;
+        
+        .solution-matrix tr:hover td {
             background: rgba(255,255,255,0.05);
-            color: var(--text-muted);
         }
-
-        .timeline-tag.available {
-            background: rgba(0, 255, 170, 0.15);
-            color: var(--accent-cyber);
+        
+        .problem-cell {
+            background: rgba(239, 68, 68, 0.1) !important;
+            border-left: 3px solid #ef4444 !important;
         }
-
-        .timeline-tag.preview {
-            background: rgba(0, 212, 255, 0.15);
-            color: var(--accent-electric);
+        
+        .today-cell {
+            background: rgba(251, 191, 36, 0.1) !important;
         }
-
-        .timeline-tag.future {
-            background: rgba(251, 191, 36, 0.15);
-            color: var(--accent-solar);
+        
+        .future-cell {
+            background: rgba(0, 212, 255, 0.1) !important;
         }
-
-        /* ============ SOLUTION GRID ============ */
-        .solution-grid {
+        
+        .paradigm-cell {
+            background: rgba(0, 255, 136, 0.1) !important;
+        }
+        
+        /* Solution Cards */
+        .solutions-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 24px;
-            margin: 32px 0;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
         }
-
+        
         .solution-card {
-            background: var(--bg-elevated);
-            border-radius: 16px;
-            padding: 28px;
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .solution-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-        }
-
-        .solution-card.gds::before { background: var(--gradient-cyber); }
-        .solution-card.cxl::before { background: linear-gradient(90deg, var(--accent-plasma), #6366f1); }
-        .solution-card.uec::before { background: linear-gradient(90deg, var(--accent-solar), #f97316); }
-        .solution-card.nvme::before { background: linear-gradient(90deg, var(--accent-electric), #38bdf8); }
-
-        .solution-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(255,255,255,0.1);
-        }
-
-        .solution-icon {
-            width: 56px;
-            height: 56px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px;
+            padding: 30px;
+            transition: all 0.3s;
+        }
+        
+        .solution-card:hover {
+            border-color: rgba(0, 255, 136, 0.3);
+            transform: translateY(-3px);
+        }
+        
+        .solution-card.current {
+            border-left: 4px solid #fbbf24;
+        }
+        
+        .solution-card.nearterm {
+            border-left: 4px solid #00d4ff;
+        }
+        
+        .solution-card.paradigm {
+            border-left: 4px solid #00ff88;
+        }
+        
+        .card-header {
             display: flex;
-            align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: flex-start;
             margin-bottom: 20px;
         }
-
-        .solution-card.gds .solution-icon { background: rgba(0, 255, 170, 0.15); }
-        .solution-card.cxl .solution-icon { background: rgba(168, 85, 247, 0.15); }
-        .solution-card.uec .solution-icon { background: rgba(251, 191, 36, 0.15); }
-        .solution-card.nvme .solution-icon { background: rgba(0, 212, 255, 0.15); }
-
-        .solution-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 12px;
+        
+        .card-title {
+            font-size: 1.3rem;
+            color: #fff;
         }
-
-        .solution-desc {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
+        
+        .card-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
         }
-
-        .solution-metrics {
-            display: flex;
-            gap: 20px;
+        
+        .badge-current {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
         }
-
+        
+        .badge-nearterm {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+        }
+        
+        .badge-paradigm {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+        
+        .card-description {
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+        
+        .card-benefits {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+        
+        .card-benefits li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #ccc;
+        }
+        
+        .card-benefits li::before {
+            content: '[OK] ';
+            position: absolute;
+            left: 0;
+            color: #00ff88;
+            font-weight: bold;
+        }
+        
+        .card-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
         .metric {
             text-align: center;
         }
-
+        
         .metric-value {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             font-weight: 700;
+            color: #00ff88;
         }
-
-        .solution-card.gds .metric-value { color: var(--accent-cyber); }
-        .solution-card.cxl .metric-value { color: var(--accent-plasma); }
-        .solution-card.uec .metric-value { color: var(--accent-solar); }
-        .solution-card.nvme .metric-value { color: var(--accent-electric); }
-
+        
         .metric-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
         }
-
-        /* ============ CXL ARCHITECTURE DIAGRAM ============ */
+        
+        /* Architecture Diagrams */
         .arch-diagram {
-            background: var(--bg-deep);
-            border-radius: 16px;
-            padding: 40px;
-            margin: 32px 0;
-            overflow-x: auto;
-        }
-
-        .arch-diagram svg {
-            display: block;
-            margin: 0 auto;
-        }
-
-        /* ============ INFO BOXES ============ */
-        .info-box {
-            padding: 24px;
-            border-radius: 12px;
-            margin: 24px 0;
-        }
-
-        .info-box.insight {
-            background: rgba(0, 212, 255, 0.1);
-            border-left: 4px solid var(--accent-electric);
-        }
-
-        .info-box.warning {
-            background: rgba(255, 107, 107, 0.1);
-            border-left: 4px solid var(--accent-ember);
-        }
-
-        .info-box.success {
-            background: rgba(0, 255, 170, 0.1);
-            border-left: 4px solid var(--accent-cyber);
-        }
-
-        .info-box-title {
-            font-weight: 700;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* ============ PROBLEM-SOLUTION TABLE ============ */
-        .ps-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 24px 0;
-        }
-
-        .ps-table th {
-            background: var(--bg-elevated);
-            padding: 16px 20px;
-            text-align: left;
-            font-weight: 600;
-            border-bottom: 2px solid rgba(0, 255, 170, 0.2);
-        }
-
-        .ps-table th:first-child { color: var(--accent-ember); }
-        .ps-table th:last-child { color: var(--accent-cyber); }
-
-        .ps-table td {
-            padding: 16px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            vertical-align: top;
-        }
-
-        .ps-table td:first-child { color: var(--text-secondary); }
-        .ps-table td:last-child { color: var(--text-primary); }
-
-        .ps-table tr:hover {
-            background: rgba(255,255,255,0.02);
-        }
-
-        /* Navigation footer */
-        .nav-footer {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 60px;
-            padding-top: 40px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .nav-btn {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px 24px;
-            background: var(--bg-surface);
+            background: rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px;
-            color: var(--text-primary);
+            padding: 30px;
+            margin: 30px 0;
+        }
+        
+        .arch-title {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #00d4ff;
+            margin-bottom: 25px;
+        }
+        
+        .arch-flow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .arch-box {
+            padding: 15px 25px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .arch-gpu {
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            color: #000;
+            font-weight: 600;
+        }
+        
+        .arch-cpu {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: #fff;
+        }
+        
+        .arch-storage {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #000;
+            font-weight: 600;
+        }
+        
+        .arch-fabric {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: #fff;
+        }
+        
+        .arch-memory {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+        }
+        
+        .arch-cxl {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            color: #fff;
+        }
+        
+        .arch-arrow {
+            font-size: 1.5rem;
+            color: #00ff88;
+        }
+        
+        .arch-arrow-down {
+            transform: rotate(90deg);
+        }
+        
+        .arch-label {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        /* Comparison Tables */
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .compare-table th {
+            background: rgba(0, 212, 255, 0.15);
+            color: #00d4ff;
+            padding: 15px;
+            text-align: left;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .compare-table td {
+            padding: 12px 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.02);
+        }
+        
+        .compare-table tr:hover td {
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .good { color: #00ff88; }
+        .medium { color: #fbbf24; }
+        .poor { color: #ef4444; }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+            margin: 30px 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #fbbf24, #00d4ff, #00ff88);
+            border-radius: 2px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -32px;
+            top: 25px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 3px solid #0a0a0f;
+        }
+        
+        .timeline-item.current::before {
+            background: #fbbf24;
+        }
+        
+        .timeline-item.nearterm::before {
+            background: #00d4ff;
+        }
+        
+        .timeline-item.future::before {
+            background: #00ff88;
+        }
+        
+        .timeline-date {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-title {
+            font-size: 1.1rem;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        
+        .timeline-desc {
+            color: #aaa;
+            font-size: 0.95rem;
+        }
+        
+        /* Code Blocks */
+        .code-block {
+            background: #0d0d12;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 15px 0;
+            white-space: pre;
+            line-height: 1.6;
+        }
+        
+        .code-comment { color: #6a737d; }
+        .code-keyword { color: #ff7b72; }
+        .code-type { color: #79c0ff; }
+        .code-string { color: #a5d6ff; }
+        .code-number { color: #ffa657; }
+        .code-function { color: #d2a8ff; }
+        
+        /* Info Boxes */
+        .info-box {
+            padding: 20px 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .info-box.insight {
+            background: rgba(0, 212, 255, 0.1);
+            border-left: 4px solid #00d4ff;
+        }
+        
+        .info-box.warning {
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 4px solid #fbbf24;
+        }
+        
+        .info-box.success {
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 4px solid #00ff88;
+        }
+        
+        /* Decision Tree */
+        .decision-tree {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        
+        .decision-node {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin: 10px 0;
+            display: inline-block;
+        }
+        
+        .decision-question {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
+            color: #00d4ff;
+            font-weight: 600;
+        }
+        
+        .decision-answer {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
             text-decoration: none;
             transition: all 0.3s;
         }
-
+        
         .nav-btn:hover {
-            border-color: var(--accent-cyber);
-            background: var(--bg-elevated);
+            background: rgba(0,255,136,0.1);
+            border-color: #00ff88;
         }
-
-        .nav-btn-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .nav-btn-title {
-            font-weight: 600;
-        }
-
-        @media (max-width: 900px) {
-            .timeline-line { left: 20px; }
-            .timeline-item { flex-direction: column !important; }
-            .timeline-content { width: 100%; margin-left: 50px !important; margin-right: 0 !important; }
-            .timeline-dot { left: 20px; }
+        
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .solutions-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+            .arch-flow { flex-direction: column; }
         }
     </style>
 </head>
 <body>
     <nav class="nav">
-        <a href="index.html">← Home</a>
-        <span class="nav-title">07 — Solutions Architecture</span>
-        <a href="08_advanced_solutions.html">Next →</a>
+        <a href="index.html" style="font-weight: 600; color: #fff;">NVMe for GPUs</a>
+        <div class="nav-links">
+            <a href="01_motivation.html">Motivation</a>
+            <a href="02_cpu_vs_gpu.html">CPU vs GPU</a>
+            <a href="03_sync_problem.html">Sync Problem</a>
+            <a href="04_challenges.html">Challenges</a>
+            <a href="05_expert_deep_dive.html">Expert Deep Dive</a>
+            <a href="06_implementation.html">Implementation</a>
+            <a href="07_solutions.html" style="color: #00ff88;">Solutions</a>
+            <a href="08_advanced_solutions.html">Advanced</a>
+            <a href="09_production_reality.html">Production</a>
+        </div>
     </nav>
 
     <div class="container">
-        <header class="page-header">
-            <div class="page-number">07</div>
-            <h1 class="page-title">Solutions Architecture</h1>
-            <p class="page-subtitle">
-                Technology roadmap and solution architecture for GPU-optimized storage access. 
-                From today's GPUDirect Storage to tomorrow's CXL and Ultra Ethernet.
+        <div class="hero">
+            <h1>Solutions Architecture</h1>
+            <p>A comprehensive roadmap from today's workarounds to tomorrow's paradigm shifts&mdash;including CXL memory semantics and Ultra Ethernet fabric</p>
+        </div>
+
+        <!-- Section 1: Problem-Solution Matrix -->
+        <div class="section">
+            <h2 class="section-title">Problem &rarr; Solution Mapping</h2>
+            
+            <p style="margin-bottom: 25px; color: #aaa;">
+                Each GPU-NVMe bottleneck has solutions at multiple time horizons. Choose based on your deployment timeline and performance requirements.
             </p>
-        </header>
 
-        <!-- Technology Timeline -->
-        <section class="section">
-            <h2 class="section-title">Technology Evolution Timeline</h2>
-
-            <div class="timeline-container">
-                <div class="timeline-line"></div>
-
-                <div class="timeline-item">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">
-                        <div class="timeline-year">2020 - Present</div>
-                        <div class="timeline-title">GPUDirect Storage (GDS)</div>
-                        <div class="timeline-desc">
-                            NVIDIA's PCIe peer-to-peer solution enabling direct NVMe→GPU DMA transfers. 
-                            Eliminates CPU bounce buffer, reduces latency by 6-7×.
-                        </div>
-                        <div class="timeline-tags">
-                            <span class="timeline-tag available">Production Ready</span>
-                            <span class="timeline-tag">CUDA 11+</span>
-                            <span class="timeline-tag">PCIe Gen4/5</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="timeline-item">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">
-                        <div class="timeline-year">2023 - 2024</div>
-                        <div class="timeline-title">CXL 2.0 Memory Pooling</div>
-                        <div class="timeline-desc">
-                            Compute Express Link enables shared memory pools with cache-coherent access. 
-                            Type 3 devices provide memory expansion for GPU clusters.
-                        </div>
-                        <div class="timeline-tags">
-                            <span class="timeline-tag preview">Early Adoption</span>
-                            <span class="timeline-tag">300-400ns latency</span>
-                            <span class="timeline-tag">DRAM-backed</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="timeline-item">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">
-                        <div class="timeline-year">2024 - 2025</div>
-                        <div class="timeline-title">PCIe Gen6 & NVMe 2.0</div>
-                        <div class="timeline-desc">
-                            PCIe 6.0 doubles bandwidth to 256 GB/s (x16). NVMe 2.0 adds ZNS, KV, 
-                            and improved multi-path support for AI workloads.
-                        </div>
-                        <div class="timeline-tags">
-                            <span class="timeline-tag preview">Sampling 2025</span>
-                            <span class="timeline-tag">64 GT/s</span>
-                            <span class="timeline-tag">PAM4 Signaling</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="timeline-item">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">
-                        <div class="timeline-year">2025 - 2026</div>
-                        <div class="timeline-title">Ultra Ethernet Consortium (UEC)</div>
-                        <div class="timeline-desc">
-                            AI-optimized Ethernet fabric replacing InfiniBand for training clusters. 
-                            Sub-microsecond latency with lossless transport.
-                        </div>
-                        <div class="timeline-tags">
-                            <span class="timeline-tag future">Specification 2025</span>
-                            <span class="timeline-tag">800G-1.6T</span>
-                            <span class="timeline-tag">RDMA</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="timeline-item">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">
-                        <div class="timeline-year">2027+</div>
-                        <div class="timeline-title">CXL 3.0 + Persistent Memory</div>
-                        <div class="timeline-desc">
-                            CXL 3.0 enables fabric-attached storage with memory semantics. 
-                            True storage-class memory accessible via load/store.
-                        </div>
-                        <div class="timeline-tags">
-                            <span class="timeline-tag future">Future</span>
-                            <span class="timeline-tag">Fabric Topology</span>
-                            <span class="timeline-tag">SCM/NAND</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="timeline-item">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">
-                        <div class="timeline-year">2028+</div>
-                        <div class="timeline-title">Unified GPU-Storage Fabric</div>
-                        <div class="timeline-desc">
-                            Converged CXL + UEC fabric with native GPU support. 
-                            Disaggregated compute and storage with microsecond access.
-                        </div>
-                        <div class="timeline-tags">
-                            <span class="timeline-tag future">Vision</span>
-                            <span class="timeline-tag">UCIe</span>
-                            <span class="timeline-tag">Chiplets</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Solution Cards -->
-        <section class="section">
-            <h2 class="section-title">Current & Emerging Solutions</h2>
-
-            <div class="solution-grid">
-                <div class="solution-card gds">
-                    <div class="solution-icon">
-                        <svg width="28" height="28" fill="none" stroke="var(--accent-cyber)" stroke-width="2">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                        </svg>
-                    </div>
-                    <div class="solution-title">GPUDirect Storage</div>
-                    <div class="solution-desc">
-                        Production-ready PCIe P2P. Direct NVMe to GPU memory transfer without CPU involvement.
-                    </div>
-                    <div class="solution-metrics">
-                        <div class="metric">
-                            <div class="metric-value">12.8</div>
-                            <div class="metric-label">GB/s Throughput</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-value">~15μs</div>
-                            <div class="metric-label">Latency</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-value">0</div>
-                            <div class="metric-label">CPU Copies</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="solution-card cxl">
-                    <div class="solution-icon">
-                        <svg width="28" height="28" fill="none" stroke="var(--accent-plasma)" stroke-width="2">
-                            <circle cx="12" cy="12" r="3"/>
-                            <path d="M12 1v4M12 19v4M1 12h4M19 12h4"/>
-                            <path d="M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83"/>
-                            <path d="M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
-                        </svg>
-                    </div>
-                    <div class="solution-title">CXL Memory Expansion</div>
-                    <div class="solution-desc">
-                        Cache-coherent memory pooling. Extends GPU-accessible memory beyond local HBM capacity.
-                    </div>
-                    <div class="solution-metrics">
-                        <div class="metric">
-                            <div class="metric-value">64</div>
-                            <div class="metric-label">GB/s per link</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-value">~300ns</div>
-                            <div class="metric-label">Latency (DRAM)</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-value">TB</div>
-                            <div class="metric-label">Scale</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="solution-card uec">
-                    <div class="solution-icon">
-                        <svg width="28" height="28" fill="none" stroke="var(--accent-solar)" stroke-width="2">
-                            <rect x="2" y="2" width="20" height="20" rx="5"/>
-                            <path d="M7 12h10M12 7v10"/>
-                        </svg>
-                    </div>
-                    <div class="solution-title">Ultra Ethernet (UEC)</div>
-                    <div class="solution-desc">
-                        AI-optimized lossless fabric. Replaces InfiniBand with open standard for training clusters.
-                    </div>
-                    <div class="solution-metrics">
-                        <div class="metric">
-                            <div class="metric-value">800G</div>
-                            <div class="metric-label">Link Speed</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-value">&lt;1μs</div>
-                            <div class="metric-label">Target Latency</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-value">1000s</div>
-                            <div class="metric-label">GPU Scale</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="solution-card nvme">
-                    <div class="solution-icon">
-                        <svg width="28" height="28" fill="none" stroke="var(--accent-electric)" stroke-width="2">
-                            <rect x="4" y="4" width="16" height="16" rx="2"/>
-                            <circle cx="12" cy="12" r="3"/>
-                            <path d="M12 4v3M12 17v3M4 12h3M17 12h3"/>
-                        </svg>
-                    </div>
-                    <div class="solution-title">NVMe 2.0 Command Sets</div>
-                    <div class="solution-desc">
-                        ZNS for sequential workloads, KV for metadata, FDP for write placement control.
-                    </div>
-                    <div class="solution-metrics">
-                        <div class="metric">
-                            <div class="metric-value">2-4×</div>
-                            <div class="metric-label">Endurance (ZNS)</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-value">30%</div>
-                            <div class="metric-label">Tail Latency ↓</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-value">↓</div>
-                            <div class="metric-label">WAF Reduction</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- CXL Architecture Diagram -->
-        <section class="section">
-            <h2 class="section-title">CXL Memory Tier Architecture</h2>
-
-            <div class="arch-diagram">
-                <svg viewBox="0 0 900 450" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="gpuGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#a855f7"/>
-                            <stop offset="100%" style="stop-color:#6366f1"/>
-                        </linearGradient>
-                        <linearGradient id="hbmGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#00ffaa"/>
-                            <stop offset="100%" style="stop-color:#00d4ff"/>
-                        </linearGradient>
-                        <linearGradient id="cxlGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#8b5cf6"/>
-                            <stop offset="100%" style="stop-color:#a78bfa"/>
-                        </linearGradient>
-                        <linearGradient id="nvmeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#f59e0b"/>
-                            <stop offset="100%" style="stop-color:#fbbf24"/>
-                        </linearGradient>
-                    </defs>
-
-                    <!-- Background -->
-                    <rect x="0" y="0" width="900" height="450" fill="#0a0a12"/>
-
-                    <!-- Title -->
-                    <text x="450" y="35" fill="white" font-size="16" font-weight="600" text-anchor="middle">GPU Memory Hierarchy with CXL</text>
-
-                    <!-- Tier Labels -->
-                    <text x="80" y="100" fill="var(--accent-cyber)" font-size="12" font-weight="600">TIER 0</text>
-                    <text x="80" y="115" fill="#888" font-size="10">Fastest</text>
-                    
-                    <text x="80" y="200" fill="var(--accent-electric)" font-size="12" font-weight="600">TIER 1</text>
-                    <text x="80" y="215" fill="#888" font-size="10">Fast</text>
-                    
-                    <text x="80" y="310" fill="var(--accent-plasma)" font-size="12" font-weight="600">TIER 2</text>
-                    <text x="80" y="325" fill="#888" font-size="10">Expanded</text>
-                    
-                    <text x="80" y="400" fill="var(--accent-solar)" font-size="12" font-weight="600">TIER 3</text>
-                    <text x="80" y="415" fill="#888" font-size="10">Persistent</text>
-
-                    <!-- Tier 0: GPU + HBM -->
-                    <rect x="150" y="70" width="200" height="70" rx="12" fill="url(#gpuGrad)"/>
-                    <text x="250" y="100" fill="white" font-size="14" font-weight="700" text-anchor="middle">GPU</text>
-                    <text x="250" y="120" fill="white" font-size="11" text-anchor="middle">H100/B200</text>
-
-                    <rect x="380" y="70" width="200" height="70" rx="12" fill="url(#hbmGrad)"/>
-                    <text x="480" y="100" fill="#030308" font-size="14" font-weight="700" text-anchor="middle">HBM3e Memory</text>
-                    <text x="480" y="120" fill="#030308" font-size="11" text-anchor="middle">80-192 GB | 3.35 TB/s</text>
-
-                    <rect x="610" y="80" width="120" height="50" rx="8" fill="#1a1a28" stroke="rgba(0,255,170,0.3)" stroke-width="1"/>
-                    <text x="670" y="100" fill="var(--accent-cyber)" font-size="11" font-weight="600" text-anchor="middle">~100 ns</text>
-                    <text x="670" y="115" fill="#888" font-size="9" text-anchor="middle">Latency</text>
-
-                    <!-- Tier 1: Local DDR -->
-                    <rect x="150" y="170" width="430" height="60" rx="12" fill="#1e3a5f"/>
-                    <text x="365" y="200" fill="white" font-size="14" font-weight="600" text-anchor="middle">Local DDR5 (CPU Accessible)</text>
-                    <text x="365" y="218" fill="#aaa" font-size="11" text-anchor="middle">512 GB - 2 TB | ~100 GB/s</text>
-
-                    <rect x="610" y="175" width="120" height="50" rx="8" fill="#1a1a28" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
-                    <text x="670" y="195" fill="var(--accent-electric)" font-size="11" font-weight="600" text-anchor="middle">~120 ns</text>
-                    <text x="670" y="210" fill="#888" font-size="9" text-anchor="middle">Latency</text>
-
-                    <!-- Tier 2: CXL Memory -->
-                    <rect x="150" y="260" width="430" height="80" rx="12" fill="url(#cxlGrad)"/>
-                    <text x="365" y="295" fill="white" font-size="14" font-weight="700" text-anchor="middle">CXL Memory Pool (Type 3)</text>
-                    <text x="365" y="315" fill="white" font-size="11" text-anchor="middle">Multi-TB DRAM | Cache Coherent | Load/Store Access</text>
-
-                    <rect x="610" y="275" width="120" height="50" rx="8" fill="#1a1a28" stroke="rgba(168,85,247,0.3)" stroke-width="1"/>
-                    <text x="670" y="295" fill="var(--accent-plasma)" font-size="11" font-weight="600" text-anchor="middle">~300 ns</text>
-                    <text x="670" y="310" fill="#888" font-size="9" text-anchor="middle">Latency</text>
-
-                    <!-- Tier 3: NVMe Storage -->
-                    <rect x="150" y="370" width="430" height="60" rx="12" fill="url(#nvmeGrad)"/>
-                    <text x="365" y="398" fill="#030308" font-size="14" font-weight="700" text-anchor="middle">NVMe Storage (GDS/CXL.io)</text>
-                    <text x="365" y="416" fill="#030308" font-size="11" text-anchor="middle">Petabytes | 14 GB/s per drive | Persistent</text>
-
-                    <rect x="610" y="375" width="120" height="50" rx="8" fill="#1a1a28" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
-                    <text x="670" y="395" fill="var(--accent-solar)" font-size="11" font-weight="600" text-anchor="middle">~10-80 μs</text>
-                    <text x="670" y="410" fill="#888" font-size="9" text-anchor="middle">Latency</text>
-
-                    <!-- Bandwidth indicators -->
-                    <rect x="760" y="70" width="100" height="360" rx="8" fill="#12121c" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-                    <text x="810" y="95" fill="white" font-size="11" font-weight="600" text-anchor="middle">Bandwidth</text>
-                    
-                    <rect x="770" y="110" width="80" height="12" rx="2" fill="var(--accent-cyber)"/>
-                    <text x="810" y="135" fill="#888" font-size="9" text-anchor="middle">3.35 TB/s</text>
-                    
-                    <rect x="770" y="175" width="25" height="12" rx="2" fill="var(--accent-electric)"/>
-                    <text x="810" y="200" fill="#888" font-size="9" text-anchor="middle">100 GB/s</text>
-                    
-                    <rect x="770" y="285" width="18" height="12" rx="2" fill="var(--accent-plasma)"/>
-                    <text x="810" y="310" fill="#888" font-size="9" text-anchor="middle">64 GB/s</text>
-                    
-                    <rect x="770" y="385" width="4" height="12" rx="2" fill="var(--accent-solar)"/>
-                    <text x="810" y="410" fill="#888" font-size="9" text-anchor="middle">14 GB/s</text>
-                </svg>
-            </div>
-
-            <div class="info-box warning">
-                <div class="info-box-title">
-                    <svg width="20" height="20" fill="none" stroke="var(--accent-ember)" stroke-width="2">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-                        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                    </svg>
-                    CXL Reality Check
-                </div>
-                <p style="color: var(--text-secondary);">
-                    CXL 2.0 memory expansion is <strong>DRAM-backed</strong> with ~300ns latency — NOT flash storage. 
-                    CXL-attached <strong>NAND storage</strong> (CXL.io) won't see significant latency improvements 
-                    over NVMe because NAND access time (~70μs) dominates. CXL 3.0 fabric storage is 
-                    <strong style="color: var(--accent-solar);">2027+ timeline</strong>.
-                </p>
-            </div>
-        </section>
-
-        <!-- Problem → Solution Mapping -->
-        <section class="section">
-            <h2 class="section-title">Problem → Solution Mapping</h2>
-
-            <table class="ps-table">
+            <table class="solution-matrix">
                 <thead>
                     <tr>
-                        <th style="width: 45%;">Problem</th>
-                        <th style="width: 55%;">Solution</th>
+                        <th style="width: 20%;">Problem</th>
+                        <th style="width: 25%;">Today (2024-2025)</th>
+                        <th style="width: 25%;">Near-Term (NVMe 2.x)</th>
+                        <th style="width: 30%;">Future (CXL / NVMe-oF)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>CPU bounce buffer adds latency and uses memory bandwidth</td>
-                        <td><strong style="color: var(--accent-cyber);">GPUDirect Storage</strong> — PCIe P2P bypasses CPU entirely</td>
+                        <td class="problem-cell">
+                            <strong>CID Allocation Sync</strong><br>
+                            <small>I/O-agent warps batch commands (queue depth limited)</small>
+                        </td>
+                        <td class="today-cell">
+                            Thread-local CID pools<br>
+                            Hierarchical allocation<br>
+                            <code>warp_id &lt;&lt; 16 | local_cid</code>
+                        </td>
+                        <td class="future-cell">
+                            NVMe 2.x: Shadow doorbells (DBBUF) reduce MMIO<br>
+                            Controller-assigned CIDs
+                        </td>
+                        <td class="paradigm-cell">
+                            <strong>CXL.mem:</strong> No command IDs&mdash;direct load/store semantics<br>
+                            <strong>NVMe-oF/UEC:</strong> Standard NVMe CIDs over improved fabric
+                        </td>
                     </tr>
                     <tr>
-                        <td>GPU memory (HBM) capacity limited to 80-192 GB</td>
-                        <td><strong style="color: var(--accent-plasma);">CXL Memory Pooling</strong> — Extends to multi-TB with ~300ns access</td>
+                        <td class="problem-cell">
+                            <strong>Doorbell Contention</strong><br>
+                            <small>Serial PCIe writes bottleneck</small>
+                        </td>
+                        <td class="today-cell">
+                            Batch submissions (32+ commands)<br>
+                            Multi-queue striping<br>
+                            Shadow doorbells in GPU memory
+                        </td>
+                        <td class="future-cell">
+                            NVMe: Doorbell-less submission<br>
+                            Controller polls SQ tail
+                        </td>
+                        <td class="paradigm-cell">
+                            <strong>CXL:</strong> Memory-mapped&mdash;no doorbells<br>
+                            <strong>NVMe-oF/UEC:</strong> Remote doorbells via RDMA
+                        </td>
                     </tr>
                     <tr>
-                        <td>AI training needs checkpoints faster than NVMe can provide</td>
-                        <td><strong style="color: var(--accent-plasma);">CXL DRAM tier</strong> — Checkpoint to CXL memory, async flush to NVMe</td>
+                        <td class="problem-cell">
+                            <strong>CQ Polling Overhead</strong><br>
+                            <small>O(N) scan for out-of-order completion</small>
+                        </td>
+                        <td class="today-cell">
+                            Indexed completion tables<br>
+                            Per-CID status flags<br>
+                            Dedicated polling warps
+                        </td>
+                        <td class="future-cell">
+                            NVMe: Ordered completion option<br>
+                            Direct CID&rarr;slot mapping
+                        </td>
+                        <td class="paradigm-cell">
+                            <strong>CXL:</strong> Synchronous completion (load returns data)<br>
+                            <strong>NVMe-oF/UEC:</strong> RDMA completion to host/GPU memory
+                        </td>
                     </tr>
                     <tr>
-                        <td>Random small I/O has high WAF and poor endurance</td>
-                        <td><strong style="color: var(--accent-electric);">ZNS/FDP</strong> — Application-controlled write placement</td>
+                        <td class="problem-cell">
+                            <strong>Memory Copy Overhead</strong><br>
+                            <small>CPU bounce buffers waste bandwidth</small>
+                        </td>
+                        <td class="today-cell">
+                            GPUDirect Storage (P2P DMA)<br>
+                            cuFile / kvikIO<br>
+                            BAR1 mapping
+                        </td>
+                        <td class="future-cell">
+                            Larger BAR space (resizable BAR)<br>
+                            Unified memory improvements
+                        </td>
+                        <td class="paradigm-cell">
+                            <strong>CXL 3.0:</strong> Shared memory pool (GPU + Storage)<br>
+                            <strong>NVMe-oF/UEC:</strong> GPUDirect RDMA over Ethernet
+                        </td>
                     </tr>
                     <tr>
-                        <td>InfiniBand is proprietary and expensive at scale</td>
-                        <td><strong style="color: var(--accent-solar);">Ultra Ethernet (UEC)</strong> — Open standard with RDMA semantics</td>
+                        <td class="problem-cell">
+                            <strong>CPU Control Path</strong><br>
+                            <small>GPU can't initiate I/O directly</small>
+                        </td>
+                        <td class="today-cell">
+                            Async I/O + prefetching<br>
+                            Double buffering<br>
+                            CPU-side batching
+                        </td>
+                        <td class="future-cell">
+                            GPU-callable cuFile (CUDA kernels)<br>
+                            BaM-style GPU drivers
+                        </td>
+                        <td class="paradigm-cell">
+                            <strong>CXL:</strong> GPU issues load/store directly<br>
+                            <strong>NVMe-oF/UEC:</strong> Improved latency for remote storage
+                        </td>
                     </tr>
                     <tr>
-                        <td>NVMe interrupt model hurts GPU SIMT execution</td>
-                        <td><strong style="color: var(--accent-cyber);">Polling-based completion</strong> — GPU-initiated completion check</td>
-                    </tr>
-                    <tr>
-                        <td>Disaggregated storage needs low-latency fabric</td>
-                        <td><strong style="color: var(--accent-plasma);">CXL 3.0 Fabric</strong> — Memory semantics over switch topology (2027+)</td>
+                        <td class="problem-cell">
+                            <strong>Queue Scaling</strong><br>
+                            <small>Limited I/O queues vs. I/O agent parallelism</small>
+                        </td>
+                        <td class="today-cell">
+                            Max out controller queues (128-1024)<br>
+                            Smart thread&rarr;queue mapping<br>
+                            Multi-SSD striping
+                        </td>
+                        <td class="future-cell">
+                            NVMe: 64K+ queues<br>
+                            Per-warp queue support
+                        </td>
+                        <td class="paradigm-cell">
+                            <strong>CXL:</strong> No queues&mdash;address space partitioning<br>
+                            <strong>NVMe-oF/UEC:</strong> NVMe queue model over Ethernet
+                        </td>
                     </tr>
                 </tbody>
             </table>
-        </section>
+        </div>
 
-        <!-- Navigation Footer -->
-        <nav class="nav-footer">
-            <a href="06_implementation.html" class="nav-btn">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M15 18l-6-6 6-6"/>
-                </svg>
-                <div>
-                    <div class="nav-btn-label">Previous</div>
-                    <div class="nav-btn-title">06 — Implementation</div>
+        <!-- Section 2: Current Solutions -->
+        <div class="section">
+            <h2 class="section-title">Current Solutions (Deploy Today)</h2>
+            
+            <div class="solutions-grid">
+                <div class="solution-card current">
+                    <div class="card-header">
+                        <h3 class="card-title">GPUDirect Storage (GDS)</h3>
+                        <span class="card-badge badge-current">Available Now</span>
+                    </div>
+                    <p class="card-description">
+                        NVIDIA's P2P DMA path enabling direct SSD&rarr;GPU transfers without CPU bounce buffers. Production-ready since CUDA 11.4.
+                    </p>
+                    <ul class="card-benefits">
+                        <li>Eliminates CPU memory copies</li>
+                        <li>2&times; throughput improvement</li>
+                        <li>50% latency reduction</li>
+                        <li>Works with existing NVMe SSDs</li>
+                    </ul>
+                    <div class="card-metrics">
+                        <div class="metric">
+                            <div class="metric-value">12.5 GB/s</div>
+                            <div class="metric-label">Per SSD (Peak)</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">~100 &micro;s</div>
+                            <div class="metric-label">Latency</div>
+                        </div>
+                    </div>
+                    <div class="info-box warning" style="margin-top: 15px; font-size: 0.85em;">
+                        <strong>Peak vs Sustained:</strong> 12.5 GB/s is peak sequential read with optimal conditions. Sustained throughput during real AI workloads typically 60-80% of peak due to: mixed read/write patterns, GC activity, thermal throttling, and checkpoint interference. Budget for ~8-10 GB/s sustained per enterprise SSD.
+                    </div>
                 </div>
-            </a>
-            <a href="08_advanced_solutions.html" class="nav-btn">
-                <div style="text-align: right;">
-                    <div class="nav-btn-label">Next</div>
-                    <div class="nav-btn-title">08 — Advanced Solutions</div>
+
+                <div class="solution-card current">
+                    <div class="card-header">
+                        <h3 class="card-title">Multi-Queue Striping</h3>
+                        <span class="card-badge badge-current">Available Now</span>
+                    </div>
+                    <p class="card-description">
+                        Distribute GPU threads across multiple NVMe queues and SSDs to parallelize I/O and reduce per-queue contention.
+                    </p>
+                    <ul class="card-benefits">
+                        <li>Linear throughput scaling</li>
+                        <li>Reduced sync contention</li>
+                        <li>Better SSD utilization</li>
+                        <li>No protocol changes needed</li>
+                    </ul>
+                    <div class="card-metrics">
+                        <div class="metric">
+                            <div class="metric-value">8&times;</div>
+                            <div class="metric-label">Scaling (8 SSDs)</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">100 GB/s</div>
+                            <div class="metric-label">Aggregate BW</div>
+                        </div>
+                    </div>
                 </div>
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 18l6-6-6-6"/>
-                </svg>
-            </a>
-        </nav>
+
+                <div class="solution-card current">
+                    <div class="card-header">
+                        <h3 class="card-title">Batch Submission</h3>
+                        <span class="card-badge badge-current">Available Now</span>
+                    </div>
+                    <p class="card-description">
+                        Accumulate multiple I/O commands before ringing doorbell. Amortizes sync overhead across many operations.
+                    </p>
+                    <ul class="card-benefits">
+                        <li>32&times; fewer doorbell writes</li>
+                        <li>Better PCIe efficiency</li>
+                        <li>Reduced sync points</li>
+                        <li>Software-only change</li>
+                    </ul>
+                    <div class="card-metrics">
+                        <div class="metric">
+                            <div class="metric-value">32+</div>
+                            <div class="metric-label">Optimal Batch</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">10&times;</div>
+                            <div class="metric-label">IOPS Gain</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="solution-card current">
+                    <div class="card-header">
+                        <h3 class="card-title">Prefetch + Double Buffer</h3>
+                        <span class="card-badge badge-current">Available Now</span>
+                    </div>
+                    <p class="card-description">
+                        Overlap I/O with computation using predictive prefetching and ping-pong buffers. Hides storage latency behind GPU work.
+                    </p>
+                    <ul class="card-benefits">
+                        <li>Hides I/O latency</li>
+                        <li>Continuous GPU utilization</li>
+                        <li>Works with sequential access</li>
+                        <li>Simple implementation</li>
+                    </ul>
+                    <div class="card-metrics">
+                        <div class="metric">
+                            <div class="metric-value">95%+</div>
+                            <div class="metric-label">GPU Utilization</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">2&times;</div>
+                            <div class="metric-label">Memory Usage</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-block">
+<span class="code-comment">// Current Best Practice: GDS + Multi-Queue + Batching</span>
+
+<span class="code-keyword">#define</span> NUM_SSDS      <span class="code-number">8</span>
+<span class="code-keyword">#define</span> QUEUES_PER_SSD <span class="code-number">128</span>
+<span class="code-keyword">#define</span> BATCH_SIZE    <span class="code-number">32</span>
+
+<span class="code-comment">// Thread-to-queue mapping for reduced contention</span>
+<span class="code-type">int</span> <span class="code-function">get_queue_id</span>(<span class="code-type">int</span> thread_id) {
+    <span class="code-type">int</span> ssd_id = (thread_id / QUEUES_PER_SSD) % NUM_SSDS;
+    <span class="code-type">int</span> queue_id = thread_id % QUEUES_PER_SSD;
+    <span class="code-keyword">return</span> ssd_id * QUEUES_PER_SSD + queue_id;
+}
+
+<span class="code-comment">// Batched submission reduces doorbell overhead</span>
+<span class="code-type">void</span> <span class="code-function">submit_batch</span>(<span class="code-type">cufile_handle_t</span> handle, <span class="code-type">cufile_io_batch_t</span>* batch) {
+    <span class="code-function">cuFileBatchIOSetUp</span>(batch, BATCH_SIZE);
+    <span class="code-keyword">for</span> (<span class="code-type">int</span> i = <span class="code-number">0</span>; i &lt; BATCH_SIZE; i++) {
+        <span class="code-function">cuFileBatchIOSubmit</span>(handle, &amp;batch[i], <span class="code-number">0</span>);
+    }
+    <span class="code-function">cuFileBatchIOGetStatus</span>(batch, BATCH_SIZE, NULL);  <span class="code-comment">// Single completion check</span>
+}
+            </div>
+        </div>
+
+        <!-- Section 3: Near-Term Solutions (NVMe Evolution) -->
+        <div class="section">
+            <h2 class="section-title">Near-Term Solutions (2025-2027)</h2>
+            
+            <p style="margin-bottom: 25px; color: #aaa;">
+                NVMe protocol enhancements under discussion in NVM Express working groups. Requires SSD firmware updates and driver changes.
+            </p>
+
+            <div class="solutions-grid">
+                <div class="solution-card nearterm">
+                    <div class="card-header">
+                        <h3 class="card-title">Extended Command ID Space</h3>
+                        <span class="card-badge badge-nearterm">NVMe 2.x+</span>
+                    </div>
+                    <p class="card-description">
+                        Expand CID from 16-bit to 32-bit, enabling hierarchical allocation: <code>warp_id:thread_id:sequence</code>
+                    </p>
+                    <ul class="card-benefits">
+                        <li>Eliminates CID sync bottleneck</li>
+                        <li>4B unique IDs per queue</li>
+                        <li>Backward compatible</li>
+                    </ul>
+                </div>
+
+                <div class="solution-card nearterm">
+                    <div class="card-header">
+                        <h3 class="card-title">Doorbell-less Submission</h3>
+                        <span class="card-badge badge-nearterm">Proposed</span>
+                    </div>
+                    <p class="card-description">
+                        Controller periodically polls SQ tail location in host memory. Eliminates doorbell PCIe writes entirely.
+                    </p>
+                    <ul class="card-benefits">
+                        <li>Zero doorbell overhead</li>
+                        <li>Better for small I/O</li>
+                        <li>Slight latency tradeoff</li>
+                    </ul>
+                </div>
+
+                <div class="solution-card nearterm">
+                    <div class="card-header">
+                        <h3 class="card-title">Ordered Completion Mode</h3>
+                        <span class="card-badge badge-nearterm">Proposed</span>
+                    </div>
+                    <p class="card-description">
+                        Guarantee completions arrive in submission order. Enables O(1) completion lookup instead of O(N) CQ scan.
+                    </p>
+                    <ul class="card-benefits">
+                        <li>Predictable completion slot</li>
+                        <li>No CID lookup needed</li>
+                        <li>Optional per-queue</li>
+                    </ul>
+                </div>
+
+                <div class="solution-card nearterm">
+                    <div class="card-header">
+                        <h3 class="card-title">GPU-Callable Storage APIs</h3>
+                        <span class="card-badge badge-nearterm">In Development</span>
+                    </div>
+                    <p class="card-description">
+                        Enable cuFile calls from within CUDA kernels, allowing GPU threads to initiate I/O without CPU involvement.
+                    </p>
+                    <ul class="card-benefits">
+                        <li>True GPU-initiated I/O</li>
+                        <li>Demand paging from storage</li>
+                        <li>Requires driver changes</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: CXL Solution -->
+        <div class="section">
+            <h2 class="section-title">Paradigm Shift: CXL Memory Semantics</h2>
+            
+            <div class="info-box success">
+                <strong>š€ The Big Idea:</strong> CXL replaces command queues with memory semantics. Instead of submitting NVMe commands, the GPU issues standard load/store operations to a unified memory address space that spans DRAM, storage, and remote memory.
+            </div>
+
+            <div class="arch-diagram">
+                <div class="arch-title">Traditional NVMe vs. CXL.mem Architecture</div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                    <div>
+                        <h4 style="color: #ef4444; text-align: center; margin-bottom: 15px;">[X]  NVMe Today</h4>
+                        <div class="arch-flow" style="flex-direction: column;">
+                            <div class="arch-box arch-gpu">GPU Thread</div>
+                            <div class="arch-arrow">&larr;</div>
+                            <div style="text-align: center; font-size: 0.8rem; color: #888;">Build SQE, sync CID</div>
+                            <div class="arch-box arch-cpu">NVMe Driver</div>
+                            <div class="arch-arrow">&larr;</div>
+                            <div style="text-align: center; font-size: 0.8rem; color: #888;">Doorbell write</div>
+                            <div class="arch-box arch-storage">SSD Controller</div>
+                            <div class="arch-arrow">&larr;</div>
+                            <div style="text-align: center; font-size: 0.8rem; color: #888;">DMA + CQE</div>
+                            <div class="arch-box arch-gpu">GPU HBM</div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="color: #00ff88; text-align: center; margin-bottom: 15px;">[OK]  CXL.mem Future</h4>
+                        <div class="arch-flow" style="flex-direction: column;">
+                            <div class="arch-box arch-gpu">GPU Thread</div>
+                            <div class="arch-arrow">&larr;</div>
+                            <div style="text-align: center; font-size: 0.8rem; color: #00ff88;">Load instruction</div>
+                            <div class="arch-box arch-cxl">CXL Switch</div>
+                            <div class="arch-arrow">&larr;</div>
+                            <div style="text-align: center; font-size: 0.8rem; color: #00ff88;">Memory transaction</div>
+                            <div class="arch-box arch-storage">CXL Type 3 Storage</div>
+                            <div class="arch-arrow">&larr;</div>
+                            <div style="text-align: center; font-size: 0.8rem; color: #00ff88;">Data return</div>
+                            <div class="arch-box arch-gpu">GPU Register</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">CXL for GPU-Storage: Key Benefits</h3>
+            
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>NVMe over PCIe</th>
+                        <th>CXL.mem (Type 3)</th>
+                        <th>Improvement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Access Model</strong></td>
+                        <td>Command queues (SQ/CQ)</td>
+                        <td>Load/Store instructions</td>
+                        <td class="good">No queue overhead</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Synchronization</strong></td>
+                        <td>CID allocation, doorbell, CQ poll</td>
+                        <td>None (memory coherent)</td>
+                        <td class="good">Zero sync points</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Minimum I/O Size</strong></td>
+                        <td>512B - 4KB (LBA)</td>
+                        <td>64B cache line</td>
+                        <td class="good">Fine-grained access</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Latency</strong></td>
+                        <td>50-100 &micro;s</td>
+                        <td>~200-400+ ns (topology dependent)</td>
+                        <td class="good">10-100&times; lower latency (varies)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GPU Integration</strong></td>
+                        <td>Via driver + P2P DMA</td>
+                        <td>Native memory instructions</td>
+                        <td class="good">Direct access</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bandwidth</strong></td>
+                        <td>~14 GB/s per SSD</td>
+                        <td>64 GB/s per CXL link</td>
+                        <td class="good">4&times; per link</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Availability</strong></td>
+                        <td>Now (mature)</td>
+                        <td>CXL 3.0 spec ratified; device maturity varies</td>
+                        <td class="medium">Emerging ecosystem</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box warning">
+                <strong>[!]  CXL Latency Reality Check:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li><strong>200-500 ns:</strong> CXL memory expander (Type 3) accessing DRAM behind CXL controller. This is for DRAM-backed CXL, not persistent storage</li>
+                    <li><strong>2-10 &micro;s:</strong> CXL-attached persistent memory (Intel Optane-class or future SCM)</li>
+                    <li><strong>50-100 &micro;s:</strong> CXL-attached NAND (storage-class), similar to NVMe but with memory semantics</li>
+                    <li><strong>Switch overhead:</strong> Each CXL switch hop adds ~50-100 ns</li>
+                </ul>
+                For GPU checkpoint workloads targeting NAND storage, CXL's advantage is simplified programming model and finer granularity, not dramatic latency reduction over NVMe.
+            </div>
+
+            <h3 class="subsection-title">CXL 3.0 Features for AI Storage</h3>
+            
+            <div class="solutions-grid">
+                <div class="solution-card paradigm">
+                    <div class="card-header">
+                        <h3 class="card-title">Memory Pooling</h3>
+                        <span class="card-badge badge-paradigm">CXL 3.0</span>
+                    </div>
+                    <p class="card-description">
+                        Multiple GPUs share a common storage pool via CXL fabric. Dynamic capacity allocation without data movement.
+                    </p>
+                    <ul class="card-benefits">
+                        <li>Shared checkpoint storage</li>
+                        <li>No inter-GPU copies</li>
+                        <li>Elastic capacity</li>
+                    </ul>
+                </div>
+
+                <div class="solution-card paradigm">
+                    <div class="card-header">
+                        <h3 class="card-title">Hardware Coherency</h3>
+                        <span class="card-badge badge-paradigm">CXL.cache</span>
+                    </div>
+                    <p class="card-description">
+                        GPU caches remain coherent with CXL-attached storage. No explicit flush/invalidate required.
+                    </p>
+                    <ul class="card-benefits">
+                        <li>Simplified programming</li>
+                        <li>No cache management</li>
+                        <li>Consistent view</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="code-block">
+<span class="code-comment">// Future: GPU kernel with CXL memory-mapped storage</span>
+<span class="code-comment">// No NVMe commands, no queues, no synchronization</span>
+
+<span class="code-keyword">__global__</span> <span class="code-type">void</span> <span class="code-function">load_embeddings_cxl</span>(
+    <span class="code-type">float</span>* cxl_storage,      <span class="code-comment">// CXL-attached storage, memory-mapped</span>
+    <span class="code-type">int</span>* indices,
+    <span class="code-type">float</span>* output,
+    <span class="code-type">int</span> embedding_dim
+) {
+    <span class="code-type">int</span> tid = blockIdx.x * blockDim.x + threadIdx.x;
+    <span class="code-type">int</span> idx = indices[tid];
+    
+    <span class="code-comment">// Direct load from CXL storage - no I/O submission!</span>
+    <span class="code-comment">// Hardware handles the memory transaction</span>
+    <span class="code-keyword">for</span> (<span class="code-type">int</span> i = <span class="code-number">0</span>; i &lt; embedding_dim; i++) {
+        output[tid * embedding_dim + i] = cxl_storage[idx * embedding_dim + i];
+    }
+}
+
+<span class="code-comment">// Host setup - just map the CXL address space</span>
+<span class="code-type">float</span>* cxl_ptr = (<span class="code-type">float</span>*)<span class="code-function">cxl_mem_map</span>(device_id, size, CXL_MEM_TYPE3);
+<span class="code-function">load_embeddings_cxl</span>&lt;&lt;&lt;grid, block&gt;&gt;&gt;(cxl_ptr, indices, output, dim);
+            </div>
+        </div>
+
+        <!-- Section 5: UEC Solution -->
+        <div class="section">
+            <h2 class="section-title">Future Transport: Ultra Ethernet Consortium (UEC)</h2>
+            
+            <div class="info-box insight">
+                <strong>Œ What UEC Actually Is:</strong> The Ultra Ethernet Consortium is developing an improved Ethernet transport stack (UET - Ultra Ethernet Transport) optimized for AI/HPC workloads. UEC focuses on congestion control, multipath, and collective operations&mdash;<em>not</em> storage semantics. Storage would still use NVMe-oF, but over a UEC-improved fabric.
+            </div>
+
+            <div class="arch-diagram">
+                <div class="arch-title">UEC: Improved Ethernet Fabric for AI Workloads</div>
+                <div class="arch-flow">
+                    <div class="arch-box arch-gpu">
+                        GPU<br>
+                        <small>HBM</small>
+                    </div>
+                    <div class="arch-arrow">&rarr;</div>
+                    <div class="arch-box arch-fabric">
+                        UEC NIC<br>
+                        <small>w/ UET</small>
+                    </div>
+                    <div class="arch-arrow">&rarr;</div>
+                    <div class="arch-box arch-fabric">
+                        800G Ethernet<br>
+                        <small>UEC Fabric</small>
+                    </div>
+                    <div class="arch-arrow">&rarr;</div>
+                    <div class="arch-box arch-fabric">
+                        Storage NIC<br>
+                        <small>Target</small>
+                    </div>
+                    <div class="arch-arrow">&rarr;</div>
+                    <div class="arch-box arch-storage">
+                        NVMe-oF<br>
+                        <small>Storage Array</small>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 20px; color: #888;">
+                    NVMe-oF over UEC: Standard NVMe-oF protocol benefits from improved fabric transport
+                </div>
+            </div>
+
+            <h3 class="subsection-title">UEC vs. Traditional RoCE</h3>
+            
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>RoCE v2</th>
+                        <th>UEC/UET</th>
+                        <th>Benefit for Storage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Congestion Control</strong></td>
+                        <td>PFC/ECN (prone to deadlock)</td>
+                        <td>AI-optimized CC (handles bursts)</td>
+                        <td class="good">Better under bursty checkpoint I/O</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Multipath</strong></td>
+                        <td>Software MPIO, limited</td>
+                        <td>Hardware packet spraying</td>
+                        <td class="good">Better bandwidth utilization</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ordering</strong></td>
+                        <td>Strict per-connection</td>
+                        <td>Relaxed ordering option</td>
+                        <td class="good">Higher throughput potential</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Collective Ops</strong></td>
+                        <td>Software (NCCL/etc.)</td>
+                        <td>Hardware-assisted</td>
+                        <td class="good">Faster distributed training</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Software Stack</strong></td>
+                        <td>libibverbs</td>
+                        <td>libfabric/OFI native</td>
+                        <td class="good">Simpler GPU integration</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Speed</strong></td>
+                        <td>100-400 Gbps</td>
+                        <td>800G-1.6T target</td>
+                        <td class="good">Higher fabric bandwidth</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsection-title">UEC Relevance for GPU-Storage</h3>
+            
+            <div class="solutions-grid">
+                <div class="solution-card paradigm">
+                    <div class="card-header">
+                        <h3 class="card-title">GPU-Attached NICs</h3>
+                        <span class="card-badge badge-paradigm">UEC 1.0</span>
+                    </div>
+                    <p class="card-description">
+                        NIC connects directly to GPU (via NVLink/CXL), bypassing CPU entirely. GPU threads post RDMA operations directly.
+                    </p>
+                    <ul class="card-benefits">
+                        <li>GPU-initiated RDMA</li>
+                        <li>No CPU in data path</li>
+                        <li>Sub-microsecond latency</li>
+                    </ul>
+                </div>
+
+                <div class="solution-card paradigm">
+                    <div class="card-header">
+                        <h3 class="card-title">Ordered vs. Unordered Ops</h3>
+                        <span class="card-badge badge-paradigm">UEC 1.0</span>
+                    </div>
+                    <p class="card-description">
+                        Fine-grained ordering control. Bulk transfers use unordered (parallel) while metadata uses ordered (consistent).
+                    </p>
+                    <ul class="card-benefits">
+                        <li>Matches AI access patterns</li>
+                        <li>Higher parallelism</li>
+                        <li>Selective consistency</li>
+                    </ul>
+                </div>
+
+                <div class="solution-card paradigm">
+                    <div class="card-header">
+                        <h3 class="card-title">Fabric-Level Storage</h3>
+                        <span class="card-badge badge-paradigm">Future</span>
+                    </div>
+                    <p class="card-description">
+                        Storage disaggregated across fabric. Any GPU accesses any storage via uniform RDMA semantics.
+                    </p>
+                    <ul class="card-benefits">
+                        <li>Elastic storage pools</li>
+                        <li>GPU�”GPU�”Storage</li>
+                        <li>Composable infrastructure</li>
+                    </ul>
+                </div>
+
+                <div class="solution-card paradigm">
+                    <div class="card-header">
+                        <h3 class="card-title">Collective Storage Ops</h3>
+                        <span class="card-badge badge-paradigm">Research</span>
+                    </div>
+                    <p class="card-description">
+                        AllGather/ReduceScatter from storage. Checkpoint restore directly into distributed GPU memory.
+                    </p>
+                    <ul class="card-benefits">
+                        <li>Faster checkpoint restore</li>
+                        <li>No staging buffers</li>
+                        <li>Network-optimized patterns</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="code-block">
+<span class="code-comment">// Future: GPU-initiated storage access over UEC fabric</span>
+<span class="code-comment">// Conceptual API - actual UEC APIs still in development</span>
+
+<span class="code-keyword">__device__</span> <span class="code-type">void</span> <span class="code-function">uec_read_async</span>(
+    <span class="code-type">uec_handle_t</span> handle,
+    <span class="code-type">uint64_t</span> remote_addr,    <span class="code-comment">// Storage target address</span>
+    <span class="code-type">void</span>* local_buf,         <span class="code-comment">// GPU HBM destination</span>
+    <span class="code-type">size_t</span> size,
+    <span class="code-type">uec_completion_t</span>* comp
+);
+
+<span class="code-keyword">__global__</span> <span class="code-type">void</span> <span class="code-function">load_kv_cache_uec</span>(
+    <span class="code-type">uec_handle_t</span> storage,
+    <span class="code-type">uint64_t</span>* keys,
+    <span class="code-type">float</span>* values,
+    <span class="code-type">int</span> num_keys
+) {
+    <span class="code-type">int</span> tid = blockIdx.x * blockDim.x + threadIdx.x;
+    <span class="code-type">uec_completion_t</span> comp;
+    
+    <span class="code-comment">// GPU thread directly initiates RDMA read</span>
+    <span class="code-function">uec_read_async</span>(
+        storage,
+        keys[tid] * VALUE_SIZE,              <span class="code-comment">// Remote storage offset</span>
+        &amp;values[tid * VALUE_SIZE],           <span class="code-comment">// Local GPU buffer</span>
+        VALUE_SIZE,
+        &amp;comp
+    );
+    
+    <span class="code-comment">// Continue other work while I/O in flight...</span>
+    <span class="code-function">do_compute</span>();
+    
+    <span class="code-comment">// Wait for completion</span>
+    <span class="code-function">uec_wait</span>(&amp;comp);
+}
+            </div>
+        </div>
+
+        <!-- Section 6: Solution Timeline -->
+        <div class="section">
+            <h2 class="section-title">Implementation Timeline</h2>
+            
+            <div class="timeline">
+                <div class="timeline-item current">
+                    <div class="timeline-date">2024-2025: Deploy Now</div>
+                    <div class="timeline-title">GPUDirect Storage + Multi-Queue + Batching</div>
+                    <div class="timeline-desc">
+                        Production-ready solutions using existing NVMe SSDs. Achieves 50-100 GB/s aggregate with 8 SSDs. 
+                        Requires CUDA 11.4+, compatible NVMe SSDs, PCIe switch topology.
+                    </div>
+                </div>
+                
+                <div class="timeline-item nearterm">
+                    <div class="timeline-date">2025-2026: Early Adoption</div>
+                    <div class="timeline-title">NVMe Protocol Enhancements + CXL 2.0 Memory</div>
+                    <div class="timeline-desc">
+                        NVMe 2.1/3.0 features (shadow doorbells (DBBUF), batched submission). CXL 2.0 Type 3 memory expanders as 
+                        high-speed cache tier. GPU-callable cuFile APIs in development.
+                    </div>
+                </div>
+                
+                <div class="timeline-item nearterm">
+                    <div class="timeline-date">2026-2027: Mainstream</div>
+                    <div class="timeline-title">CXL 3.0 Memory Pooling + UEC 1.0 Fabric</div>
+                    <div class="timeline-desc">
+                        CXL 3.0 enables shared memory pools across GPUs and storage. UEC provides GPU-native 
+                        RDMA over 800G Ethernet. First systems with GPU-attached NICs.
+                    </div>
+                </div>
+                
+                <div class="timeline-item future">
+                    <div class="timeline-date">2028+: Paradigm Shift</div>
+                    <div class="timeline-title">Unified Memory-Semantic Storage</div>
+                    <div class="timeline-desc">
+                        Storage fully integrated into GPU memory address space. No explicit I/O&mdash;just load/store. 
+                        CXL + UEC converged fabric. GPU threads access PB-scale storage with ns-class latency.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 7: Decision Guide -->
+        <div class="section">
+            <h2 class="section-title">Solution Selection Guide</h2>
+            
+            <div class="decision-tree">
+                <h3 style="color: #00d4ff; margin-bottom: 20px;">Choose Your Path</h3>
+                
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>Your Situation</th>
+                            <th>Recommended Solution</th>
+                            <th>Expected Outcome</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Training large models today</strong><br><small>Need reliable, production solution</small></td>
+                            <td>GDS + 8 SSDs + Multi-queue striping</td>
+                            <td>80-100 GB/s throughput<br>~100 &micro;s latency</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Inference with KV-cache</strong><br><small>Need low latency, high IOPS</small></td>
+                            <td>GDS + NVMe batching + prefetch</td>
+                            <td>1M+ IOPS<br>GPU utilization &gt;90%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Building new AI cluster (2025)</strong><br><small>Can wait for new tech</small></td>
+                            <td>Plan for CXL 2.0 memory tier + UEC fabric</td>
+                            <td>10&times; better random access<br>Disaggregated storage</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Research / prototyping</strong><br><small>Exploring limits</small></td>
+                            <td>BaM + custom GPU NVMe driver</td>
+                            <td>GPU-initiated I/O<br>Learn future patterns</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Multi-GPU distributed training</strong><br><small>Need shared checkpoint storage</small></td>
+                            <td>Wait for CXL 3.0 pooling or UEC collectives</td>
+                            <td>Shared storage pool<br>No inter-GPU copies</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="info-box warning">
+                <strong>[!]  Key Decision Factors:</strong>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li><strong>Timeline:</strong> Production now &rarr; GDS; 2026+ &rarr; CXL/UEC</li>
+                    <li><strong>Access Pattern:</strong> Sequential &rarr; GDS sufficient; Random &rarr; Need CXL</li>
+                    <li><strong>Scale:</strong> Single node &rarr; Local NVMe; Multi-node &rarr; UEC fabric</li>
+                    <li><strong>Latency Sensitivity:</strong> Throughput-focused &rarr; NVMe OK; Latency-critical &rarr; CXL</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 8: Summary -->
+        <div class="section">
+            <h2 class="section-title">Key Takeaways</h2>
+            
+            <div class="solutions-grid">
+                <div class="info-box success">
+                    <h4 style="color: #00ff88; margin-bottom: 10px;">[OK]  Today's Best Practice</h4>
+                    <p>GPUDirect Storage + multi-SSD striping + batch submission. Achieves 50-100 GB/s with existing hardware. Software-only optimizations can improve IOPS 10&times;.</p>
+                </div>
+                
+                <div class="info-box insight">
+                    <h4 style="color: #00d4ff; margin-bottom: 10px;">&rarr; Near-Term Evolution</h4>
+                    <p>NVMe protocol enhancements (shadow doorbells (DBBUF), batched submission) will reduce sync overhead. GPU-callable storage APIs enable true GPU-initiated I/O.</p>
+                </div>
+                
+                <div class="info-box success">
+                    <h4 style="color: #00ff88; margin-bottom: 10px;">š€ CXL: Memory Semantics</h4>
+                    <p>CXL eliminates command queues entirely. Load/store access to storage with ns-class latency. Shared memory pools enable new architectures.</p>
+                </div>
+                
+                <div class="info-box insight">
+                    <h4 style="color: #00d4ff; margin-bottom: 10px;">Œ UEC: Fabric-Scale Storage</h4>
+                    <p>Ultra Ethernet provides GPU-native RDMA over 800G fabric. GPU-initiated storage access across the datacenter. Collective storage operations for distributed training.</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px; padding: 30px; background: rgba(0,255,136,0.1); border-radius: 12px;">
+                <h3 style="color: #00ff88; margin-bottom: 15px;">The Future: No More I/O</h3>
+                <p style="font-size: 1.1rem; color: #ccc;">
+                    The endgame is eliminating the concept of "I/O" entirely. Storage becomes just another tier of memory, 
+                    accessed with standard load/store instructions. CXL provides local memory semantics; UEC extends this 
+                    across the fabric. GPU programmers won't think about storage&mdash;just memory addresses.
+                </p>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="06_implementation.html" class="nav-btn">&larr; Implementation Patterns</a>
+            <a href="08_advanced_solutions.html" class="nav-btn">Advanced Solutions &rarr;</a>
+        </div>
     </div>
 </body>
 </html>

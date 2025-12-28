@@ -267,9 +267,9 @@
 <body>
     <div class="container">
         <nav class="nav-header">
-            <a href="index.html">← Home</a>
+            <a href="index.html">&larr; Home</a>
             <span style="color: var(--accent-red); font-weight: 600;">🚨 Production Critical Guide</span>
-            <a href="10_expert_storage_guide.html">Expert Guide →</a>
+            <a href="10_expert_storage_guide.html">Expert Guide &rarr;</a>
         </nav>
 
         <div class="hero">
@@ -322,28 +322,28 @@
                         <td>Large sequential (GB-TB)</td>
                         <td class="good">1.0 - 1.2</td>
                         <td>Low</td>
-                        <td class="good">✓ Safe</td>
+                        <td class="good">[CHECK] Safe</td>
                     </tr>
                     <tr>
                         <td><strong>Dataset Reads</strong></td>
                         <td>Sequential reads</td>
                         <td class="good">N/A (reads)</td>
                         <td>None</td>
-                        <td class="good">✓ Safe</td>
+                        <td class="good">[CHECK] Safe</td>
                     </tr>
                     <tr>
                         <td><strong>ZeRO-2 Gradient Offload</strong></td>
                         <td>Mixed 64KB-1MB</td>
                         <td class="medium">1.5 - 2.5</td>
                         <td>Medium</td>
-                        <td class="medium">⚠ Monitor</td>
+                        <td class="medium">[!] Monitor</td>
                     </tr>
                     <tr>
                         <td><strong>ZeRO-3 Param Offload</strong></td>
                         <td>Random 4KB-256KB</td>
                         <td class="poor">2.0 - 4.0</td>
                         <td>High</td>
-                        <td class="poor">⚠ Danger</td>
+                        <td class="poor">[!] Danger</td>
                     </tr>
                     <tr>
                         <td><strong>ZeRO-Infinity</strong></td>
@@ -435,8 +435,8 @@ Within Warranty:  {result['within_warranty']}
 
 <span style="color: #6a9955;"># Output:</span>
 <span style="color: #6a9955;"># NAND Writes/Day:  7.37 TB</span>
-<span style="color: #6a9955;"># Effective DWPD:   1.92 (rated: 1.0)  ← EXCEEDS RATING!</span>
-<span style="color: #6a9955;"># Expected Life:    26.0 months        ← Will fail before warranty</span>
+<span style="color: #6a9955;"># Effective DWPD:   1.92 (rated: 1.0)  &larr; EXCEEDS RATING!</span>
+<span style="color: #6a9955;"># Expected Life:    26.0 months        &larr; Will fail before warranty</span>
 <span style="color: #6a9955;"># Risk Level:       HIGH</span></code></pre>
 
             <h3 class="subsection-title">Enterprise vs Consumer SSD Comparison for AI</h3>
@@ -505,8 +505,8 @@ Within Warranty:  {result['within_warranty']}
             </table>
 
             <div class="info-box success">
-                <strong>✅ Recommendation:</strong> For ZeRO-3/Infinity or any random-write-heavy AI workload, 
-                strongly prefer enterprise SSDs with ≥1 DWPD rating. The 2x cost premium typically pays for itself in 
+                <strong>[OK] Recommendation:</strong> For ZeRO-3/Infinity or any random-write-heavy AI workload, 
+                strongly prefer enterprise SSDs with &ge;1 DWPD rating. The 2x cost premium typically pays for itself in 
                 reliability and not having to replace drives mid-training.
             </div>
 
@@ -568,21 +568,21 @@ Within Warranty:  {result['within_warranty']}
 
             <div class="cards-grid">
                 <div class="card">
-                    <h4 style="color: var(--accent-green); margin-bottom: 10px;">✓ Wear Isolation</h4>
+                    <h4 style="color: var(--accent-green); margin-bottom: 10px;">[CHECK] Wear Isolation</h4>
                     <p style="color: var(--text-secondary); font-size: 0.95rem;">
                         Separate high-wear workloads (ZeRO offload) from low-wear (checkpoints). 
                         Prevents random writes from fragmenting sequential write areas.
                     </p>
                 </div>
                 <div class="card">
-                    <h4 style="color: var(--accent-green); margin-bottom: 10px;">✓ Performance Isolation</h4>
+                    <h4 style="color: var(--accent-green); margin-bottom: 10px;">[CHECK] Performance Isolation</h4>
                     <p style="color: var(--text-secondary); font-size: 0.95rem;">
                         Garbage collection in one namespace doesn't impact latency in another. 
                         Critical for latency-sensitive inference.
                     </p>
                 </div>
                 <div class="card">
-                    <h4 style="color: var(--accent-green); margin-bottom: 10px;">✓ Capacity Planning</h4>
+                    <h4 style="color: var(--accent-green); margin-bottom: 10px;">[CHECK] Capacity Planning</h4>
                     <p style="color: var(--text-secondary); font-size: 0.95rem;">
                         Prevent one workload from consuming all space. 
                         Checkpoints get dedicated capacity.
@@ -672,7 +672,7 @@ echo <span style="color: #ce9178;">"Namespace configuration complete!"</span>
 nvme list</code></pre>
 
             <div class="info-box warning">
-                <strong>⚠️ Namespace Caveats:</strong>
+                <strong>[!]️ Namespace Caveats:</strong>
                 <ul style="margin-top: 10px; margin-left: 20px;">
                     <li>Not all SSDs support namespace management (check with <code class="inline-code">nvme id-ctrl</code>)</li>
                     <li>Namespaces share DRAM buffer and controller resources</li>
@@ -894,7 +894,7 @@ echo <span style="color: #ce9178;">"Storage watchdog started at $(date)"</span> 
             <h2 class="section-title">🟡 4. NUMA-Aware Storage Placement</h2>
             
             <div class="info-box warning">
-                <strong>⚠️ OFTEN OVERLOOKED:</strong> Placing NVMe drives on the wrong NUMA node relative to their 
+                <strong>[!]️ OFTEN OVERLOOKED:</strong> Placing NVMe drives on the wrong NUMA node relative to their 
                 consumer GPUs can cost you 40-60% of your bandwidth. This is free performance you're leaving on the table.
             </div>
 
@@ -1007,7 +1007,7 @@ echo <span style="color: #ce9178;">"NUMA-aware storage configured!"</span></code
             <h2 class="section-title">🟡 5. Reproducible Benchmarking Methodology</h2>
             
             <div class="info-box warning">
-                <strong>⚠️ STOP GUESSING:</strong> "It feels faster" is not a benchmark. Here are reproducible 
+                <strong>[!]️ STOP GUESSING:</strong> "It feels faster" is not a benchmark. Here are reproducible 
                 scripts that give you real numbers you can compare across configurations.
             </div>
 
@@ -1223,7 +1223,7 @@ nvme sanitize-log /dev/nvme0 | grep -i "Sanitize Status"</code></pre>
             <h2 class="section-title">⚡ 7. Power Management Deep Dive</h2>
             
             <div class="info-box warning">
-                <strong>⚠️ LATENCY KILLER:</strong> NVMe power states can add 5-50ms latency spikes. 
+                <strong>[!]️ LATENCY KILLER:</strong> NVMe power states can add 5-50ms latency spikes. 
                 For AI workloads, you want consistent low latency, not power savings.
             </div>
 
@@ -1276,7 +1276,7 @@ nvme get-log /dev/nvme0 --log-id=0x80 --log-len=512 | xxd | head -20</code></pre
                         <td>0</td>
                         <td>0</td>
                         <td>None</td>
-                        <td class="good">✓ Use This</td>
+                        <td class="good">[CHECK] Use This</td>
                     </tr>
                     <tr>
                         <td><strong>PS1</strong> (Idle)</td>
@@ -1431,9 +1431,9 @@ mdadm --detail $RAID_DEVICE</code></pre>
         </section>
 
         <nav class="nav-header" style="margin-top: 50px;">
-            <a href="11_ml_frameworks.html">← ML Frameworks</a>
+            <a href="11_ml_frameworks.html">&larr; ML Frameworks</a>
             <span style="color: var(--text-secondary);">Production Critical Guide</span>
-            <a href="index.html">Home →</a>
+            <a href="index.html">Home &rarr;</a>
         </nav>
 
     </div>
