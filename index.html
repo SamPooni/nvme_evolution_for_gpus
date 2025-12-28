@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU-NVMe Architecture | Why Storage Must Evolve for AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-void: #030308;
+            --bg-deep: #0a0a12;
+            --bg-surface: #12121c;
+            --bg-elevated: #1a1a28;
+            --bg-hover: #242436;
+            
+            --text-bright: #ffffff;
+            --text-primary: #e4e4ed;
+            --text-secondary: #9494a8;
+            --text-muted: #5c5c72;
+            
+            --accent-cyber: #00ffaa;
+            --accent-electric: #00d4ff;
+            --accent-plasma: #a855f7;
+            --accent-solar: #fbbf24;
+            --accent-ember: #ff6b6b;
+            --accent-ice: #38bdf8;
+            
+            --glow-cyber: 0 0 30px rgba(0, 255, 170, 0.3);
+            --glow-electric: 0 0 30px rgba(0, 212, 255, 0.3);
+            --glow-plasma: 0 0 30px rgba(168, 85, 247, 0.3);
+            
+            --gradient-cyber: linear-gradient(135deg, #00ffaa 0%, #00d4ff 100%);
+            --gradient-plasma: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+            --gradient-solar: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
+            --gradient-ember: linear-gradient(135deg, #ff6b6b 0%, #f43f5e 100%);
+            
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-void);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ============ ANIMATED BACKGROUND ============ */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0, 255, 170, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 170, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow-1 {
+            top: -200px;
+            left: -200px;
+            background: var(--accent-cyber);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .bg-glow-2 {
+            bottom: -200px;
+            right: -200px;
+            background: var(--accent-plasma);
+            animation: float 25s ease-in-out infinite reverse;
+        }
+
+        .bg-glow-3 {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--accent-electric);
+            animation: pulse 15s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(100px, 50px); }
+            50% { transform: translate(50px, 100px); }
+            75% { transform: translate(-50px, 50px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.1; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.2; transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        /* ============ CONTAINER ============ */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ============ HERO SECTION ============ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px 20px;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-elevated);
+            border: 1px solid rgba(0, 255, 170, 0.3);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--accent-cyber);
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent-cyber);
+            border-radius: 50%;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .hero-title .gradient {
+            background: var(--gradient-cyber);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin-bottom: 50px;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============ SPEED COMPARISON VISUAL ============ */
+        .speed-visual {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 60px;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+
+        .speed-comparison {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            padding: 40px;
+            background: var(--bg-surface);
+            border-radius: var(--radius-xl);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .speed-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .speed-label {
+            width: 180px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .speed-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .speed-icon.gpu { background: var(--gradient-plasma); }
+        .speed-icon.nvlink { background: var(--gradient-cyber); }
+        .speed-icon.pcie { background: var(--gradient-solar); }
+        .speed-icon.ssd { background: var(--gradient-ember); }
+
+        .speed-bar-container {
+            flex: 1;
+            height: 44px;
+            background: var(--bg-elevated);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .speed-bar {
+            height: 100%;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 16px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--bg-void);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .speed-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .speed-bar.gpu-mem { 
+            width: 100%; 
+            background: var(--gradient-plasma);
+            animation: growBar 1.5s ease-out 1s both;
+        }
+        .speed-bar.nvlink { 
+            width: 45%; 
+            background: var(--gradient-cyber);
+            animation: growBar 1.5s ease-out 1.2s both;
+        }
+        .speed-bar.pcie { 
+            width: 8%; 
+            background: var(--gradient-solar);
+            animation: growBar 1.5s ease-out 1.4s both;
+        }
+        .speed-bar.ssd { 
+            width: 3.5%; 
+            background: var(--gradient-ember);
+            animation: growBar 1.5s ease-out 1.6s both;
+            min-width: 80px;
+        }
+
+        @keyframes growBar {
+            from { width: 0; }
+        }
+
+        .speed-value {
+            position: absolute;
+            right: -80px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            width: 70px;
+        }
+
+        .bottleneck-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: var(--radius-md);
+            color: var(--accent-ember);
+            font-weight: 600;
+        }
+
+        /* ============ ARCHITECTURE DIAGRAM ============ */
+        .arch-section {
+            padding: 100px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-tag {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-electric);
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* SVG Architecture Diagram */
+        .arch-diagram {
+            background: var(--bg-surface);
+            border-radius: var(--radius-xl);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 50px 30px;
+            margin-bottom: 60px;
+            overflow-x: auto;
+        }
+
+        .arch-diagram svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* ============ NAVIGATION CARDS ============ */
+        .nav-section {
+            padding: 80px 0;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+        }
+
+        .nav-card {
+            background: var(--bg-surface);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-cyber);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(0, 255, 170, 0.3);
+            box-shadow: var(--glow-cyber);
+        }
+
+        .nav-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .nav-card-number {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        .nav-card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-bright);
+            margin-bottom: 12px;
+        }
+
+        .nav-card-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .nav-card-arrow {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-elevated);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .nav-card:hover .nav-card-arrow {
+            background: var(--accent-cyber);
+            transform: translateX(4px);
+        }
+
+        .nav-card:hover .nav-card-arrow svg {
+            stroke: var(--bg-void);
+        }
+
+        /* ============ STATS SECTION ============ */
+        .stats-section {
+            padding: 80px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-surface);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            border-radius: 0 0 4px 4px;
+        }
+
+        .stat-card:nth-child(1)::before { background: var(--accent-cyber); }
+        .stat-card:nth-child(2)::before { background: var(--accent-electric); }
+        .stat-card:nth-child(3)::before { background: var(--accent-plasma); }
+        .stat-card:nth-child(4)::before { background: var(--accent-solar); }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .stat-card:nth-child(1) .stat-value { color: var(--accent-cyber); }
+        .stat-card:nth-child(2) .stat-value { color: var(--accent-electric); }
+        .stat-card:nth-child(3) .stat-value { color: var(--accent-plasma); }
+        .stat-card:nth-child(4) .stat-value { color: var(--accent-solar); }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* ============ FOOTER ============ */
+        .footer {
+            padding: 60px 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: var(--gradient-cyber);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 768px) {
+            .speed-row { flex-direction: column; align-items: stretch; }
+            .speed-label { width: 100%; }
+            .speed-value { position: static; width: auto; margin-top: 8px; text-align: right; }
+            .nav-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+    <div class="bg-glow bg-glow-3"></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">
+                <span>GPU-NVMe Technical Documentation</span>
+            </div>
+            
+            <h1 class="hero-title">
+                Why does <span class="gradient">NVMe</span> need to evolve<br>
+                for efficient GPU storage access?
+            </h1>
+            
+            <p class="hero-subtitle">
+                Traditional NVMe was designed for CPU cores. With GPU interconnects reaching TB/s 
+                while SSDs remain at GB/s, storage has become the critical bottleneck for AI workloads.
+            </p>
+
+            <!-- Speed Comparison Visual -->
+            <div class="speed-visual">
+                <div class="speed-comparison">
+                    <div class="speed-row">
+                        <div class="speed-label">
+                            <div class="speed-icon gpu">
+                                <svg width="24" height="24" fill="none" stroke="white" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                    <path d="M7 7h10M7 12h10M7 17h6"/>
+                                </svg>
+                            </div>
+                            <span>HBM3 Memory</span>
+                        </div>
+                        <div class="speed-bar-container">
+                            <div class="speed-bar gpu-mem">3.35 TB/s</div>
+                        </div>
+                    </div>
+                    
+                    <div class="speed-row">
+                        <div class="speed-label">
+                            <div class="speed-icon nvlink">
+                                <svg width="24" height="24" fill="none" stroke="white" stroke-width="2">
+                                    <path d="M4 12h16M12 4v16"/>
+                                    <circle cx="4" cy="12" r="2"/><circle cx="20" cy="12" r="2"/>
+                                    <circle cx="12" cy="4" r="2"/><circle cx="12" cy="20" r="2"/>
+                                </svg>
+                            </div>
+                            <span>NVLink 5.0</span>
+                        </div>
+                        <div class="speed-bar-container">
+                            <div class="speed-bar nvlink">1.8 TB/s</div>
+                        </div>
+                    </div>
+                    
+                    <div class="speed-row">
+                        <div class="speed-label">
+                            <div class="speed-icon pcie">
+                                <svg width="24" height="24" fill="none" stroke="white" stroke-width="2">
+                                    <rect x="2" y="6" width="20" height="12" rx="2"/>
+                                    <path d="M6 10v4M10 10v4M14 10v4M18 10v4"/>
+                                </svg>
+                            </div>
+                            <span>PCIe Gen5 x16</span>
+                        </div>
+                        <div class="speed-bar-container">
+                            <div class="speed-bar pcie">128 GB/s</div>
+                        </div>
+                    </div>
+                    
+                    <div class="speed-row">
+                        <div class="speed-label">
+                            <div class="speed-icon ssd">
+                                <svg width="24" height="24" fill="none" stroke="white" stroke-width="2">
+                                    <rect x="4" y="4" width="16" height="16" rx="2"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </div>
+                            <span>NVMe Gen5 SSD</span>
+                        </div>
+                        <div class="speed-bar-container">
+                            <div class="speed-bar ssd">14 GB/s</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bottleneck-indicator">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                        <span>Storage is 240× slower than GPU memory — The AI Infrastructure Bottleneck</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture Diagram Section -->
+    <section class="arch-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag">System Architecture</div>
+                <h2 class="section-title">GPU-Storage Data Flow</h2>
+                <p class="section-subtitle">Understanding the path from NVMe to GPU memory and why traditional CPU-mediated I/O creates bottlenecks</p>
+            </div>
+
+            <div class="arch-diagram">
+                <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Definitions -->
+                    <defs>
+                        <linearGradient id="gpuGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#a855f7"/>
+                            <stop offset="100%" style="stop-color:#6366f1"/>
+                        </linearGradient>
+                        <linearGradient id="cpuGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3b82f6"/>
+                            <stop offset="100%" style="stop-color:#1d4ed8"/>
+                        </linearGradient>
+                        <linearGradient id="nvmeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00ffaa"/>
+                            <stop offset="100%" style="stop-color:#00d4ff"/>
+                        </linearGradient>
+                        <linearGradient id="ramGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#fbbf24"/>
+                            <stop offset="100%" style="stop-color:#f97316"/>
+                        </linearGradient>
+                        <linearGradient id="gdsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#10b981"/>
+                            <stop offset="100%" style="stop-color:#059669"/>
+                        </linearGradient>
+                        
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                        
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#00ffaa"/>
+                        </marker>
+                        <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#ff6b6b"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Background boxes -->
+                    <rect x="30" y="30" width="940" height="200" rx="16" fill="#12121c" stroke="#2a2a3a" stroke-width="1"/>
+                    <text x="50" y="58" fill="#5c5c72" font-size="12" font-weight="600">TRADITIONAL PATH (CPU-Mediated)</text>
+                    
+                    <rect x="30" y="270" width="940" height="200" rx="16" fill="#0f1f1a" stroke="#134e3a" stroke-width="1"/>
+                    <text x="50" y="298" fill="#10b981" font-size="12" font-weight="600">GPUDirect STORAGE PATH (Zero-Copy)</text>
+
+                    <!-- Traditional Path Components -->
+                    <!-- NVMe SSD -->
+                    <rect x="80" y="90" width="140" height="100" rx="12" fill="url(#nvmeGrad)" filter="url(#glow)"/>
+                    <text x="150" y="130" fill="#030308" font-size="14" font-weight="700" text-anchor="middle">NVMe SSD</text>
+                    <text x="150" y="150" fill="#030308" font-size="11" text-anchor="middle">14 GB/s</text>
+                    <text x="150" y="170" fill="#030308" font-size="10" text-anchor="middle">Gen5 x4</text>
+
+                    <!-- Arrow 1 -->
+                    <path d="M220 140 L280 140" stroke="#ff6b6b" stroke-width="3" marker-end="url(#arrowhead-red)" stroke-dasharray="8,4">
+                        <animate attributeName="stroke-dashoffset" from="24" to="0" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                    <text x="250" y="130" fill="#ff6b6b" font-size="9" text-anchor="middle">PCIe</text>
+
+                    <!-- CPU -->
+                    <rect x="280" y="90" width="140" height="100" rx="12" fill="url(#cpuGrad)" filter="url(#glow)"/>
+                    <text x="350" y="130" fill="white" font-size="14" font-weight="700" text-anchor="middle">CPU</text>
+                    <text x="350" y="150" fill="white" font-size="11" text-anchor="middle">Kernel Driver</text>
+                    <text x="350" y="170" fill="white" font-size="10" text-anchor="middle">Context Switch</text>
+
+                    <!-- Arrow 2 -->
+                    <path d="M420 140 L480 140" stroke="#ff6b6b" stroke-width="3" marker-end="url(#arrowhead-red)" stroke-dasharray="8,4">
+                        <animate attributeName="stroke-dashoffset" from="24" to="0" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                    <text x="450" y="130" fill="#ff6b6b" font-size="9" text-anchor="middle">DDR</text>
+
+                    <!-- System RAM -->
+                    <rect x="480" y="90" width="140" height="100" rx="12" fill="url(#ramGrad)" filter="url(#glow)"/>
+                    <text x="550" y="130" fill="#030308" font-size="14" font-weight="700" text-anchor="middle">System RAM</text>
+                    <text x="550" y="150" fill="#030308" font-size="11" text-anchor="middle">Bounce Buffer</text>
+                    <text x="550" y="170" fill="#030308" font-size="10" text-anchor="middle">+Copy Overhead</text>
+
+                    <!-- Arrow 3 -->
+                    <path d="M620 140 L680 140" stroke="#ff6b6b" stroke-width="3" marker-end="url(#arrowhead-red)" stroke-dasharray="8,4">
+                        <animate attributeName="stroke-dashoffset" from="24" to="0" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                    <text x="650" y="130" fill="#ff6b6b" font-size="9" text-anchor="middle">PCIe</text>
+
+                    <!-- GPU (Traditional) -->
+                    <rect x="680" y="90" width="140" height="100" rx="12" fill="url(#gpuGrad)" filter="url(#glow)"/>
+                    <text x="750" y="130" fill="white" font-size="14" font-weight="700" text-anchor="middle">GPU</text>
+                    <text x="750" y="150" fill="white" font-size="11" text-anchor="middle">HBM Memory</text>
+                    <text x="750" y="170" fill="white" font-size="10" text-anchor="middle">3.35 TB/s</text>
+
+                    <!-- Latency indicator -->
+                    <rect x="850" y="100" width="100" height="80" rx="8" fill="#1a0a0a" stroke="#ff6b6b" stroke-width="1"/>
+                    <text x="900" y="125" fill="#ff6b6b" font-size="11" font-weight="600" text-anchor="middle">LATENCY</text>
+                    <text x="900" y="150" fill="#ff6b6b" font-size="20" font-weight="700" text-anchor="middle">~100μs</text>
+                    <text x="900" y="168" fill="#ff6b6b" font-size="10" text-anchor="middle">3 copies</text>
+
+                    <!-- GDS Path Components -->
+                    <!-- NVMe SSD (GDS) -->
+                    <rect x="80" y="330" width="140" height="100" rx="12" fill="url(#nvmeGrad)" filter="url(#glow)"/>
+                    <text x="150" y="370" fill="#030308" font-size="14" font-weight="700" text-anchor="middle">NVMe SSD</text>
+                    <text x="150" y="390" fill="#030308" font-size="11" text-anchor="middle">GDS Enabled</text>
+                    <text x="150" y="410" fill="#030308" font-size="10" text-anchor="middle">BAR1 Mapped</text>
+
+                    <!-- Direct Arrow -->
+                    <path d="M220 380 L680 380" stroke="#00ffaa" stroke-width="4" marker-end="url(#arrowhead)">
+                        <animate attributeName="stroke-dasharray" values="0,1000;500,500;1000,0" dur="2s" repeatCount="indefinite"/>
+                    </path>
+                    <text x="450" y="365" fill="#00ffaa" font-size="12" font-weight="600" text-anchor="middle">DIRECT PCIe P2P TRANSFER</text>
+                    <text x="450" y="400" fill="#00ffaa" font-size="10" text-anchor="middle">GPUDirect Storage — Zero CPU involvement</text>
+
+                    <!-- GPU (GDS) -->
+                    <rect x="680" y="330" width="140" height="100" rx="12" fill="url(#gpuGrad)" filter="url(#glow)"/>
+                    <text x="750" y="370" fill="white" font-size="14" font-weight="700" text-anchor="middle">GPU</text>
+                    <text x="750" y="390" fill="white" font-size="11" text-anchor="middle">cuFile API</text>
+                    <text x="750" y="410" fill="white" font-size="10" text-anchor="middle">Direct DMA</text>
+
+                    <!-- Latency indicator (GDS) -->
+                    <rect x="850" y="340" width="100" height="80" rx="8" fill="#0a1a0f" stroke="#00ffaa" stroke-width="1"/>
+                    <text x="900" y="365" fill="#00ffaa" font-size="11" font-weight="600" text-anchor="middle">LATENCY</text>
+                    <text x="900" y="390" fill="#00ffaa" font-size="20" font-weight="700" text-anchor="middle">~15μs</text>
+                    <text x="900" y="408" fill="#00ffaa" font-size="10" text-anchor="middle">0 copies</text>
+
+                    <!-- Improvement Arrow -->
+                    <path d="M900 210 L900 330" stroke="#00ffaa" stroke-width="2" stroke-dasharray="6,3"/>
+                    <rect x="865" y="250" width="70" height="30" rx="6" fill="#00ffaa"/>
+                    <text x="900" y="270" fill="#030308" font-size="12" font-weight="700" text-anchor="middle">6.7× ↑</text>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Technical Sections</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">240×</div>
+                    <div class="stat-label">Memory vs Storage Gap</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">6.7×</div>
+                    <div class="stat-label">GDS Latency Improvement</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">2027+</div>
+                    <div class="stat-label">CXL 3.0 Storage Timeline</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation Section -->
+    <section class="nav-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag">Documentation</div>
+                <h2 class="section-title">Explore the Full Guide</h2>
+                <p class="section-subtitle">From fundamentals to production deployment</p>
+            </div>
+
+            <div class="nav-grid">
+                <a href="01_motivation.html" class="nav-card">
+                    <div class="nav-card-number">01</div>
+                    <div class="nav-card-title">Motivation: AI & Storage</div>
+                    <div class="nav-card-desc">Why GPUs are at the heart of AI training and inference, and how storage needs to be accessible to GPUs.</div>
+                    <div class="nav-card-arrow">
+                        <svg width="16" height="16" fill="none" stroke="#9494a8" stroke-width="2">
+                            <path d="M4 8h8M8 4l4 4-4 4"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="02_cpu_vs_gpu.html" class="nav-card">
+                    <div class="nav-card-number">02</div>
+                    <div class="nav-card-title">CPU vs GPU I/O</div>
+                    <div class="nav-card-desc">Fundamental differences between architectures — threads, warps, SIMT, and why it matters for storage.</div>
+                    <div class="nav-card-arrow">
+                        <svg width="16" height="16" fill="none" stroke="#9494a8" stroke-width="2">
+                            <path d="M4 8h8M8 4l4 4-4 4"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="03_sync_problem.html" class="nav-card">
+                    <div class="nav-card-number">03</div>
+                    <div class="nav-card-title">Thread Sync & Polling</div>
+                    <div class="nav-card-desc">How NVMe's thread synchronization hurts GPU utilization, and why polling beats interrupts.</div>
+                    <div class="nav-card-arrow">
+                        <svg width="16" height="16" fill="none" stroke="#9494a8" stroke-width="2">
+                            <path d="M4 8h8M8 4l4 4-4 4"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="04_challenges.html" class="nav-card">
+                    <div class="nav-card-number">04</div>
+                    <div class="nav-card-title">Challenges & Action</div>
+                    <div class="nav-card-desc">Key NVMe challenges and what needs to change for GPU-optimized storage access.</div>
+                    <div class="nav-card-arrow">
+                        <svg width="16" height="16" fill="none" stroke="#9494a8" stroke-width="2">
+                            <path d="M4 8h8M8 4l4 4-4 4"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="05_expert_deep_dive.html" class="nav-card">
+                    <div class="nav-card-number">05</div>
+                    <div class="nav-card-title">Expert Deep Dive</div>
+                    <div class="nav-card-desc">Protocol internals, latency breakdown, PCIe analysis, GPUDirect Storage architecture.</div>
+                    <div class="nav-card-arrow">
+                        <svg width="16" height="16" fill="none" stroke="#9494a8" stroke-width="2">
+                            <path d="M4 8h8M8 4l4 4-4 4"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="06_implementation.html" class="nav-card">
+                    <div class="nav-card-number">06</div>
+                    <div class="nav-card-title">Implementation Patterns</div>
+                    <div class="nav-card-desc">AI/ML workload patterns, GDS, kvikIO, optimization strategies, and future directions.</div>
+                    <div class="nav-card-arrow">
+                        <svg width="16" height="16" fill="none" stroke="#9494a8" stroke-width="2">
+                            <path d="M4 8h8M8 4l4 4-4 4"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="07_solutions.html" class="nav-card">
+                    <div class="nav-card-number">07</div>
+                    <div class="nav-card-title">Solutions Architecture</div>
+                    <div class="nav-card-desc">Problem→Solution mapping. CXL memory semantics and Ultra Ethernet fabric.</div>
+                    <div class="nav-card-arrow">
+                        <svg width="16" height="16" fill="none" stroke="#9494a8" stroke-width="2">
+                            <path d="M4 8h8M8 4l4 4-4 4"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="08_advanced_solutions.html" class="nav-card">
+                    <div class="nav-card-number">08</div>
+                    <div class="nav-card-title">Advanced & Hard Truths</div>
+                    <div class="nav-card-desc">Reality checks: CXL DRAM vs NAND, computational storage, GPU vendor divergence.</div>
+                    <div class="nav-card-arrow">
+                        <svg width="16" height="16" fill="none" stroke="#9494a8" stroke-width="2">
+                            <path d="M4 8h8M8 4l4 4-4 4"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="09_production_reality.html" class="nav-card">
+                    <div class="nav-card-number">09</div>
+                    <div class="nav-card-title">Production Reality</div>
+                    <div class="nav-card-desc">NVMe-oF, Linux stack, K8s/CSI, security, TCO, ZNS/KV command sets, MLPerf methodology.</div>
+                    <div class="nav-card-arrow">
+                        <svg width="16" height="16" fill="none" stroke="#9494a8" stroke-width="2">
+                            <path d="M4 8h8M8 4l4 4-4 4"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="10_expert_storage_guide.html" class="nav-card">
+                    <div class="nav-card-number">10</div>
+                    <div class="nav-card-title">Expert Storage Guide</div>
+                    <div class="nav-card-desc">NUMA/PCIe topology, power management, debugging tools, checkpoint optimization.</div>
+                    <div class="nav-card-arrow">
+                        <svg width="16" height="16" fill="none" stroke="#9494a8" stroke-width="2">
+                            <path d="M4 8h8M8 4l4 4-4 4"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="11_ml_frameworks.html" class="nav-card">
+                    <div class="nav-card-number">11</div>
+                    <div class="nav-card-title">ML Frameworks</div>
+                    <div class="nav-card-desc">DeepSpeed ZeRO-Infinity, Megatron-LM, PyTorch FSDP, JAX/Flax storage patterns.</div>
+                    <div class="nav-card-arrow">
+                        <svg width="16" height="16" fill="none" stroke="#9494a8" stroke-width="2">
+                            <path d="M4 8h8M8 4l4 4-4 4"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="12_production_critical.html" class="nav-card">
+                    <div class="nav-card-number">12</div>
+                    <div class="nav-card-title">Production Critical</div>
+                    <div class="nav-card-desc">SSD endurance, NVMe namespaces, failure modes, security hardening, firmware.</div>
+                    <div class="nav-card-arrow">
+                        <svg width="16" height="16" fill="none" stroke="#9494a8" stroke-width="2">
+                            <path d="M4 8h8M8 4l4 4-4 4"/>
+                        </svg>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">GPU-NVMe v3</div>
+                <div class="footer-text">
+                    <strong>Authors:</strong> Chandra Guda, Suresh Rajgopal, Pierre Labat — Micron Technology
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

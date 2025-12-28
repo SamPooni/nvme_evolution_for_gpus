@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Critical Guide - SSD Endurance, Security, Failure Modes & Benchmarking</title>
+    <style>
+        :root {
+            --bg-void: #030308;
+            --bg-deep: #0a0a12;
+            --bg-surface: #12121c;
+            --bg-elevated: #1a1a28;
+            --text-primary: #e4e4ed;
+            --text-secondary: #9494a8;
+            --text-muted: #5c5c72;
+            --accent-cyber: #00ffaa;
+            --accent-electric: #00d4ff;
+            --accent-plasma: #a855f7;
+            --accent-solar: #fbbf24;
+            --accent-ember: #ff6b6b;
+            --gradient-cyber: linear-gradient(135deg, #00ffaa 0%, #00d4ff 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-void);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: rgba(3, 3, 8, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 100;
+        }
+
+        .nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav a:hover { color: var(--accent-cyber); }
+        .nav-title { color: var(--text-primary); font-weight: 600; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 24px 80px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .page-number {
+            font-size: 6rem;
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: -30px;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient-cyber);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background: var(--bg-surface);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent-solar);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .subsection-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-cyber);
+            margin: 24px 0 12px;
+        }
+
+        h2 { color: var(--accent-solar); margin: 32px 0 16px; }
+        h3 { color: var(--accent-cyber); margin: 24px 0 12px; }
+        h4 { color: var(--accent-electric); margin: 20px 0 10px; }
+
+        p { color: var(--text-secondary); margin-bottom: 16px; }
+        
+        ul, ol { color: var(--text-secondary); margin: 16px 0 16px 24px; }
+        li { margin-bottom: 8px; }
+
+        a { color: var(--accent-electric); }
+        a:hover { color: var(--accent-cyber); }
+
+        strong { color: var(--text-primary); }
+        em { color: var(--accent-plasma); font-style: normal; }
+
+        .code-block, pre {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            white-space: pre;
+            color: #e6edf3;
+        }
+
+        code {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.9em;
+            color: var(--accent-cyber);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th {
+            background: rgba(0, 255, 170, 0.1);
+            color: var(--accent-cyber);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(0, 255, 170, 0.2);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-secondary);
+        }
+
+        tr:hover { background: rgba(255,255,255,0.02); }
+
+        .info-box, .warning-box, .note-box {
+            padding: 20px 24px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .warning-box {
+            background: rgba(255, 107, 107, 0.1);
+            border-left: 4px solid var(--accent-ember);
+        }
+
+        .info-box {
+            background: rgba(0, 212, 255, 0.1);
+            border-left: 4px solid var(--accent-electric);
+        }
+
+        .note-box, .success-box {
+            background: rgba(0, 255, 170, 0.1);
+            border-left: 4px solid var(--accent-cyber);
+        }
+
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 48px;
+            padding-top: 32px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            background: var(--bg-surface);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--accent-cyber);
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+        }
+
+        .expert-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #fbbf24 100%);
+            color: #000;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        /* Emoji fixes */
+        .emoji { font-style: normal; }
+
+        @media (max-width: 768px) {
+            .nav { padding: 0 20px; }
+            .container { padding: 80px 16px 60px; }
+            .section { padding: 24px; }
+            .page-title { font-size: 1.8rem; }
+            .nav-footer { flex-direction: column; gap: 12px; }
+        }
+</style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <nav class="nav-header">
+            <a href="index.html">← Home</a>
+            <span style="color: var(--accent-red); font-weight: 600;">🚨 Production Critical Guide</span>
+            <a href="10_expert_storage_guide.html">Expert Guide →</a>
+        </nav>
+
+        <div class="hero">
+            <span class="hero-badge">🚨 Production Critical</span>
+            <h1>Production-Critical Storage Guide</h1>
+            <p>SSD Endurance, Security Hardening, Failure Modes, NUMA Topology, and Reproducible Benchmarking. 
+            The gaps that can kill your AI training infrastructure.</p>
+        </div>
+
+        <div class="toc">
+            <h3>🔴 Critical Topics Covered</h3>
+            <div class="toc-grid">
+                <a href="#waf">1. Write Amplification & SSD Endurance</a>
+                <a href="#namespaces">2. NVMe Namespace Strategies</a>
+                <a href="#failure-modes">3. Failure Mode Analysis</a>
+                <a href="#numa">4. NUMA-Aware Storage Placement</a>
+                <a href="#benchmarks">5. Reproducible Benchmarking</a>
+                <a href="#security">6. Security Hardening</a>
+                <a href="#power">7. Power Management Deep Dive</a>
+                <a href="#firmware">8. Firmware Management</a>
+                <a href="#corrections">9. Technical Corrections</a>
+            </div>
+        </div>
+
+        <!-- Section 1: Write Amplification Factor -->
+        <section class="section critical" id="waf">
+            <h2 class="section-title">🔴 1. Write Amplification Factor (WAF) & SSD Endurance</h2>
+            
+            <div class="info-box critical">
+                <strong>🚨 THE #1 PRODUCTION KILLER:</strong> AI training workloads can burn through consumer SSDs 
+                in 6-12 months. ZeRO-Infinity swapping can achieve WAF of 3-10x, meaning you write 3-10x more data 
+                to NAND than your application thinks it's writing. This is NOT covered in most AI infrastructure guides.
+            </div>
+
+            <h3 class="subsection-title">Understanding Write Amplification in AI Workloads</h3>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Workload Type</th>
+                        <th>I/O Pattern</th>
+                        <th>Typical WAF</th>
+                        <th>DWPD Impact</th>
+                        <th>Risk Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Checkpoint Writes</strong></td>
+                        <td>Large sequential (GB-TB)</td>
+                        <td class="good">1.0 - 1.2</td>
+                        <td>Low</td>
+                        <td class="good">✓ Safe</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dataset Reads</strong></td>
+                        <td>Sequential reads</td>
+                        <td class="good">N/A (reads)</td>
+                        <td>None</td>
+                        <td class="good">✓ Safe</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ZeRO-2 Gradient Offload</strong></td>
+                        <td>Mixed 64KB-1MB</td>
+                        <td class="medium">1.5 - 2.5</td>
+                        <td>Medium</td>
+                        <td class="medium">⚠ Monitor</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ZeRO-3 Param Offload</strong></td>
+                        <td>Random 4KB-256KB</td>
+                        <td class="poor">2.0 - 4.0</td>
+                        <td>High</td>
+                        <td class="poor">⚠ Danger</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ZeRO-Infinity</strong></td>
+                        <td>Random 4KB demand paging</td>
+                        <td class="poor">3.0 - 10.0</td>
+                        <td>Very High</td>
+                        <td class="poor">🔴 Critical</td>
+                    </tr>
+                    <tr>
+                        <td><strong>KV Cache Offload</strong></td>
+                        <td>Random small writes</td>
+                        <td class="poor">5.0 - 15.0</td>
+                        <td>Extreme</td>
+                        <td class="poor">🔴 Critical</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsection-title">SSD Endurance Calculator for AI Workloads</h3>
+
+            <pre><code><span style="color: #6a9955;">#!/usr/bin/env python3</span>
+<span style="color: #6a9955;">"""
+SSD Endurance Calculator for AI Training Workloads
+Run this BEFORE deploying to estimate SSD lifespan
+"""</span>
+
+<span style="color: #c586c0;">def</span> <span style="color: #dcdcaa;">calculate_ssd_lifespan</span>(
+    ssd_capacity_tb: <span style="color: #4ec9b0;">float</span>,
+    ssd_dwpd: <span style="color: #4ec9b0;">float</span>,          <span style="color: #6a9955;"># Drive Writes Per Day rating</span>
+    ssd_warranty_years: <span style="color: #4ec9b0;">float</span>,
+    daily_checkpoint_gb: <span style="color: #4ec9b0;">float</span>,
+    checkpoint_waf: <span style="color: #4ec9b0;">float</span> = <span style="color: #b5cea8;">1.1</span>,
+    daily_zero_offload_gb: <span style="color: #4ec9b0;">float</span> = <span style="color: #b5cea8;">0</span>,
+    zero_waf: <span style="color: #4ec9b0;">float</span> = <span style="color: #b5cea8;">3.0</span>,
+    daily_kv_cache_gb: <span style="color: #4ec9b0;">float</span> = <span style="color: #b5cea8;">0</span>,
+    kv_waf: <span style="color: #4ec9b0;">float</span> = <span style="color: #b5cea8;">8.0</span>
+) -> <span style="color: #4ec9b0;">dict</span>:
+    <span style="color: #ce9178;">"""Calculate expected SSD lifespan for AI workloads"""</span>
+    
+    <span style="color: #6a9955;"># Total NAND writes per day (accounting for WAF)</span>
+    nand_writes_per_day_tb = (
+        (daily_checkpoint_gb * checkpoint_waf / <span style="color: #b5cea8;">1024</span>) +
+        (daily_zero_offload_gb * zero_waf / <span style="color: #b5cea8;">1024</span>) +
+        (daily_kv_cache_gb * kv_waf / <span style="color: #b5cea8;">1024</span>)
+    )
+    
+    <span style="color: #6a9955;"># SSD's rated endurance (TBW = Terabytes Written)</span>
+    rated_tbw = ssd_capacity_tb * ssd_dwpd * <span style="color: #b5cea8;">365</span> * ssd_warranty_years
+    
+    <span style="color: #6a9955;"># Expected lifespan</span>
+    lifespan_days = rated_tbw / nand_writes_per_day_tb <span style="color: #c586c0;">if</span> nand_writes_per_day_tb > <span style="color: #b5cea8;">0</span> <span style="color: #c586c0;">else</span> <span style="color: #4ec9b0;">float</span>(<span style="color: #ce9178;">'inf'</span>)
+    lifespan_months = lifespan_days / <span style="color: #b5cea8;">30.44</span>
+    
+    <span style="color: #6a9955;"># Effective DWPD being used</span>
+    effective_dwpd = nand_writes_per_day_tb / ssd_capacity_tb
+    
+    <span style="color: #c586c0;">return</span> {
+        <span style="color: #ce9178;">'nand_writes_per_day_tb'</span>: <span style="color: #4ec9b0;">round</span>(nand_writes_per_day_tb, <span style="color: #b5cea8;">2</span>),
+        <span style="color: #ce9178;">'effective_dwpd'</span>: <span style="color: #4ec9b0;">round</span>(effective_dwpd, <span style="color: #b5cea8;">2</span>),
+        <span style="color: #ce9178;">'rated_dwpd'</span>: ssd_dwpd,
+        <span style="color: #ce9178;">'rated_tbw'</span>: <span style="color: #4ec9b0;">round</span>(rated_tbw, <span style="color: #b5cea8;">0</span>),
+        <span style="color: #ce9178;">'lifespan_days'</span>: <span style="color: #4ec9b0;">round</span>(lifespan_days, <span style="color: #b5cea8;">0</span>),
+        <span style="color: #ce9178;">'lifespan_months'</span>: <span style="color: #4ec9b0;">round</span>(lifespan_months, <span style="color: #b5cea8;">1</span>),
+        <span style="color: #ce9178;">'within_warranty'</span>: lifespan_months >= (ssd_warranty_years * <span style="color: #b5cea8;">12</span>),
+        <span style="color: #ce9178;">'risk_level'</span>: <span style="color: #ce9178;">'LOW'</span> <span style="color: #c586c0;">if</span> effective_dwpd < ssd_dwpd * <span style="color: #b5cea8;">0.5</span> <span style="color: #c586c0;">else</span> 
+                      (<span style="color: #ce9178;">'MEDIUM'</span> <span style="color: #c586c0;">if</span> effective_dwpd < ssd_dwpd <span style="color: #c586c0;">else</span> <span style="color: #ce9178;">'HIGH'</span>)
+    }
+
+<span style="color: #6a9955;"># Example: 70B model training with ZeRO-3</span>
+result = calculate_ssd_lifespan(
+    ssd_capacity_tb=<span style="color: #b5cea8;">3.84</span>,           <span style="color: #6a9955;"># Samsung PM9A3 3.84TB</span>
+    ssd_dwpd=<span style="color: #b5cea8;">1.0</span>,                   <span style="color: #6a9955;"># 1 DWPD rating</span>
+    ssd_warranty_years=<span style="color: #b5cea8;">5</span>,
+    daily_checkpoint_gb=<span style="color: #b5cea8;">500</span>,       <span style="color: #6a9955;"># 500GB checkpoints/day</span>
+    daily_zero_offload_gb=<span style="color: #b5cea8;">2000</span>,    <span style="color: #6a9955;"># 2TB ZeRO-3 swapping/day</span>
+    zero_waf=<span style="color: #b5cea8;">3.5</span>,
+    daily_kv_cache_gb=<span style="color: #b5cea8;">0</span>            <span style="color: #6a9955;"># Training, not inference</span>
+)
+
+<span style="color: #4ec9b0;">print</span>(<span style="color: #ce9178;">f"""
+SSD Endurance Analysis:
+=======================
+NAND Writes/Day:  {result['nand_writes_per_day_tb']} TB
+Effective DWPD:   {result['effective_dwpd']} (rated: {result['rated_dwpd']})
+Expected Life:    {result['lifespan_months']} months
+Risk Level:       {result['risk_level']}
+Within Warranty:  {result['within_warranty']}
+"""</span>)
+
+<span style="color: #6a9955;"># Output:</span>
+<span style="color: #6a9955;"># NAND Writes/Day:  7.37 TB</span>
+<span style="color: #6a9955;"># Effective DWPD:   1.92 (rated: 1.0)  ← EXCEEDS RATING!</span>
+<span style="color: #6a9955;"># Expected Life:    26.0 months        ← Will fail before warranty</span>
+<span style="color: #6a9955;"># Risk Level:       HIGH</span></code></pre>
+
+            <h3 class="subsection-title">Enterprise vs Consumer SSD Comparison for AI</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Consumer (970 EVO)</th>
+                        <th>Prosumer (990 PRO)</th>
+                        <th>Enterprise (PM9A3)</th>
+                        <th>AI-Optimized (D7-P5520)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>DWPD Rating</strong></td>
+                        <td class="poor">0.3</td>
+                        <td class="medium">0.6</td>
+                        <td class="good">1.0</td>
+                        <td class="good">1.0 - 3.0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DRAM Buffer</strong></td>
+                        <td>512MB - 1GB</td>
+                        <td>1-2GB</td>
+                        <td>4-8GB</td>
+                        <td>8GB+</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Over-provisioning</strong></td>
+                        <td>~7%</td>
+                        <td>~7%</td>
+                        <td>~28%</td>
+                        <td>~28%</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Power Loss Protection</strong></td>
+                        <td class="poor">No</td>
+                        <td class="poor">No</td>
+                        <td class="good">Yes (PLP)</td>
+                        <td class="good">Yes (PLP)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>End-to-End Protection</strong></td>
+                        <td class="poor">No</td>
+                        <td class="medium">Partial</td>
+                        <td class="good">Yes (T10 DIF)</td>
+                        <td class="good">Yes (T10 DIF)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ZeRO-3 Suitability</strong></td>
+                        <td class="poor">6-12 months life</td>
+                        <td class="medium">12-18 months life</td>
+                        <td class="good">3-5 years life</td>
+                        <td class="good">5+ years life</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cost (3.84TB)</strong></td>
+                        <td>$200-300</td>
+                        <td>$300-400</td>
+                        <td>$400-600</td>
+                        <td>$600-900</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box success">
+                <strong>✅ Recommendation:</strong> For ZeRO-3/Infinity or any random-write-heavy AI workload, 
+                strongly prefer enterprise SSDs with ≥1 DWPD rating. The 2x cost premium typically pays for itself in 
+                reliability and not having to replace drives mid-training.
+            </div>
+
+            <h3 class="subsection-title">Monitoring SSD Health in Production</h3>
+
+            <pre><code><span style="color: #6a9955;">#!/bin/bash</span>
+<span style="color: #6a9955;"># ssd_health_monitor.sh - Run daily via cron</span>
+
+<span style="color: #c586c0;">for</span> dev <span style="color: #c586c0;">in</span> /dev/nvme*n1; <span style="color: #c586c0;">do</span>
+    echo <span style="color: #ce9178;">"=== $dev ==="</span>
+    
+    <span style="color: #6a9955;"># Get SMART data</span>
+    smart=$(nvme smart-log $dev -o json)
+    
+    <span style="color: #6a9955;"># Critical metrics</span>
+    pct_used=$(echo $smart | jq <span style="color: #ce9178;">'.percent_used'</span>)
+    avail_spare=$(echo $smart | jq <span style="color: #ce9178;">'.avail_spare'</span>)
+    data_written_tb=$(echo $smart | jq <span style="color: #ce9178;">'.data_units_written * 512000 / 1e12'</span>)
+    media_errors=$(echo $smart | jq <span style="color: #ce9178;">'.media_errors'</span>)
+    
+    echo <span style="color: #ce9178;">"Percent Used:     ${pct_used}%"</span>
+    echo <span style="color: #ce9178;">"Available Spare:  ${avail_spare}%"</span>
+    echo <span style="color: #ce9178;">"Data Written:     ${data_written_tb} TB"</span>
+    echo <span style="color: #ce9178;">"Media Errors:     ${media_errors}"</span>
+    
+    <span style="color: #6a9955;"># Alert thresholds</span>
+    <span style="color: #c586c0;">if</span> (( $(echo <span style="color: #ce9178;">"$pct_used > 80"</span> | bc -l) )); <span style="color: #c586c0;">then</span>
+        echo <span style="color: #ce9178;">"🔴 CRITICAL: SSD life nearly exhausted!"</span>
+        <span style="color: #6a9955;"># Send alert to monitoring system</span>
+        curl -X POST <span style="color: #ce9178;">"$ALERTMANAGER_URL"</span> -d <span style="color: #ce9178;">"{\"alert\":\"ssd_endurance_critical\",\"device\":\"$dev\"}"</span>
+    <span style="color: #c586c0;">elif</span> (( $(echo <span style="color: #ce9178;">"$pct_used > 50"</span> | bc -l) )); <span style="color: #c586c0;">then</span>
+        echo <span style="color: #ce9178;">"🟡 WARNING: SSD past 50% life"</span>
+    <span style="color: #c586c0;">fi</span>
+    
+    <span style="color: #c586c0;">if</span> (( $(echo <span style="color: #ce9178;">"$avail_spare < 10"</span> | bc -l) )); <span style="color: #c586c0;">then</span>
+        echo <span style="color: #ce9178;">"🔴 CRITICAL: Spare blocks nearly exhausted!"</span>
+    <span style="color: #c586c0;">fi</span>
+    
+    <span style="color: #c586c0;">if</span> (( media_errors > 0 )); <span style="color: #c586c0;">then</span>
+        echo <span style="color: #ce9178;">"🔴 CRITICAL: Media errors detected - replace drive!"</span>
+    <span style="color: #c586c0;">fi</span>
+    
+    echo <span style="color: #ce9178;">""</span>
+<span style="color: #c586c0;">done</span></code></pre>
+
+        </section>
+
+        <!-- Section 2: NVMe Namespace Strategies -->
+        <section class="section critical" id="namespaces">
+            <h2 class="section-title">🔴 2. NVMe Namespace Strategies</h2>
+            
+            <div class="info-box critical">
+                <strong>🚨 UNDERUTILIZED FEATURE:</strong> NVMe namespaces let you partition a single physical 
+                SSD into multiple logical drives with isolated performance and wear characteristics. 
+                Almost nobody in AI uses this, but they should.
+            </div>
+
+            <h3 class="subsection-title">Why Use Namespaces for AI Workloads?</h3>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <h4 style="color: var(--accent-green); margin-bottom: 10px;">✓ Wear Isolation</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                        Separate high-wear workloads (ZeRO offload) from low-wear (checkpoints). 
+                        Prevents random writes from fragmenting sequential write areas.
+                    </p>
+                </div>
+                <div class="card">
+                    <h4 style="color: var(--accent-green); margin-bottom: 10px;">✓ Performance Isolation</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                        Garbage collection in one namespace doesn't impact latency in another. 
+                        Critical for latency-sensitive inference.
+                    </p>
+                </div>
+                <div class="card">
+                    <h4 style="color: var(--accent-green); margin-bottom: 10px;">✓ Capacity Planning</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                        Prevent one workload from consuming all space. 
+                        Checkpoints get dedicated capacity.
+                    </p>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">Recommended Namespace Layout for AI Training</h3>
+
+            <pre><code><span style="color: #6a9955;">#!/bin/bash</span>
+<span style="color: #6a9955;"># setup_ai_namespaces.sh - Configure NVMe for AI training</span>
+
+DEVICE=<span style="color: #ce9178;">"/dev/nvme0"</span>
+
+<span style="color: #6a9955;"># Check current namespace configuration</span>
+nvme list-ns $DEVICE
+nvme id-ctrl $DEVICE | grep -E <span style="color: #ce9178;">"nn|tnvmcap"</span>
+
+<span style="color: #6a9955;"># Delete existing namespaces (DESTRUCTIVE!)</span>
+<span style="color: #6a9955;"># nvme delete-ns $DEVICE -n 1</span>
+
+<span style="color: #6a9955;"># Get total capacity in 512-byte blocks</span>
+TOTAL_BLOCKS=$(nvme id-ctrl $DEVICE | grep tnvmcap | awk <span style="color: #ce9178;">'{print $3}'</span>)
+
+<span style="color: #6a9955;"># Namespace allocation strategy for 3.84TB SSD:</span>
+<span style="color: #6a9955;"># NS1: 2TB   - Training data (sequential reads)</span>
+<span style="color: #6a9955;"># NS2: 1TB   - Checkpoints (sequential writes)</span>
+<span style="color: #6a9955;"># NS3: 500GB - ZeRO offload (random read/write)</span>
+<span style="color: #6a9955;"># NS4: 340GB - Scratch/temp (expendable)</span>
+
+<span style="color: #6a9955;"># Create namespaces (sizes in 512-byte blocks)</span>
+NS1_SIZE=<span style="color: #b5cea8;">4294967296</span>   <span style="color: #6a9955;"># 2TB</span>
+NS2_SIZE=<span style="color: #b5cea8;">2147483648</span>   <span style="color: #6a9955;"># 1TB</span>
+NS3_SIZE=<span style="color: #b5cea8;">1073741824</span>   <span style="color: #6a9955;"># 500GB</span>
+NS4_SIZE=<span style="color: #b5cea8;">732807168</span>    <span style="color: #6a9955;"># ~340GB</span>
+
+<span style="color: #6a9955;"># Create NS1: Training Data</span>
+nvme create-ns $DEVICE \
+    --nsze=$NS1_SIZE \
+    --ncap=$NS1_SIZE \
+    --flbas=0 \
+    --dps=0 \
+    --nmic=0
+nvme attach-ns $DEVICE --namespace-id=1 --controllers=0
+
+<span style="color: #6a9955;"># Create NS2: Checkpoints</span>
+nvme create-ns $DEVICE \
+    --nsze=$NS2_SIZE \
+    --ncap=$NS2_SIZE \
+    --flbas=0 \
+    --dps=0
+nvme attach-ns $DEVICE --namespace-id=2 --controllers=0
+
+<span style="color: #6a9955;"># Create NS3: ZeRO Offload (consider enabling T10 DIF for data integrity)</span>
+nvme create-ns $DEVICE \
+    --nsze=$NS3_SIZE \
+    --ncap=$NS3_SIZE \
+    --flbas=0 \
+    --dps=1 \        <span style="color: #6a9955;"># Enable Type 1 protection</span>
+    --nmic=0
+nvme attach-ns $DEVICE --namespace-id=3 --controllers=0
+
+<span style="color: #6a9955;"># Create NS4: Scratch</span>
+nvme create-ns $DEVICE \
+    --nsze=$NS4_SIZE \
+    --ncap=$NS4_SIZE \
+    --flbas=0 \
+    --dps=0
+nvme attach-ns $DEVICE --namespace-id=4 --controllers=0
+
+<span style="color: #6a9955;"># Rescan to see new namespaces</span>
+nvme ns-rescan $DEVICE
+
+<span style="color: #6a9955;"># Format and mount</span>
+mkfs.xfs -f /dev/nvme0n1  <span style="color: #6a9955;"># Training data</span>
+mkfs.xfs -f /dev/nvme0n2  <span style="color: #6a9955;"># Checkpoints</span>
+mkfs.xfs -f /dev/nvme0n3  <span style="color: #6a9955;"># ZeRO offload</span>
+mkfs.xfs -f /dev/nvme0n4  <span style="color: #6a9955;"># Scratch</span>
+
+mkdir -p /mnt/nvme/{data,checkpoints,zero_offload,scratch}
+mount /dev/nvme0n1 /mnt/nvme/data
+mount /dev/nvme0n2 /mnt/nvme/checkpoints
+mount /dev/nvme0n3 /mnt/nvme/zero_offload
+mount /dev/nvme0n4 /mnt/nvme/scratch
+
+echo <span style="color: #ce9178;">"Namespace configuration complete!"</span>
+nvme list</code></pre>
+
+            <div class="info-box warning">
+                <strong>⚠️ Namespace Caveats:</strong>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li>Not all SSDs support namespace management (check with <code class="inline-code">nvme id-ctrl</code>)</li>
+                    <li>Namespaces share DRAM buffer and controller resources</li>
+                    <li>Creating namespaces requires deleting existing ones (destructive)</li>
+                    <li>Some older kernel versions have namespace bugs - use 5.15+</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 3: Failure Mode Analysis -->
+        <section class="section critical" id="failure-modes">
+            <h2 class="section-title">🔴 3. Failure Mode Analysis & Recovery</h2>
+            
+            <div class="info-box critical">
+                <strong>🚨 WHEN (NOT IF) THINGS GO WRONG:</strong> Storage failures during multi-day training runs 
+                are inevitable. The difference between losing hours vs. days of work is how well you've prepared.
+            </div>
+
+            <h3 class="subsection-title">Common Failure Modes in AI Training</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Failure Mode</th>
+                        <th>Symptoms</th>
+                        <th>Detection</th>
+                        <th>Recovery</th>
+                        <th>Prevention</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>NVMe Timeout</strong></td>
+                        <td>I/O hangs, dmesg errors, training stalls</td>
+                        <td><code class="inline-code">nvme_timeout</code> in kernel log</td>
+                        <td>Controller reset, worst case reboot</td>
+                        <td>Proper timeout tuning, avoid power saving</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Thermal Throttling</strong></td>
+                        <td>Gradual performance drop, high latency spikes</td>
+                        <td>SMART temp >70°C, reduced bandwidth</td>
+                        <td>Improve cooling, reduce workload</td>
+                        <td>Heatsinks, airflow, monitor temps</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PCIe Link Degradation</strong></td>
+                        <td>50-75% bandwidth loss</td>
+                        <td><code class="inline-code">lspci</code> shows x1 instead of x4</td>
+                        <td>Reseat SSD, replace riser</td>
+                        <td>Quality motherboard, check seating</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Silent Data Corruption</strong></td>
+                        <td>Model produces NaN, checkpoint won't load</td>
+                        <td>Checksum verification fails</td>
+                        <td>Restore from verified backup</td>
+                        <td>Use enterprise SSD with E2E protection</td>
+                    </tr>
+                    <tr>
+                        <td><strong>RAID Array Degradation</strong></td>
+                        <td>One drive fails, array rebuilding</td>
+                        <td>mdadm status shows degraded</td>
+                        <td>Replace failed drive, rebuild</td>
+                        <td>RAID-5/6, hot spare, monitoring</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Filesystem Corruption</strong></td>
+                        <td>Mount fails, I/O errors</td>
+                        <td><code class="inline-code">xfs_repair</code> finds errors</td>
+                        <td>fsck/xfs_repair, restore from backup</td>
+                        <td>Journaling, proper shutdown, UPS</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsection-title">Failure Detection & Auto-Recovery Scripts</h3>
+
+            <pre><code><span style="color: #6a9955;">#!/bin/bash</span>
+<span style="color: #6a9955;"># storage_watchdog.sh - Continuous monitoring for AI training</span>
+<span style="color: #6a9955;"># Run as: nohup ./storage_watchdog.sh &</span>
+
+LOG_FILE=<span style="color: #ce9178;">"/var/log/storage_watchdog.log"</span>
+ALERT_WEBHOOK=<span style="color: #ce9178;">"$SLACK_WEBHOOK_URL"</span>
+CHECK_INTERVAL=<span style="color: #b5cea8;">30</span>  <span style="color: #6a9955;"># seconds</span>
+
+send_alert() {
+    local severity=$1
+    local message=$2
+    echo <span style="color: #ce9178;">"$(date -Iseconds) [$severity] $message"</span> >> $LOG_FILE
+    curl -s -X POST -H <span style="color: #ce9178;">'Content-type: application/json'</span> \
+        --data <span style="color: #ce9178;">"{\"text\":\"[$severity] Storage Alert: $message\"}"</span> \
+        $ALERT_WEBHOOK
+}
+
+check_nvme_health() {
+    <span style="color: #c586c0;">for</span> dev <span style="color: #c586c0;">in</span> /dev/nvme*n1; <span style="color: #c586c0;">do</span>
+        <span style="color: #6a9955;"># Check for controller errors</span>
+        <span style="color: #c586c0;">if</span> dmesg | tail -100 | grep -q <span style="color: #ce9178;">"nvme.*timeout\|nvme.*error"</span>; <span style="color: #c586c0;">then</span>
+            send_alert <span style="color: #ce9178;">"CRITICAL"</span> <span style="color: #ce9178;">"NVMe timeout/error detected on $dev"</span>
+            
+            <span style="color: #6a9955;"># Attempt controller reset</span>
+            echo <span style="color: #b5cea8;">1</span> > /sys/block/$(basename $dev)/device/reset_controller
+            sleep <span style="color: #b5cea8;">5</span>
+            
+            <span style="color: #c586c0;">if</span> nvme smart-log $dev &>/dev/null; <span style="color: #c586c0;">then</span>
+                send_alert <span style="color: #ce9178;">"INFO"</span> <span style="color: #ce9178;">"Controller reset successful for $dev"</span>
+            <span style="color: #c586c0;">else</span>
+                send_alert <span style="color: #ce9178;">"CRITICAL"</span> <span style="color: #ce9178;">"Controller reset FAILED for $dev - manual intervention required"</span>
+            <span style="color: #c586c0;">fi</span>
+        <span style="color: #c586c0;">fi</span>
+        
+        <span style="color: #6a9955;"># Check temperature</span>
+        temp=$(nvme smart-log $dev -o json 2>/dev/null | jq <span style="color: #ce9178;">'.temperature - 273'</span>)
+        <span style="color: #c586c0;">if</span> (( temp > <span style="color: #b5cea8;">75</span> )); <span style="color: #c586c0;">then</span>
+            send_alert <span style="color: #ce9178;">"WARNING"</span> <span style="color: #ce9178;">"High temperature on $dev: ${temp}°C"</span>
+        <span style="color: #c586c0;">fi</span>
+        
+        <span style="color: #6a9955;"># Check for media errors</span>
+        media_errors=$(nvme smart-log $dev -o json 2>/dev/null | jq <span style="color: #ce9178;">'.media_errors'</span>)
+        <span style="color: #c586c0;">if</span> (( media_errors > <span style="color: #b5cea8;">0</span> )); <span style="color: #c586c0;">then</span>
+            send_alert <span style="color: #ce9178;">"CRITICAL"</span> <span style="color: #ce9178;">"Media errors detected on $dev: $media_errors - REPLACE DRIVE"</span>
+        <span style="color: #c586c0;">fi</span>
+    <span style="color: #c586c0;">done</span>
+}
+
+check_raid_health() {
+    <span style="color: #c586c0;">for</span> md <span style="color: #c586c0;">in</span> /dev/md*; <span style="color: #c586c0;">do</span>
+        <span style="color: #c586c0;">if</span> [[ -b $md ]]; <span style="color: #c586c0;">then</span>
+            state=$(cat /sys/block/$(basename $md)/md/array_state 2>/dev/null)
+            <span style="color: #c586c0;">if</span> [[ $state != <span style="color: #ce9178;">"clean"</span> && $state != <span style="color: #ce9178;">"active"</span> ]]; <span style="color: #c586c0;">then</span>
+                send_alert <span style="color: #ce9178;">"CRITICAL"</span> <span style="color: #ce9178;">"RAID array $md in state: $state"</span>
+            <span style="color: #c586c0;">fi</span>
+        <span style="color: #c586c0;">fi</span>
+    <span style="color: #c586c0;">done</span>
+}
+
+check_pcie_link() {
+    <span style="color: #c586c0;">for</span> dev <span style="color: #c586c0;">in</span> /dev/nvme*; <span style="color: #c586c0;">do</span>
+        pci_addr=$(readlink -f /sys/class/nvme/$(basename $dev)/device | grep -oP <span style="color: #ce9178;">'[0-9a-f:]+\.[0-9]'</span>)
+        <span style="color: #c586c0;">if</span> [[ -n $pci_addr ]]; <span style="color: #c586c0;">then</span>
+            link_status=$(lspci -vvv -s $pci_addr 2>/dev/null | grep <span style="color: #ce9178;">"LnkSta:"</span>)
+            <span style="color: #c586c0;">if</span> echo $link_status | grep -qP <span style="color: #ce9178;">"Width x[12],"</span>; <span style="color: #c586c0;">then</span>
+                send_alert <span style="color: #ce9178;">"WARNING"</span> <span style="color: #ce9178;">"PCIe link degraded on $dev: $link_status"</span>
+            <span style="color: #c586c0;">fi</span>
+        <span style="color: #c586c0;">fi</span>
+    <span style="color: #c586c0;">done</span>
+}
+
+<span style="color: #6a9955;"># Main loop</span>
+echo <span style="color: #ce9178;">"Storage watchdog started at $(date)"</span> >> $LOG_FILE
+<span style="color: #c586c0;">while</span> true; <span style="color: #c586c0;">do</span>
+    check_nvme_health
+    check_raid_health
+    check_pcie_link
+    sleep $CHECK_INTERVAL
+<span style="color: #c586c0;">done</span></code></pre>
+
+            <h3 class="subsection-title">Checkpoint Integrity Verification</h3>
+
+            <pre><code><span style="color: #6a9955;"># checkpoint_integrity.py - Verify checkpoint files aren't corrupted</span>
+<span style="color: #c586c0;">import</span> hashlib
+<span style="color: #c586c0;">import</span> json
+<span style="color: #c586c0;">import</span> torch
+<span style="color: #c586c0;">from</span> pathlib <span style="color: #c586c0;">import</span> Path
+
+<span style="color: #c586c0;">def</span> <span style="color: #dcdcaa;">compute_checkpoint_hash</span>(checkpoint_path: str) -> str:
+    <span style="color: #ce9178;">"""Compute SHA256 hash of checkpoint file"""</span>
+    sha256 = hashlib.sha256()
+    <span style="color: #c586c0;">with</span> open(checkpoint_path, <span style="color: #ce9178;">'rb'</span>) <span style="color: #c586c0;">as</span> f:
+        <span style="color: #c586c0;">for</span> chunk <span style="color: #c586c0;">in</span> iter(<span style="color: #c586c0;">lambda</span>: f.read(<span style="color: #b5cea8;">8192</span> * <span style="color: #b5cea8;">1024</span>), b<span style="color: #ce9178;">''</span>):  <span style="color: #6a9955;"># 8MB chunks</span>
+            sha256.update(chunk)
+    <span style="color: #c586c0;">return</span> sha256.hexdigest()
+
+<span style="color: #c586c0;">def</span> <span style="color: #dcdcaa;">save_with_verification</span>(state_dict: dict, path: str):
+    <span style="color: #ce9178;">"""Save checkpoint with integrity metadata"""</span>
+    torch.save(state_dict, path)
+    
+    <span style="color: #6a9955;"># Compute and save hash</span>
+    checksum = compute_checkpoint_hash(path)
+    meta_path = path + <span style="color: #ce9178;">'.meta.json'</span>
+    <span style="color: #c586c0;">with</span> open(meta_path, <span style="color: #ce9178;">'w'</span>) <span style="color: #c586c0;">as</span> f:
+        json.dump({
+            <span style="color: #ce9178;">'sha256'</span>: checksum,
+            <span style="color: #ce9178;">'size_bytes'</span>: Path(path).stat().st_size,
+            <span style="color: #ce9178;">'timestamp'</span>: datetime.now().isoformat()
+        }, f)
+    
+    <span style="color: #6a9955;"># Verify immediately after save</span>
+    <span style="color: #c586c0;">if</span> compute_checkpoint_hash(path) != checksum:
+        <span style="color: #c586c0;">raise</span> RuntimeError(<span style="color: #ce9178;">f"Checkpoint verification failed immediately after save: {path}"</span>)
+
+<span style="color: #c586c0;">def</span> <span style="color: #dcdcaa;">load_with_verification</span>(path: str) -> dict:
+    <span style="color: #ce9178;">"""Load checkpoint with integrity check"""</span>
+    meta_path = path + <span style="color: #ce9178;">'.meta.json'</span>
+    
+    <span style="color: #c586c0;">if</span> Path(meta_path).exists():
+        <span style="color: #c586c0;">with</span> open(meta_path) <span style="color: #c586c0;">as</span> f:
+            meta = json.load(f)
+        
+        current_hash = compute_checkpoint_hash(path)
+        <span style="color: #c586c0;">if</span> current_hash != meta[<span style="color: #ce9178;">'sha256'</span>]:
+            <span style="color: #c586c0;">raise</span> RuntimeError(
+                <span style="color: #ce9178;">f"CHECKPOINT CORRUPTION DETECTED!\n"</span>
+                <span style="color: #ce9178;">f"Expected: {meta['sha256']}\n"</span>
+                <span style="color: #ce9178;">f"Got: {current_hash}"</span>
+            )
+    
+    <span style="color: #c586c0;">return</span> torch.load(path, weights_only=<span style="color: #569cd6;">False</span>)
+
+<span style="color: #6a9955;"># Usage in training loop:</span>
+<span style="color: #6a9955;"># save_with_verification(model.state_dict(), '/checkpoints/step_10000.pt')</span>
+<span style="color: #6a9955;"># state_dict = load_with_verification('/checkpoints/step_10000.pt')</span></code></pre>
+
+        </section>
+
+        <!-- Section 4: NUMA-Aware Storage Placement -->
+        <section class="section important" id="numa">
+            <h2 class="section-title">🟡 4. NUMA-Aware Storage Placement</h2>
+            
+            <div class="info-box warning">
+                <strong>⚠️ OFTEN OVERLOOKED:</strong> Placing NVMe drives on the wrong NUMA node relative to their 
+                consumer GPUs can cost you 40-60% of your bandwidth. This is free performance you're leaving on the table.
+            </div>
+
+            <h3 class="subsection-title">Understanding NUMA Topology</h3>
+
+            <pre><code><span style="color: #6a9955;"># Discover your system's NUMA topology</span>
+
+<span style="color: #6a9955;"># 1. Get overall NUMA layout</span>
+$ numactl --hardware
+available: 2 nodes (0-1)
+node 0 cpus: 0-31
+node 0 size: 256000 MB
+node 1 cpus: 32-63
+node 1 size: 256000 MB
+node distances:
+node   0   1
+  0:  10  21
+  1:  21  10
+
+<span style="color: #6a9955;"># 2. Find GPU NUMA affinity</span>
+$ nvidia-smi topo -m
+        GPU0    GPU1    GPU2    GPU3    GPU4    GPU5    GPU6    GPU7    NIC0    CPU Affinity    NUMA
+GPU0     X      NV18    NV18    NV18    SYS     SYS     SYS     SYS     SYS     0-31            0
+GPU1    NV18     X      NV18    NV18    SYS     SYS     SYS     SYS     SYS     0-31            0
+GPU2    NV18    NV18     X      NV18    SYS     SYS     SYS     SYS     SYS     0-31            0
+GPU3    NV18    NV18    NV18     X      SYS     SYS     SYS     SYS     SYS     0-31            0
+GPU4    SYS     SYS     SYS     SYS      X      NV18    NV18    NV18    SYS     32-63           1
+GPU5    SYS     SYS     SYS     SYS     NV18     X      NV18    NV18    SYS     32-63           1
+GPU6    SYS     SYS     SYS     SYS     NV18    NV18     X      NV18    SYS     32-63           1
+GPU7    SYS     SYS     SYS     SYS     NV18    NV18    NV18     X      SYS     32-63           1
+
+<span style="color: #6a9955;"># 3. Find NVMe NUMA affinity</span>
+$ <span style="color: #c586c0;">for</span> dev <span style="color: #c586c0;">in</span> /sys/class/nvme/nvme*/device; <span style="color: #c586c0;">do</span>
+    echo <span style="color: #ce9178;">"$(basename $(dirname $dev)): NUMA node $(cat $dev/numa_node)"</span>
+<span style="color: #c586c0;">done</span>
+nvme0: NUMA node 0
+nvme1: NUMA node 0
+nvme2: NUMA node 0
+nvme3: NUMA node 0
+nvme4: NUMA node 1
+nvme5: NUMA node 1
+nvme6: NUMA node 1
+nvme7: NUMA node 1
+
+<span style="color: #6a9955;"># 4. Visualize with lstopo</span>
+$ lstopo --of txt</code></pre>
+
+            <h3 class="subsection-title">Optimal Affinity Configuration</h3>
+
+            <pre><code><span style="color: #6a9955;">#!/bin/bash</span>
+<span style="color: #6a9955;"># configure_numa_affinity.sh - Bind storage to correct NUMA nodes</span>
+
+<span style="color: #6a9955;"># Create NUMA-aware mount points</span>
+mkdir -p /mnt/nvme_numa0 /mnt/nvme_numa1
+
+<span style="color: #6a9955;"># RAID array for NUMA node 0 (for GPUs 0-3)</span>
+mdadm --create /dev/md0 --level=0 --raid-devices=4 \
+    /dev/nvme0n1 /dev/nvme1n1 /dev/nvme2n1 /dev/nvme3n1
+mkfs.xfs -f /dev/md0
+mount /dev/md0 /mnt/nvme_numa0
+
+<span style="color: #6a9955;"># RAID array for NUMA node 1 (for GPUs 4-7)</span>
+mdadm --create /dev/md1 --level=0 --raid-devices=4 \
+    /dev/nvme4n1 /dev/nvme5n1 /dev/nvme6n1 /dev/nvme7n1
+mkfs.xfs -f /dev/md1
+mount /dev/md1 /mnt/nvme_numa1
+
+<span style="color: #6a9955;"># Create symlinks for easy access</span>
+ln -s /mnt/nvme_numa0 /data/gpu0-3
+ln -s /mnt/nvme_numa1 /data/gpu4-7
+
+<span style="color: #6a9955;"># Configure DeepSpeed to use NUMA-local storage</span>
+cat > ds_config_numa_aware.json << <span style="color: #ce9178;">'EOF'</span>
+{
+    "zero_optimization": {
+        "stage": 3,
+        "offload_optimizer": {
+            "device": "nvme",
+            "nvme_path": "/data/gpu${LOCAL_RANK % 4 < 4 ? '0-3' : '4-7'}/zero_offload"
+        }
+    }
+}
+<span style="color: #ce9178;">EOF</span>
+
+echo <span style="color: #ce9178;">"NUMA-aware storage configured!"</span></code></pre>
+
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <div class="metric-value">40-60%</div>
+                    <div class="metric-label">Bandwidth Loss (Cross-NUMA)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">2x</div>
+                    <div class="metric-label">Latency Increase</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">+15%</div>
+                    <div class="metric-label">CPU Utilization</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">Free</div>
+                    <div class="metric-label">Cost to Fix</div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Section 5: Reproducible Benchmarking -->
+        <section class="section important" id="benchmarks">
+            <h2 class="section-title">🟡 5. Reproducible Benchmarking Methodology</h2>
+            
+            <div class="info-box warning">
+                <strong>⚠️ STOP GUESSING:</strong> "It feels faster" is not a benchmark. Here are reproducible 
+                scripts that give you real numbers you can compare across configurations.
+            </div>
+
+            <h3 class="subsection-title">Standardized GDS Benchmark Suite</h3>
+
+            <pre><code><span style="color: #6a9955;">#!/bin/bash</span>
+<span style="color: #6a9955;"># gds_benchmark_suite.sh - Comprehensive GDS performance testing</span>
+<span style="color: #6a9955;"># Produces comparable results across different systems</span>
+
+OUTPUT_DIR=<span style="color: #ce9178;">"./benchmark_results_$(date +%Y%m%d_%H%M%S)"</span>
+mkdir -p $OUTPUT_DIR
+
+<span style="color: #6a9955;"># System info</span>
+echo <span style="color: #ce9178;">"=== System Configuration ==="</span> | tee $OUTPUT_DIR/system_info.txt
+nvidia-smi --query-gpu=name,memory.total,pcie.link.gen.current,pcie.link.width.current --format=csv >> $OUTPUT_DIR/system_info.txt
+nvme list >> $OUTPUT_DIR/system_info.txt
+lscpu | grep -E <span style="color: #ce9178;">"Model name|Socket|Core|Thread"</span> >> $OUTPUT_DIR/system_info.txt
+
+<span style="color: #6a9955;"># Test parameters</span>
+TEST_FILE=<span style="color: #ce9178;">"/mnt/nvme/gds_test_file"</span>
+TEST_SIZES=(<span style="color: #ce9178;">"1G"</span> <span style="color: #ce9178;">"10G"</span> <span style="color: #ce9178;">"100G"</span>)
+BLOCK_SIZES=(<span style="color: #ce9178;">"64K"</span> <span style="color: #ce9178;">"256K"</span> <span style="color: #ce9178;">"1M"</span> <span style="color: #ce9178;">"4M"</span>)
+IO_DEPTHS=(<span style="color: #b5cea8;">1</span> <span style="color: #b5cea8;">4</span> <span style="color: #b5cea8;">16</span> <span style="color: #b5cea8;">64</span>)
+
+<span style="color: #6a9955;"># Pre-test: Warm up drive to steady-state</span>
+echo <span style="color: #ce9178;">"Warming up drive..."</span>
+fio --name=warmup --filename=$TEST_FILE --direct=1 --rw=write \
+    --bs=1M --iodepth=64 --numjobs=4 --size=50G --runtime=60 --time_based
+
+<span style="color: #6a9955;"># Test 1: Sequential Read (GDS enabled)</span>
+echo <span style="color: #ce9178;">"=== Sequential Read (GDS) ==="</span> | tee -a $OUTPUT_DIR/results.txt
+<span style="color: #c586c0;">for</span> bs <span style="color: #c586c0;">in</span> <span style="color: #ce9178;">"${BLOCK_SIZES[@]}"</span>; <span style="color: #c586c0;">do</span>
+    echo <span style="color: #ce9178;">"Block size: $bs"</span>
+    /usr/local/cuda/gds/tools/gdsio \
+        -f $TEST_FILE -d 0 -w 4 -s 10G -i $bs -x 0 -I 1 -T 30 \
+        2>&1 | tee -a $OUTPUT_DIR/results.txt
+<span style="color: #c586c0;">done</span>
+
+<span style="color: #6a9955;"># Test 2: Sequential Read (GDS disabled, baseline)</span>
+echo <span style="color: #ce9178;">"=== Sequential Read (NO GDS - baseline) ==="</span> | tee -a $OUTPUT_DIR/results.txt
+export CUFILE_ENV_PATH_JSON=/dev/null
+<span style="color: #c586c0;">for</span> bs <span style="color: #c586c0;">in</span> <span style="color: #ce9178;">"${BLOCK_SIZES[@]}"</span>; <span style="color: #c586c0;">do</span>
+    fio --name=seq_read_nogds --filename=$TEST_FILE --direct=1 \
+        --rw=read --bs=$bs --iodepth=64 --numjobs=4 --runtime=30 \
+        --output-format=json | jq <span style="color: #ce9178;">'.jobs[0].read.bw_bytes'</span> >> $OUTPUT_DIR/results.txt
+<span style="color: #c586c0;">done</span>
+unset CUFILE_ENV_PATH_JSON
+
+<span style="color: #6a9955;"># Test 3: Random Read (worst case for GDS)</span>
+echo <span style="color: #ce9178;">"=== Random 4K Read (GDS) ==="</span> | tee -a $OUTPUT_DIR/results.txt
+/usr/local/cuda/gds/tools/gdsio \
+    -f $TEST_FILE -d 0 -w 4 -s 10G -i 4K -x 1 -I 1 -T 30 \
+    2>&1 | tee -a $OUTPUT_DIR/results.txt
+
+<span style="color: #6a9955;"># Test 4: Checkpoint-like write pattern</span>
+echo <span style="color: #ce9178;">"=== Checkpoint Write Pattern ==="</span> | tee -a $OUTPUT_DIR/results.txt
+<span style="color: #c586c0;">for</span> size <span style="color: #c586c0;">in</span> <span style="color: #ce9178;">"${TEST_SIZES[@]}"</span>; <span style="color: #c586c0;">do</span>
+    /usr/local/cuda/gds/tools/gdsio \
+        -f $TEST_FILE -d 0 -w 4 -s $size -i 4M -x 0 -I 0 -T 60 \
+        2>&1 | tee -a $OUTPUT_DIR/results.txt
+<span style="color: #c586c0;">done</span>
+
+<span style="color: #6a9955;"># Generate summary</span>
+echo <span style="color: #ce9178;">"=== SUMMARY ==="</span> | tee -a $OUTPUT_DIR/results.txt
+echo <span style="color: #ce9178;">"Results saved to: $OUTPUT_DIR"</span></code></pre>
+
+            <h3 class="subsection-title">Expected Results Reference Table</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Configuration</th>
+                        <th>Seq Read (1M)</th>
+                        <th>Seq Write (1M)</th>
+                        <th>Rand 4K IOPS</th>
+                        <th>GDS Speedup</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>1x Gen4 NVMe (7GB/s)</strong></td>
+                        <td>6.5-7.0 GB/s</td>
+                        <td>5.5-6.0 GB/s</td>
+                        <td>800K-1M</td>
+                        <td>1.3-1.5x</td>
+                    </tr>
+                    <tr>
+                        <td><strong>1x Gen5 NVMe (14GB/s)</strong></td>
+                        <td>12-14 GB/s</td>
+                        <td>10-12 GB/s</td>
+                        <td>1.5-2M</td>
+                        <td>1.4-1.6x</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4x Gen4 RAID-0</strong></td>
+                        <td>24-28 GB/s</td>
+                        <td>20-24 GB/s</td>
+                        <td>3-4M</td>
+                        <td>1.5-1.8x</td>
+                    </tr>
+                    <tr>
+                        <td><strong>8x Gen5 RAID-0</strong></td>
+                        <td>80-100 GB/s</td>
+                        <td>60-80 GB/s</td>
+                        <td>8-12M</td>
+                        <td>1.6-2.0x</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box insight">
+                <strong>💡 If Your Results Don't Match:</strong>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li><strong>&lt;50% of expected:</strong> Check PCIe link width, NUMA placement, power states</li>
+                    <li><strong>50-80% of expected:</strong> Check filesystem alignment, queue depth settings</li>
+                    <li><strong>80-100% of expected:</strong> Normal - you're in the right ballpark</li>
+                    <li><strong>&gt;100% of expected:</strong> Caching effects - increase test size/duration</li>
+                </ul>
+            </div>
+
+        </section>
+
+        <!-- Section 6: Security Hardening -->
+        <section class="section security" id="security">
+            <h2 class="section-title">🔒 6. Security Hardening</h2>
+            
+            <div class="info-box security">
+                <strong>🔒 DON'T SKIP THIS:</strong> AI training data and model weights are valuable IP. 
+                Storage security is often the weakest link in AI infrastructure.
+            </div>
+
+            <h3 class="subsection-title">Data-at-Rest Encryption</h3>
+
+            <pre><code><span style="color: #6a9955;"># Option 1: LUKS encryption (software, ~5-10% overhead)</span>
+cryptsetup luksFormat /dev/nvme0n1
+cryptsetup open /dev/nvme0n1 nvme_encrypted
+mkfs.xfs /dev/mapper/nvme_encrypted
+mount /dev/mapper/nvme_encrypted /mnt/secure_nvme
+
+<span style="color: #6a9955;"># Option 2: NVMe SED (Self-Encrypting Drive, ~0% overhead)</span>
+<span style="color: #6a9955;"># Check if drive supports TCG Opal</span>
+sedutil-cli --scan
+
+<span style="color: #6a9955;"># Initialize Opal locking</span>
+sedutil-cli --initialSetup &lt;password&gt; /dev/nvme0
+sedutil-cli --enableLockingRange 0 &lt;password&gt; /dev/nvme0
+sedutil-cli --setLockingRange 0 RW &lt;password&gt; /dev/nvme0
+
+<span style="color: #6a9955;"># Enable pre-boot authentication (PBA) for full protection</span>
+sedutil-cli --loadPBAimage &lt;password&gt; /path/to/pba.img /dev/nvme0
+sedutil-cli --setMBREnable on &lt;password&gt; /dev/nvme0</code></pre>
+
+            <h3 class="subsection-title">NVMe-oF Security (for Networked Storage)</h3>
+
+            <pre><code><span style="color: #6a9955;"># Enable DH-HMAC-CHAP authentication for NVMe-oF</span>
+<span style="color: #6a9955;"># Server (target) side:</span>
+nvme gen-dhchap-key --hmac 1 --nqn nqn.2024-01.com.company:storage
+<span style="color: #6a9955;"># Output: DHHC-1:00:xxxxx</span>
+
+<span style="color: #6a9955;"># Configure target with authentication</span>
+cat > /etc/nvmet/subsystems/nvme-subsys/attr_dhchap_key << EOF
+DHHC-1:00:xxxxx
+EOF
+
+<span style="color: #6a9955;"># Client (host) side:</span>
+nvme connect \
+    -t tcp \
+    -a 192.168.1.100 \
+    -s 4420 \
+    -n nqn.2024-01.com.company:storage \
+    --dhchap-secret=DHHC-1:00:xxxxx</code></pre>
+
+            <h3 class="subsection-title">Secure Erase for Decommissioning</h3>
+
+            <pre><code><span style="color: #6a9955;"># CRITICAL: Before disposing of or returning SSDs with sensitive data</span>
+
+<span style="color: #6a9955;"># Check sanitize capabilities</span>
+nvme id-ctrl /dev/nvme0 | grep -i sanitize
+
+<span style="color: #6a9955;"># Option 1: Cryptographic Erase (fastest, ~seconds)</span>
+<span style="color: #6a9955;"># Destroys encryption key, making data unrecoverable</span>
+nvme sanitize /dev/nvme0 --sanact=4  <span style="color: #6a9955;"># Crypto Erase</span>
+
+<span style="color: #6a9955;"># Option 2: Block Erase (~minutes)</span>
+nvme sanitize /dev/nvme0 --sanact=2  <span style="color: #6a9955;"># Block Erase</span>
+
+<span style="color: #6a9955;"># Option 3: Overwrite (slowest, ~hours, most thorough)</span>
+nvme sanitize /dev/nvme0 --sanact=1 --ovrpat=0xDEADBEEF
+
+<span style="color: #6a9955;"># Monitor sanitize progress</span>
+nvme sanitize-log /dev/nvme0
+
+<span style="color: #6a9955;"># Verify completion</span>
+nvme sanitize-log /dev/nvme0 | grep -i "Sanitize Status"</code></pre>
+
+            <h3 class="subsection-title">Security Checklist</h3>
+
+            <ul class="checklist">
+                <li>Enable data-at-rest encryption (LUKS or SED)</li>
+                <li>Configure DH-HMAC-CHAP for NVMe-oF connections</li>
+                <li>Disable remote management interfaces (if not needed)</li>
+                <li>Enable audit logging for storage access</li>
+                <li>Implement secure erase procedures for decommissioning</li>
+                <li>Restrict physical access to storage servers</li>
+                <li>Use separate VLANs for storage traffic</li>
+                <li>Regularly rotate encryption keys</li>
+            </ul>
+
+        </section>
+
+        <!-- Section 7: Power Management -->
+        <section class="section important" id="power">
+            <h2 class="section-title">⚡ 7. Power Management Deep Dive</h2>
+            
+            <div class="info-box warning">
+                <strong>⚠️ LATENCY KILLER:</strong> NVMe power states can add 5-50ms latency spikes. 
+                For AI workloads, you want consistent low latency, not power savings.
+            </div>
+
+            <h3 class="subsection-title">Disabling All Power Management</h3>
+
+            <pre><code><span style="color: #6a9955;">#!/bin/bash</span>
+<span style="color: #6a9955;"># disable_nvme_power_management.sh</span>
+
+<span style="color: #6a9955;"># 1. Disable APST (Autonomous Power State Transitions)</span>
+<span style="color: #c586c0;">for</span> dev <span style="color: #c586c0;">in</span> /dev/nvme*; <span style="color: #c586c0;">do</span>
+    nvme set-feature $dev -f 0x0c -v 0
+    echo <span style="color: #ce9178;">"Disabled APST on $dev"</span>
+<span style="color: #c586c0;">done</span>
+
+<span style="color: #6a9955;"># 2. Kernel-level disable</span>
+echo <span style="color: #b5cea8;">0</span> > /sys/module/nvme_core/parameters/default_ps_max_latency_us
+
+<span style="color: #6a9955;"># 3. Make persistent across reboots</span>
+cat >> /etc/modprobe.d/nvme.conf << EOF
+options nvme_core default_ps_max_latency_us=0
+EOF
+
+<span style="color: #6a9955;"># 4. Verify power state is PS0</span>
+<span style="color: #c586c0;">for</span> dev <span style="color: #c586c0;">in</span> /dev/nvme*; <span style="color: #c586c0;">do</span>
+    echo <span style="color: #ce9178;">"=== $dev ==="</span>
+    nvme get-feature $dev -f 0x0c -H  <span style="color: #6a9955;"># Should show "Autonomous Power State Transition Enable (APSTE): Disabled"</span>
+    
+    <span style="color: #6a9955;"># Check current power state</span>
+    cat /sys/class/nvme/$(basename $dev)/device/power_state
+<span style="color: #c586c0;">done</span>
+
+<span style="color: #6a9955;"># 5. Monitor for power state transitions (should be none)</span>
+nvme get-log /dev/nvme0 --log-id=0x80 --log-len=512 | xxd | head -20</code></pre>
+
+            <h3 class="subsection-title">Impact Quantification</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Power State</th>
+                        <th>Entry Latency</th>
+                        <th>Exit Latency</th>
+                        <th>Impact at 1M IOPS</th>
+                        <th>Recommendation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>PS0</strong> (Active)</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>None</td>
+                        <td class="good">✓ Use This</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PS1</strong> (Idle)</td>
+                        <td>~100μs</td>
+                        <td>~100μs</td>
+                        <td>~100 ops lost</td>
+                        <td class="medium">Avoid</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PS2</strong> (Light Sleep)</td>
+                        <td>~1ms</td>
+                        <td>~1ms</td>
+                        <td>~1000 ops lost</td>
+                        <td class="poor">Disable</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PS3/PS4</strong> (Deep Sleep)</td>
+                        <td>~5-50ms</td>
+                        <td>~5-50ms</td>
+                        <td>~5000-50000 ops lost</td>
+                        <td class="poor">Disable</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </section>
+
+        <!-- Section 8: Firmware Management -->
+        <section class="section important" id="firmware">
+            <h2 class="section-title">🔧 8. Firmware Management</h2>
+
+            <h3 class="subsection-title">Checking and Updating Firmware</h3>
+
+            <pre><code><span style="color: #6a9955;"># Check current firmware versions</span>
+<span style="color: #c586c0;">for</span> dev <span style="color: #c586c0;">in</span> /dev/nvme*; <span style="color: #c586c0;">do</span>
+    echo <span style="color: #ce9178;">"=== $dev ==="</span>
+    nvme id-ctrl $dev | grep -E <span style="color: #ce9178;">"^fr |^mn "</span>
+<span style="color: #c586c0;">done</span>
+
+<span style="color: #6a9955;"># Download firmware from vendor (example: Samsung)</span>
+<span style="color: #6a9955;"># Always verify checksum!</span>
+wget https://semiconductor.samsung.com/resources/software/PM9A3_GDC5602Q.enc
+sha256sum PM9A3_GDC5602Q.enc  <span style="color: #6a9955;"># Verify matches vendor-provided hash</span>
+
+<span style="color: #6a9955;"># Update firmware (REQUIRES PLANNING!)</span>
+<span style="color: #6a9955;"># Option 1: Online update (if supported, no reboot needed)</span>
+nvme fw-download /dev/nvme0 --fw=PM9A3_GDC5602Q.enc
+nvme fw-commit /dev/nvme0 --slot=1 --action=1  <span style="color: #6a9955;"># Activate immediately</span>
+
+<span style="color: #6a9955;"># Option 2: Offline update (safer, requires reboot)</span>
+nvme fw-download /dev/nvme0 --fw=PM9A3_GDC5602Q.enc
+nvme fw-commit /dev/nvme0 --slot=1 --action=2  <span style="color: #6a9955;"># Activate on next reset</span>
+<span style="color: #6a9955;"># Then reboot</span>
+
+<span style="color: #6a9955;"># Verify update</span>
+nvme id-ctrl /dev/nvme0 | grep <span style="color: #ce9178;">"^fr "</span></code></pre>
+
+            <h3 class="subsection-title">Rolling Update Procedure for RAID Arrays</h3>
+
+            <pre><code><span style="color: #6a9955;">#!/bin/bash</span>
+<span style="color: #6a9955;"># rolling_firmware_update.sh - Update RAID without downtime</span>
+
+RAID_DEVICE=<span style="color: #ce9178;">"/dev/md0"</span>
+FIRMWARE_FILE=<span style="color: #ce9178;">"PM9A3_GDC5602Q.enc"</span>
+
+<span style="color: #6a9955;"># Get member drives</span>
+MEMBERS=$(mdadm --detail $RAID_DEVICE | grep <span style="color: #ce9178;">'/dev/nvme'</span> | awk <span style="color: #ce9178;">'{print $NF}'</span>)
+
+<span style="color: #c586c0;">for</span> member <span style="color: #c586c0;">in</span> $MEMBERS; <span style="color: #c586c0;">do</span>
+    echo <span style="color: #ce9178;">"=== Updating $member ==="</span>
+    
+    <span style="color: #6a9955;"># 1. Mark drive as faulty and remove from array</span>
+    mdadm --manage $RAID_DEVICE --fail $member
+    mdadm --manage $RAID_DEVICE --remove $member
+    
+    <span style="color: #6a9955;"># 2. Wait for array to stabilize</span>
+    sleep <span style="color: #b5cea8;">10</span>
+    
+    <span style="color: #6a9955;"># 3. Get controller device from namespace device</span>
+    CTRL_DEV=$(echo $member | sed <span style="color: #ce9178;">'s/n[0-9]*$//'</span>)
+    
+    <span style="color: #6a9955;"># 4. Update firmware</span>
+    nvme fw-download $CTRL_DEV --fw=$FIRMWARE_FILE
+    nvme fw-commit $CTRL_DEV --slot=1 --action=3  <span style="color: #6a9955;"># Activate on next controller reset</span>
+    
+    <span style="color: #6a9955;"># 5. Reset controller to apply firmware</span>
+    nvme reset $CTRL_DEV
+    sleep <span style="color: #b5cea8;">5</span>
+    
+    <span style="color: #6a9955;"># 6. Verify new firmware</span>
+    nvme id-ctrl $CTRL_DEV | grep <span style="color: #ce9178;">"^fr "</span>
+    
+    <span style="color: #6a9955;"># 7. Re-add to array</span>
+    mdadm --manage $RAID_DEVICE --add $member
+    
+    <span style="color: #6a9955;"># 8. Wait for rebuild before proceeding to next drive</span>
+    echo <span style="color: #ce9178;">"Waiting for rebuild..."</span>
+    <span style="color: #c586c0;">while</span> grep -q <span style="color: #ce9178;">"recovery"</span> /proc/mdstat; <span style="color: #c586c0;">do</span>
+        sleep <span style="color: #b5cea8;">30</span>
+        cat /proc/mdstat
+    <span style="color: #c586c0;">done</span>
+    
+    echo <span style="color: #ce9178;">"$member updated successfully"</span>
+<span style="color: #c586c0;">done</span>
+
+echo <span style="color: #ce9178;">"All drives updated!"</span>
+mdadm --detail $RAID_DEVICE</code></pre>
+
+        </section>
+
+        <!-- Section 9: Technical Corrections -->
+        <section class="section" id="corrections">
+            <h2 class="section-title">📝 9. Technical Corrections & Updates</h2>
+
+            <div class="info-box insight">
+                <strong>💡 Corrections from Review:</strong> The following are updates to information 
+                in other sections of this documentation.
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Topic</th>
+                        <th>Original Claim</th>
+                        <th>Corrected Information</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CXL 2.0 Latency</strong></td>
+                        <td>~200ns</td>
+                        <td class="medium">250-400ns in real-world deployments. Lab results may show 200ns, but production systems with real workloads see higher.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>PCIe Gen6 Timeline</strong></td>
+                        <td>2025-2026</td>
+                        <td class="medium">Late 2026-2027 for enterprise availability. Consumer drives may appear in 2026, but enterprise-grade Gen6 NVMe is 2027+.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GDS Speedup</strong></td>
+                        <td>Often cited as "2x"</td>
+                        <td class="good">1.3-2.0x depending on workload. Sequential reads see lower benefit than random access patterns.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>UALink Timeline</strong></td>
+                        <td>2027+</td>
+                        <td class="medium">2027 for spec finalization, 2028+ for products. Storage integration undefined in initial spec.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </section>
+
+        <nav class="nav-header" style="margin-top: 50px;">
+            <a href="11_ml_frameworks.html">← ML Frameworks</a>
+            <span style="color: var(--text-secondary);">Production Critical Guide</span>
+            <a href="index.html">Home →</a>
+        </nav>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Solutions - Real-World GPU-Storage Architecture</title>
+    <style>
+        :root {
+            --bg-void: #030308;
+            --bg-deep: #0a0a12;
+            --bg-surface: #12121c;
+            --bg-elevated: #1a1a28;
+            --text-primary: #e4e4ed;
+            --text-secondary: #9494a8;
+            --text-muted: #5c5c72;
+            --accent-cyber: #00ffaa;
+            --accent-electric: #00d4ff;
+            --accent-plasma: #a855f7;
+            --accent-solar: #fbbf24;
+            --accent-ember: #ff6b6b;
+            --gradient-cyber: linear-gradient(135deg, #00ffaa 0%, #00d4ff 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-void);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: rgba(3, 3, 8, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 100;
+        }
+
+        .nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav a:hover { color: var(--accent-cyber); }
+        .nav-title { color: var(--text-primary); font-weight: 600; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 24px 80px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .page-number {
+            font-size: 6rem;
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.01) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: -30px;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient-cyber);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background: var(--bg-surface);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent-solar);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .subsection-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-cyber);
+            margin: 24px 0 12px;
+        }
+
+        h2 { color: var(--accent-solar); margin: 32px 0 16px; }
+        h3 { color: var(--accent-cyber); margin: 24px 0 12px; }
+        h4 { color: var(--accent-electric); margin: 20px 0 10px; }
+
+        p { color: var(--text-secondary); margin-bottom: 16px; }
+        
+        ul, ol { color: var(--text-secondary); margin: 16px 0 16px 24px; }
+        li { margin-bottom: 8px; }
+
+        a { color: var(--accent-electric); }
+        a:hover { color: var(--accent-cyber); }
+
+        strong { color: var(--text-primary); }
+        em { color: var(--accent-plasma); font-style: normal; }
+
+        .code-block, pre {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            white-space: pre;
+            color: #e6edf3;
+        }
+
+        code {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.9em;
+            color: var(--accent-cyber);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th {
+            background: rgba(0, 255, 170, 0.1);
+            color: var(--accent-cyber);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(0, 255, 170, 0.2);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-secondary);
+        }
+
+        tr:hover { background: rgba(255,255,255,0.02); }
+
+        .info-box, .warning-box, .note-box {
+            padding: 20px 24px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .warning-box {
+            background: rgba(255, 107, 107, 0.1);
+            border-left: 4px solid var(--accent-ember);
+        }
+
+        .info-box {
+            background: rgba(0, 212, 255, 0.1);
+            border-left: 4px solid var(--accent-electric);
+        }
+
+        .note-box, .success-box {
+            background: rgba(0, 255, 170, 0.1);
+            border-left: 4px solid var(--accent-cyber);
+        }
+
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 48px;
+            padding-top: 32px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            background: var(--bg-surface);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--accent-cyber);
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+        }
+
+        .expert-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #fbbf24 100%);
+            color: #000;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        /* Emoji fixes */
+        .emoji { font-style: normal; }
+
+        @media (max-width: 768px) {
+            .nav { padding: 0 20px; }
+            .container { padding: 80px 16px 60px; }
+            .section { padding: 24px; }
+            .page-title { font-size: 1.8rem; }
+            .nav-footer { flex-direction: column; gap: 12px; }
+        }
+</style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="nav">
+        <a href="index.html" style="font-weight: 600; color: #fff;">NVMe for GPUs</a>
+        <div class="nav-links">
+            <a href="01_motivation.html">Motivation</a>
+            <a href="02_cpu_vs_gpu.html">CPU vs GPU</a>
+            <a href="03_sync_problem.html">Sync Problem</a>
+            <a href="04_challenges.html">Challenges</a>
+            <a href="05_expert_deep_dive.html">Deep Dive</a>
+            <a href="06_implementation.html">Implementation</a>
+            <a href="07_solutions.html">Solutions</a>
+            <a href="08_advanced_solutions.html" style="color: #fbbf24;">Advanced</a>
+            <a href="09_production_reality.html">Production</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="hero">
+            <span class="reality-badge">âš ï¸ REALITY CHECK</span>
+            <h1>Advanced Solutions &amp; Hard Truths</h1>
+            <p>The technologies the industry doesn't want to talk honestly about: what's production-ready, what's hype, and what actually solves GPU-storage bottlenecks today.</p>
+        </div>
+
+        <!-- Section 1: CXL Reality Check -->
+        <div class="section">
+            <h2 class="section-title">CXL Reality Check: DRAM vs. NAND</h2>
+            
+            <div class="info-box warning">
+                <strong>ðŸš¨ Critical Distinction:</strong> "CXL Storage" conflates two very different things: CXL-attached DRAM (fast, expensive, limited capacity) and CXL-attached SSDs (still NAND-backed, still has NVMe-like FTL internally). The latency profiles are 10-100× different.
+            </div>
+
+            <div class="arch-diagram">
+                <div class="arch-title">CXL Type 3 Device Internals: DRAM vs. NAND</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                    <div>
+                        <h4 style="color: #00ff88; text-align: center; margin-bottom: 15px;">CXL Memory Expander (DRAM-backed)</h4>
+                        <div class="arch-flow" style="flex-direction: column;">
+                            <div class="arch-box arch-gpu">GPU Load/Store</div>
+                            <div class="arch-arrow">â†“</div>
+                            <div class="arch-box arch-cxl">CXL Controller</div>
+                            <div class="arch-arrow">â†“</div>
+                            <div class="arch-box arch-dram">DRAM Array</div>
+                            <div style="text-align: center; margin-top: 10px;">
+                                <span class="good">~150-300 ns latency</span><br>
+                                <span style="color: #888;">True memory semantics</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="color: #fbbf24; text-align: center; margin-bottom: 15px;">CXL SSD (NAND-backed)</h4>
+                        <div class="arch-flow" style="flex-direction: column;">
+                            <div class="arch-box arch-gpu">GPU Load/Store</div>
+                            <div class="arch-arrow">â†“</div>
+                            <div class="arch-box arch-cxl">CXL Controller</div>
+                            <div class="arch-arrow">â†“</div>
+                            <div class="arch-box" style="background: #444; color: #fff;">FTL + DRAM Cache</div>
+                            <div class="arch-arrow">â†“</div>
+                            <div class="arch-box arch-nand">NAND Flash</div>
+                            <div style="text-align: center; margin-top: 10px;">
+                                <span class="medium">~3-10 µs latency (cache hit)</span><br>
+                                <span class="poor">~50-100 µs latency (NAND)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">CXL Product Reality (As of Q4 2024)</h3>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Type</th>
+                        <th>Backend</th>
+                        <th>Latency</th>
+                        <th>Capacity</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Samsung CMM-D</strong></td>
+                        <td>Memory Expander</td>
+                        <td>DDR5 DRAM</td>
+                        <td class="good">~200 ns</td>
+                        <td>128-512 GB</td>
+                        <td><span class="good">Shipping</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Micron CZ120</strong></td>
+                        <td>Memory Expander</td>
+                        <td>DDR5 DRAM</td>
+                        <td class="good">~170 ns</td>
+                        <td>256 GB</td>
+                        <td><span class="good">Shipping</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>SK Hynix CMB</strong></td>
+                        <td>Memory Expander</td>
+                        <td>DDR5 DRAM</td>
+                        <td class="good">~200 ns</td>
+                        <td>96-128 GB</td>
+                        <td><span class="good">Sampling</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Samsung CXL SSD</strong></td>
+                        <td>CXL Storage</td>
+                        <td>NAND + DRAM cache</td>
+                        <td class="medium">~5 µs (hit) / 80 µs (miss)</td>
+                        <td>2-8 TB</td>
+                        <td><span class="medium">Sampling</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Kioxia XL-FLASH CXL</strong></td>
+                        <td>CXL Storage</td>
+                        <td>XL-FLASH (SLC)</td>
+                        <td class="medium">~3 µs</td>
+                        <td>800 GB</td>
+                        <td><span class="medium">Announced</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>ASIC-based CXL 3.0</strong></td>
+                        <td>Memory Pooling</td>
+                        <td>Mixed</td>
+                        <td class="medium">~200ns-2µs</td>
+                        <td>TB scale</td>
+                        <td><span class="poor">2026+</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box reality">
+                <strong>💡 The Hard Truth:</strong> CXL memory expanders (DRAM-backed) are real and shipping. They give you ~200ns latency with memory semantics — great for expanding GPU-accessible memory. But CXL SSDs still have NAND physics: 50-100µs for reads that miss the internal DRAM cache. CXL changes the interface, not the media.
+            </div>
+
+            <h3 class="subsection-title">GPU Vendor Divergence on CXL</h3>
+            
+            <div class="comparison">
+                <div class="comparison-side nvidia">
+                    <h4 style="color: #76b900;">NVIDIA Position</h4>
+                    <ul class="card-specs">
+                        <li><strong>No CXL support announced</strong> for H100/H200/B100</li>
+                        <li>Betting on NVLink (900 GB/s) over CXL (64 GB/s)</li>
+                        <li>Grace CPU has CXL, but GPUâ†”CXL path unclear</li>
+                        <li>GDS (GPUDirect Storage) is their storage answer</li>
+                        <li>NVLink-C2C for GPUâ†”CPU coherency instead</li>
+                    </ul>
+                    <div class="info-box warning" style="margin-top: 15px;">
+                        <strong>Risk:</strong> If you're NVIDIA-only, CXL storage may not help your GPU path directly.
+                    </div>
+                </div>
+                
+                <div class="comparison-side amd">
+                    <h4 style="color: #ed1c24;">AMD Position</h4>
+                    <ul class="card-specs">
+                        <li><strong>MI300A/X has CXL support</strong></li>
+                        <li>Infinity Fabric can bridge to CXL</li>
+                        <li>EPYC Genoa/Turin: robust CXL 1.1/2.0</li>
+                        <li>Actively sampling CXL memory with partners</li>
+                        <li>ROCm 6.x adding CXL memory support</li>
+                    </ul>
+                    <div class="info-box success" style="margin-top: 15px;">
+                        <strong>Opportunity:</strong> AMD MI300 + CXL memory expander = larger effective GPU memory pool.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Computational Storage -->
+        <div class="section">
+            <h2 class="section-title">Computational Storage for AI</h2>
+            
+            <div class="info-box insight">
+                <strong>ðŸ§  The Insight:</strong> Instead of moving 100GB of raw data to GPU, filter/decompress/preprocess at the SSD. Only move the 10GB that matters. This inverts the bottleneck — compute moves to data, not data to compute.
+            </div>
+
+            <div class="arch-diagram">
+                <div class="arch-title">Traditional vs. Computational Storage Data Flow</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                    <div>
+                        <h4 style="color: #ef4444; text-align: center; margin-bottom: 15px;">âŒ Traditional: Move All Data</h4>
+                        <div class="arch-flow" style="flex-direction: column;">
+                            <div class="arch-box arch-storage">SSD: 100 GB raw</div>
+                            <div class="arch-arrow">â†“ 100 GB transfer</div>
+                            <div class="arch-box arch-cpu">CPU: Decompress</div>
+                            <div class="arch-arrow">â†“ 100 GB transfer</div>
+                            <div class="arch-box arch-gpu">GPU: Filter to 10 GB</div>
+                        </div>
+                        <div style="text-align: center; margin-top: 15px; color: #ef4444;">
+                            200 GB moved, 10s+ latency
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="color: #00ff88; text-align: center; margin-bottom: 15px;">✓ Computational Storage</h4>
+                        <div class="arch-flow" style="flex-direction: column;">
+                            <div class="arch-box arch-storage">SSD: 100 GB raw</div>
+                            <div class="arch-arrow">â†“ In-SSD processing</div>
+                            <div class="arch-box arch-compute">CSx: Decompress + Filter</div>
+                            <div class="arch-arrow">â†“ 10 GB transfer</div>
+                            <div class="arch-box arch-gpu">GPU: Ready data</div>
+                        </div>
+                        <div style="text-align: center; margin-top: 15px; color: #00ff88;">
+                            10 GB moved, 1s latency
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">Computational Storage Products</h3>
+            
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">ScaleFlux CSD 3000</h3>
+                        <span class="card-badge badge-production">Production</span>
+                    </div>
+                    <p class="card-desc">Hardware-accelerated compression/decompression at the SSD. Transparent to application — data compressed at rest, decompressed on read.</p>
+                    <ul class="card-specs">
+                        <li>4:1 compression ratio typical</li>
+                        <li>Line-rate decompression (no CPU)</li>
+                        <li>NVMe standard interface</li>
+                        <li>Works with existing GDS</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Samsung SmartSSD</h3>
+                        <span class="card-badge badge-production">Production</span>
+                    </div>
+                    <p class="card-desc">Xilinx FPGA embedded in SSD. Programmable compute for custom preprocessing — filtering, regex, SQL pushdown.</p>
+                    <ul class="card-specs">
+                        <li>Xilinx Kintex UltraScale+ FPGA</li>
+                        <li>4GB dedicated DRAM</li>
+                        <li>Vitis/OpenCL programmable</li>
+                        <li>Good for Spark/database offload</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">NGD Newport</h3>
+                        <span class="card-badge badge-emerging">Emerging</span>
+                    </div>
+                    <p class="card-desc">ARM cores inside SSD for general-purpose compute. Run Linux, containers, custom code at the storage.</p>
+                    <ul class="card-specs">
+                        <li>Quad-core ARM A53</li>
+                        <li>Linux environment</li>
+                        <li>eBPF programs at storage</li>
+                        <li>Pre-filtering for ML pipelines</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">SNIA CSA Standard</h3>
+                        <span class="card-badge badge-emerging">Standardizing</span>
+                    </div>
+                    <p class="card-desc">SNIA Computational Storage Architecture defines standard APIs for offloading computation to storage devices.</p>
+                    <ul class="card-specs">
+                        <li>CSx Compute Programs</li>
+                        <li>Standard discovery/management</li>
+                        <li>NVMe TP4091 integration</li>
+                        <li>Vendor interoperability goal</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">AI Workloads Suited for Computational Storage</h3>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Workload</th>
+                        <th>Offload Operation</th>
+                        <th>Data Reduction</th>
+                        <th>Benefit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Training Data Loading</strong></td>
+                        <td>Decompress (zstd, LZ4)</td>
+                        <td>4-10×</td>
+                        <td>4-10× less data moved to GPU</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Image Preprocessing</strong></td>
+                        <td>Decode JPEG, resize, normalize</td>
+                        <td>3-5×</td>
+                        <td>Raw pixels ready for GPU</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Log/Event Processing</strong></td>
+                        <td>Filter, grep, regex</td>
+                        <td>10-100×</td>
+                        <td>Only matching records transferred</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Embedding Lookup</strong></td>
+                        <td>Index scan, gather</td>
+                        <td>100-1000×</td>
+                        <td>Only requested embeddings</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Checkpoint Restore</strong></td>
+                        <td>Decompress, tensor reshape</td>
+                        <td>2-4×</td>
+                        <td>Faster model loading</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="code-block">
+<span class="code-comment">// Example: ScaleFlux transparent compression with GDS</span>
+<span class="code-comment">// Data stored compressed, automatically decompressed on read</span>
+
+<span class="code-comment">// 1. Write compressed (application writes raw, SSD compresses)</span>
+<span class="code-function">cuFileWrite</span>(handle, gpu_buffer, size, offset, <span class="code-number">0</span>);
+<span class="code-comment">// SSD stores ~25% of original size</span>
+
+<span class="code-comment">// 2. Read decompressed (SSD decompresses at line rate)</span>
+<span class="code-function">cuFileRead</span>(handle, gpu_buffer, size, offset, <span class="code-number">0</span>);
+<span class="code-comment">// GPU receives uncompressed data, 4× less PCIe traffic</span>
+
+<span class="code-comment">// No application changes needed — transparent compression</span>
+            </div>
+        </div>
+
+        <!-- Section 3: NVMe Command Sets -->
+        <div class="section">
+            <h2 class="section-title">NVMe Command Sets for AI Workloads</h2>
+            
+            <p style="margin-bottom: 25px; color: #aaa;">
+                Beyond basic read/write, NVMe 2.0+ defines specialized command sets that map better to AI access patterns than traditional LBA I/O.
+            </p>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">ZNS (Zoned Namespaces)</h3>
+                        <span class="card-badge badge-production">NVMe 2.0</span>
+                    </div>
+                    <p class="card-desc">Sequential-write zones eliminate garbage collection. Perfect for append-only AI workloads: logs, checkpoints, training data writes.</p>
+                    <ul class="card-specs">
+                        <li>Minimal GC = more predictable latency</li>
+                        <li>Zone append = parallel writes</li>
+                        <li>Ideal for checkpoint streaming</li>
+                        <li>4× write amplification reduction</li>
+                        <li><strong>GPU fit:</strong> Streaming writes from training</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">KV Command Set</h3>
+                        <span class="card-badge badge-emerging">NVMe 2.0</span>
+                    </div>
+                    <p class="card-desc">Native key-value operations in NVMe. No filesystem, no LBA translation. Direct semantic access for embeddings, KV-cache.</p>
+                    <ul class="card-specs">
+                        <li>Variable-size values (no 4KB alignment)</li>
+                        <li>Native get/put/delete/exists</li>
+                        <li>Iterator support for scans</li>
+                        <li>Better for random small reads</li>
+                        <li><strong>GPU fit:</strong> Embedding lookups, KV-cache</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">FDP (Flexible Data Placement)</h3>
+                        <span class="card-badge badge-production">NVMe 2.0</span>
+                    </div>
+                    <p class="card-desc">Application hints for data placement. Separate hot/cold data, reduce write amplification, improve tail latency.</p>
+                    <ul class="card-specs">
+                        <li>Placement handles for data streams</li>
+                        <li>Reclaim units for isolation</li>
+                        <li>Works with standard namespaces</li>
+                        <li>Meta + Samsung + Google pushing</li>
+                        <li><strong>GPU fit:</strong> Separate model weights vs. KV-cache</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Copy Offload</h3>
+                        <span class="card-badge badge-production">NVMe 1.4</span>
+                    </div>
+                    <p class="card-desc">SSD-to-SSD copy without host involvement. Useful for checkpoint replication, data shuffling between storage tiers.</p>
+                    <ul class="card-specs">
+                        <li>Simple Copy command</li>
+                        <li>No host memory bandwidth used</li>
+                        <li>Intra-device or cross-device</li>
+                        <li>Limited adoption so far</li>
+                        <li><strong>GPU fit:</strong> Checkpoint replication</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">ZNS for AI Checkpointing</h3>
+            
+            <div class="arch-diagram">
+                <div class="arch-title">Traditional vs. ZNS Checkpoint Write Pattern</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; text-align: center;">
+                    <div>
+                        <h4 style="color: #ef4444; margin-bottom: 15px;">Traditional NVMe</h4>
+                        <div style="background: rgba(239,68,68,0.1); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                            Random writes â†’ GC triggers<br>
+                            <strong>Latency spikes during checkpoint</strong>
+                        </div>
+                        <div style="font-size: 0.9rem; color: #888;">
+                            Write amp: 3-5×<br>
+                            Tail latency: 10-100ms
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="color: #00ff88; margin-bottom: 15px;">ZNS NVMe</h4>
+                        <div style="background: rgba(0,255,136,0.1); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                            Sequential zone writes â†’ Minimal GC<br>
+                            <strong>Predictable checkpoint latency</strong>
+                        </div>
+                        <div style="font-size: 0.9rem; color: #888;">
+                            Write amp: ~1×<br>
+                            Tail latency: &lt;1ms
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-block">
+<span class="code-comment">// ZNS Zone Append for parallel checkpoint writes</span>
+<span class="code-comment">// Multiple GPU threads can append to same zone without coordination</span>
+
+<span class="code-keyword">struct</span> <span class="code-type">nvme_zone_append_cmd</span> {
+    <span class="code-type">uint8_t</span>  opcode;        <span class="code-comment">// 0x7D = Zone Append</span>
+    <span class="code-type">uint8_t</span>  flags;
+    <span class="code-type">uint16_t</span> cid;
+    <span class="code-type">uint32_t</span> nsid;
+    <span class="code-type">uint64_t</span> zslba;         <span class="code-comment">// Zone Start LBA (which zone)</span>
+    <span class="code-type">uint64_t</span> mptr;
+    <span class="code-type">uint64_t</span> prp1;
+    <span class="code-type">uint64_t</span> prp2;
+    <span class="code-type">uint32_t</span> nlb;           <span class="code-comment">// Number of logical blocks</span>
+    <span class="code-comment">// ...</span>
+};
+
+<span class="code-comment">// Completion returns actual LBA where data was written</span>
+<span class="code-comment">// SSD handles write pointer atomically — no host coordination!</span>
+            </div>
+        </div>
+
+        <!-- Section 4: DPU Offload -->
+        <div class="section">
+            <h2 class="section-title">DPU Storage Offload (Deploy Today)</h2>
+            
+            <div class="info-box success">
+                <strong>✓ Production-Ready Now:</strong> DPUs (Data Processing Units) like NVIDIA BlueField can offload NVMe processing from CPU, freeing CPU cores for other work and providing a dedicated I/O path. This is not vaporware — it's shipping in production datacenters.
+            </div>
+
+            <div class="arch-diagram">
+                <div class="arch-title">DPU-Accelerated GPU Storage Path</div>
+                <div class="arch-flow">
+                    <div class="arch-box arch-gpu">
+                        GPU<br>
+                        <small>Compute</small>
+                    </div>
+                    <div class="arch-arrow">â†”</div>
+                    <div class="arch-box arch-dpu">
+                        BlueField DPU<br>
+                        <small>NVMe-oF Target</small>
+                    </div>
+                    <div class="arch-arrow">â†”</div>
+                    <div class="arch-box arch-storage">
+                        NVMe SSDs<br>
+                        <small>Local/Remote</small>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 15px; color: #888;">
+                    DPU handles NVMe queuing, P2P DMA setup, and storage virtualization<br>
+                    CPU completely out of storage data path
+                </div>
+            </div>
+
+            <h3 class="subsection-title">DPU Products for Storage Offload</h3>
+            
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">NVIDIA BlueField-3</h3>
+                        <span class="card-badge badge-production">Production</span>
+                    </div>
+                    <p class="card-desc">16 ARM cores + ConnectX-7 + crypto. SNAP (Software-defined NVMe Accelerated Virtualization) for storage virtualization.</p>
+                    <ul class="card-specs">
+                        <li>400 Gbps networking</li>
+                        <li>NVMe-oF target offload</li>
+                        <li>SNAP: virtualized NVMe</li>
+                        <li>GPUDirect RDMA support</li>
+                        <li>DOCA SDK for custom offloads</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">AMD Pensando DSC-200</h3>
+                        <span class="card-badge badge-production">Production</span>
+                    </div>
+                    <p class="card-desc">P4 programmable pipeline + ARM cores. Storage offload via custom P4 programs.</p>
+                    <ul class="card-specs">
+                        <li>200 Gbps networking</li>
+                        <li>P4 programmable datapath</li>
+                        <li>NVMe-oF initiator/target</li>
+                        <li>IONIC driver for Linux</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Intel IPU E2000</h3>
+                        <span class="card-badge badge-emerging">Emerging</span>
+                    </div>
+                    <p class="card-desc">Intel's Infrastructure Processing Unit. xPU cores + network + storage acceleration.</p>
+                    <ul class="card-specs">
+                        <li>200 Gbps networking</li>
+                        <li>NVMe/virtio-blk offload</li>
+                        <li>vRAN acceleration</li>
+                        <li>IPDK software stack</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Fungible F1 DPU</h3>
+                        <span class="card-badge badge-production">Production</span>
+                    </div>
+                    <p class="card-desc">Purpose-built for storage. TrueFabric for composable storage, native NVMe-oF.</p>
+                    <ul class="card-specs">
+                        <li>Acquired by Microsoft</li>
+                        <li>Azure infrastructure use</li>
+                        <li>High storage IOPS offload</li>
+                        <li>Sub-100µs NVMe-oF latency</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">NVIDIA SNAP: NVMe Virtualization</h3>
+            
+            <div class="info-box insight">
+                <strong>SNAP (Software-defined NVMe Accelerated Processing):</strong> BlueField presents virtual NVMe devices to the host/GPU while handling the actual storage backend (local SSDs, NVMe-oF, object storage). The GPU sees a simple NVMe device; complexity is hidden in the DPU.
+            </div>
+
+            <div class="code-block">
+<span class="code-comment">// SNAP Architecture: DPU presents virtual NVMe to GPU</span>
+
+                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+                    â”‚      GPU        â”‚
+                    â”‚  (GDS/cuFile)   â”‚
+                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                             â”‚ PCIe (virtual NVMe)
+                    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”
+                    â”‚  BlueField DPU  â”‚
+                    â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
+                    â”‚  â”‚   SNAP    â”‚  â”‚ â† NVMe emulation
+                    â”‚  â”‚  Engine   â”‚  â”‚
+                    â”‚  â””â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜  â”‚
+                    â”‚        â”‚        â”‚
+                    â”‚  â”Œâ”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”  â”‚
+                    â”‚  â”‚  Backend  â”‚  â”‚ â† Local NVMe, NVMe-oF, S3...
+                    â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
+                    â””â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                             â”‚
+               â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+               â–¼             â–¼             â–¼
+          Local SSD    NVMe-oF Target   Object Store
+            </div>
+
+            <p style="margin-top: 20px; color: #aaa;">
+                Benefits for GPU workloads:
+            </p>
+            <ul class="card-specs" style="margin-top: 10px;">
+                <li>GPU uses standard NVMe/GDS — no code changes</li>
+                <li>DPU handles storage tiering, caching, replication</li>
+                <li>CPU cores freed from storage processing</li>
+                <li>Live migration of storage without GPU interruption</li>
+                <li>Multi-tenant isolation at DPU level</li>
+            </ul>
+        </div>
+
+        <!-- Section 5: UEC Reality Check -->
+        <div class="section">
+            <h2 class="section-title">Ultra Ethernet (UEC): Reality Check</h2>
+            
+            <div class="info-box warning">
+                <strong>âš ï¸ Honesty Time:</strong> UEC is a consortium (AMD, Arista, Broadcom, Cisco, Meta, Microsoft, etc.) working on AI-optimized Ethernet. It's promising but <strong>no silicon ships yet</strong>. Specs are still being finalized. Do not make purchasing decisions based on UEC timelines.
+            </div>
+
+            <h3 class="subsection-title">What UEC Actually Is</h3>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Current State</th>
+                        <th>Risk Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Specification</strong></td>
+                        <td>UEC 1.0 spec released June 2024</td>
+                        <td class="medium">Spec exists, but untested at scale</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Silicon</strong></td>
+                        <td>No shipping UEC-compliant NICs/switches</td>
+                        <td class="poor">12-24 months out minimum</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Software Stack</strong></td>
+                        <td>Reference implementation in progress</td>
+                        <td class="poor">Drivers, libraries not production-ready</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Interoperability</strong></td>
+                        <td>Untested across vendors</td>
+                        <td class="poor">RoCE interop took 3+ years; expect similar for UEC</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GPU Integration</strong></td>
+                        <td>Conceptual — no GPU vendor commitment</td>
+                        <td class="poor">NVIDIA may not participate</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsection-title">What to Use Instead (Today)</h3>
+            
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">RoCEv2 + GPUDirect RDMA</h3>
+                        <span class="card-badge badge-production">Production</span>
+                    </div>
+                    <p class="card-desc">RDMA over Converged Ethernet. Works with NVIDIA GPUs today via GPUDirect RDMA. Established ecosystem.</p>
+                    <ul class="card-specs">
+                        <li>ConnectX-6/7 NICs</li>
+                        <li>Spectrum switches</li>
+                        <li>100-400 Gbps</li>
+                        <li>NVMe-oF/RDMA for storage</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">InfiniBand NDR</h3>
+                        <span class="card-badge badge-production">Production</span>
+                    </div>
+                    <p class="card-desc">If you need the absolute best GPU-to-GPU and GPU-to-storage performance, InfiniBand is still king.</p>
+                    <ul class="card-specs">
+                        <li>400 Gbps (NDR) / 800 Gbps (XDR coming)</li>
+                        <li>Native RDMA, no RoCE compromises</li>
+                        <li>GPUDirect Storage over IB</li>
+                        <li>Higher cost, single vendor (NVIDIA)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- NVMe-oF Transport Latency Deep Dive -->
+            <h3 class="subsection-title">NVMe-oF Transport Latency Breakdown</h3>
+            
+            <p>Understanding the real latency characteristics of each NVMe-oF transport is critical for GPU workload planning. Here's production-measured data:</p>
+            
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Transport</th>
+                        <th>4KB Read Latency</th>
+                        <th>128KB Read Latency</th>
+                        <th>Throughput (per conn)</th>
+                        <th>CPU Overhead</th>
+                        <th>GPU Integration</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Local NVMe</strong></td>
+                        <td class="good">~80-100 µs</td>
+                        <td class="good">~120-150 µs</td>
+                        <td class="good">7+ GB/s</td>
+                        <td class="good">Minimal</td>
+                        <td class="good">GDS native</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NVMe-oF/RDMA (RoCEv2)</strong></td>
+                        <td class="okay">~120-180 µs</td>
+                        <td class="okay">~200-300 µs</td>
+                        <td class="good">6+ GB/s</td>
+                        <td class="good">Near-zero (kernel bypass)</td>
+                        <td class="good">GPUDirect RDMA</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NVMe-oF/RDMA (InfiniBand)</strong></td>
+                        <td class="good">~100-150 µs</td>
+                        <td class="okay">~180-250 µs</td>
+                        <td class="good">12+ GB/s (NDR)</td>
+                        <td class="good">Near-zero</td>
+                        <td class="good">GPUDirect RDMA native</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NVMe-oF/TCP (kernel)</strong></td>
+                        <td class="poor">~300-500 µs</td>
+                        <td class="poor">~400-700 µs</td>
+                        <td class="okay">3-4 GB/s</td>
+                        <td class="poor">High (full stack)</td>
+                        <td class="poor">CPU bounce required</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NVMe-oF/TCP (TOE/DPU)</strong></td>
+                        <td class="okay">~150-250 µs</td>
+                        <td class="okay">~250-400 µs</td>
+                        <td class="okay">5+ GB/s</td>
+                        <td class="okay">Offloaded</td>
+                        <td class="okay">BlueField passthrough</td>
+                    </tr>
+                    <tr>
+                        <td><strong>FC-NVMe (32G FC)</strong></td>
+                        <td class="okay">~150-200 µs</td>
+                        <td class="okay">~250-350 µs</td>
+                        <td class="okay">3.2 GB/s</td>
+                        <td class="okay">HBA offload</td>
+                        <td class="poor">No direct GPU path</td>
+                    </tr>
+                    <tr>
+                        <td><strong>FC-NVMe (64G FC)</strong></td>
+                        <td class="okay">~130-180 µs</td>
+                        <td class="okay">~220-300 µs</td>
+                        <td class="good">6.4 GB/s</td>
+                        <td class="okay">HBA offload</td>
+                        <td class="poor">No direct GPU path</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="info-box warning">
+                <strong>âš ï¸ Latency Reality Check:</strong>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li><strong>Add 20-50 µs</strong> for each network hop (ToR switch, spine, etc.)</li>
+                    <li><strong>Add 50-100 µs</strong> for storage array controller overhead</li>
+                    <li><strong>Add 100-200 µs</strong> for congestion during checkpoint storms</li>
+                    <li><strong>P99 latency</strong> is typically 2-3× average in production</li>
+                </ul>
+            </div>
+            
+            <h4 style="color: #00ff88; margin: 25px 0 15px 0;">NVMe-oF Transport Selection for GPU Workloads</h4>
+            
+            <pre class="code-block"><span class="comment"># Latency breakdown example: GPU read from remote NVMe via RoCEv2</span>
+
+<span class="comment"># Component latencies (measured with hardware timestamps):</span>
+GPU PCIe DMA setup:           ~2-5 µs
+PCIe traversal (GPUâ†’NIC):     ~1-2 µs
+RDMA NIC processing:          ~2-3 µs
+Network (25GbE, 2 hops):      ~5-10 µs
+Target NIC processing:        ~2-3 µs
+PCIe to target NVMe:          ~1-2 µs
+NVMe SSD read (4KB):          ~80-100 µs
+Return path (similar):        ~15-25 µs
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+Total 4KB read:               ~110-150 µs (typical)
+Total 128KB read:             ~180-280 µs (media dominates)
+
+<span class="comment"># Versus NVMe-oF/TCP (kernel path):</span>
+GPUâ†’CPU DMA (bounce buffer):  ~10-20 µs
+Kernel network stack:         ~50-100 µs
+TCP processing (both ends):   ~30-50 µs
+Context switches:             ~20-40 µs
+Network + NVMe:               ~100-120 µs
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+Total 4KB read:               ~300-450 µs (3× RDMA!)
+
+<span class="comment"># FC-NVMe path (traditional SAN):</span>
+Host HBA processing:          ~10-20 µs
+FC fabric (2 hops):           ~10-20 µs
+Array front-end:              ~30-50 µs
+Array cache/backend:          ~50-100 µs
+Return path:                  ~40-70 µs
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+Total 4KB read:               ~140-260 µs
+<span class="comment"># Note: No GPUDirect path - requires CPU bounce!</span></pre>
+
+            <h4 style="color: #00ff88; margin: 25px 0 15px 0;">When to Use Each Transport</h4>
+            
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Use RDMA (RoCEv2/IB)</h3>
+                        <span class="card-badge badge-production">Recommended</span>
+                    </div>
+                    <ul class="card-specs">
+                        <li>AI training with checkpoint to remote storage</li>
+                        <li>Inference with KV cache on disaggregated NVMe</li>
+                        <li>Any GPU workload needing &lt;200µs latency</li>
+                        <li>When GPUDirect RDMA is required</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Use TCP (with DPU)</h3>
+                        <span class="card-badge badge-okay">Acceptable</span>
+                    </div>
+                    <ul class="card-specs">
+                        <li>Existing TCP infrastructure investment</li>
+                        <li>Bulk data loading (latency less critical)</li>
+                        <li>Multi-tenant environments</li>
+                        <li>When RDMA expertise unavailable</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Use FC-NVMe</h3>
+                        <span class="card-badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">Legacy</span>
+                    </div>
+                    <ul class="card-specs">
+                        <li>Existing FC SAN investment</li>
+                        <li>CPU-centric workloads sharing cluster</li>
+                        <li>Enterprise storage array integration</li>
+                        <li><strong>Avoid for GPU-direct workloads</strong></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <pre class="code-block"><span class="comment"># Verify NVMe-oF/RDMA is using GPUDirect path</span>
+$ nvme list-subsys
+nvme-subsys0 - NQN=nqn.2024-01.com.example:storage
+\
+ +- nvme0 rdma traddr=192.168.100.10 trsvcid=4420 live
+
+<span class="comment"># Check if GPUDirect RDMA is active</span>
+$ cat /sys/class/infiniband/mlx5_0/device/numa_node
+0
+$ nvidia-smi topo -m | grep mlx5
+GPU0    mlx5_0  PIX   <span class="comment"># PIX = same PCIe switch, optimal!</span>
+
+<span class="comment"># Measure actual latency with fio over NVMe-oF/RDMA</span>
+$ fio --name=nvmeof-latency --filename=/dev/nvme0n1 \
+    --ioengine=io_uring --direct=1 --rw=randread \
+    --bs=4k --iodepth=1 --numjobs=1 --runtime=30 \
+    --lat_percentiles=1
+
+<span class="comment"># Expected output (good RoCEv2 setup):</span>
+    lat (usec): min=98, max=1823, avg=142.31, stdev=45.12
+    lat percentiles (usec):
+     |  1.00th=[  103],  5.00th=[  108], 50.00th=[  135],
+     | 95.00th=[  210], 99.00th=[  334], 99.99th=[ 1500]</pre>
+
+            <div class="info-box reality">
+                <strong>💡 Pragmatic Advice:</strong> If you're building an AI cluster in 2024-2025, use InfiniBand or RoCEv2 with GPUDirect. Plan for UEC in 2027+ once silicon ships and interoperability is proven. Don't design around vaporware.
+            </div>
+        </div>
+
+        <!-- Section 6: Realistic Timeline -->
+        <div class="section">
+            <h2 class="section-title">Realistic Timeline (No Hype)</h2>
+            
+            <div class="timeline">
+                <div class="timeline-item now">
+                    <div class="timeline-date">Now (2024-2025)</div>
+                    <div class="timeline-title">Production-Ready Solutions</div>
+                    <div class="timeline-desc">
+                        <strong>Deploy with confidence:</strong> GPUDirect Storage, BlueField DPUs, RoCEv2/IB, ZNS SSDs, ScaleFlux computational storage, CXL memory expanders (DRAM-backed). These are shipping and proven.
+                    </div>
+                </div>
+                
+                <div class="timeline-item soon">
+                    <div class="timeline-date">2025-2026</div>
+                    <div class="timeline-title">Early Adoption Phase</div>
+                    <div class="timeline-desc">
+                        <strong>Evaluate carefully:</strong> CXL 2.0 memory pooling (limited), NVMe KV command set (Samsung, Kioxia), GPU-callable cuFile (if NVIDIA delivers), CXL SSDs (with realistic latency expectations).
+                    </div>
+                </div>
+                
+                <div class="timeline-item later">
+                    <div class="timeline-date">2026-2027</div>
+                    <div class="timeline-title">Emerging Standards</div>
+                    <div class="timeline-desc">
+                        <strong>Watch and wait:</strong> CXL 3.0 fabric/pooling, first UEC silicon (GPU interconnect networking—not storage), NVMe spec evolution, AMD MI400+ CXL integration. Pilot programs, not production deployments.
+                    </div>
+                </div>
+                
+                <div class="timeline-item uncertain">
+                    <div class="timeline-date">2028+</div>
+                    <div class="timeline-title">Paradigm Shift (Maybe)</div>
+                    <div class="timeline-desc">
+                        <strong>Highly speculative:</strong> True memory-semantic storage, GPU training fabrics (UEC replaces InfiniBand), unified CXL+Ethernet fabric, storage as memory tier. Or the industry may take a different path entirely.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 7: Decision Matrix -->
+        <div class="section">
+            <h2 class="section-title">Decision Matrix: What to Deploy When</h2>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Your Situation</th>
+                        <th>Deploy Now</th>
+                        <th>Avoid</th>
+                        <th>Watch</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Training cluster, need throughput</strong></td>
+                        <td class="good">GDS + 8 NVMe SSDs + multi-queue</td>
+                        <td class="poor">CXL SSDs (latency won't help)</td>
+                        <td class="medium">ZNS for checkpoints</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Inference, KV-cache bottleneck</strong></td>
+                        <td class="good">More GPU HBM, NVMe prefetch</td>
+                        <td class="poor">UEC (not ready)</td>
+                        <td class="medium">CXL memory expanders</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AMD MI300 deployment</strong></td>
+                        <td class="good">CXL memory expanders</td>
+                        <td class="poor">Waiting for CXL SSDs</td>
+                        <td class="medium">ROCm CXL support maturity</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NVIDIA H100/B100 deployment</strong></td>
+                        <td class="good">GDS, BlueField DPU, NVLink</td>
+                        <td class="poor">CXL (no GPU support)</td>
+                        <td class="medium">Grace Hopper CXL path</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data preprocessing bottleneck</strong></td>
+                        <td class="good">ScaleFlux compression</td>
+                        <td class="poor">Generic "computational storage"</td>
+                        <td class="medium">SmartSSD for custom filters</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Multi-tenant GPU cloud</strong></td>
+                        <td class="good">BlueField SNAP virtualization</td>
+                        <td class="poor">Bare metal NVMe sharing</td>
+                        <td class="medium">CXL memory pooling</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Checkpoint write latency spikes</strong></td>
+                        <td class="good">ZNS SSDs (Western Digital, Samsung)</td>
+                        <td class="poor">Overprovisioned traditional SSD</td>
+                        <td class="medium">FDP adoption</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 8: Key Takeaways -->
+        <div class="section">
+            <h2 class="section-title">Key Takeaways</h2>
+            
+            <div class="cards-grid">
+                <div class="info-box warning">
+                    <h4 style="color: #ef4444; margin-bottom: 10px;">ðŸš¨ CXL â‰  Magic</h4>
+                    <p>CXL memory expanders (DRAM) are real and useful. CXL SSDs still have NAND latency. NVIDIA doesn't support CXL on GPUs. Don't conflate the two.</p>
+                </div>
+                
+                <div class="info-box success">
+                    <h4 style="color: #00ff88; margin-bottom: 10px;">✓ DPUs Work Today</h4>
+                    <p>BlueField SNAP and similar DPU solutions are production-ready. They offload storage complexity from CPU, work with GDS, and are deployed at scale.</p>
+                </div>
+                
+                <div class="info-box insight">
+                    <h4 style="color: #00d4ff; margin-bottom: 10px;">💡 Computational Storage is Underrated</h4>
+                    <p>Decompression/filtering at the SSD reduces data movement 4-10×. ScaleFlux is transparent. This is a real solution hiding in plain sight.</p>
+                </div>
+                
+                <div class="info-box reality">
+                    <h4 style="color: #fbbf24; margin-bottom: 10px;">âš ï¸ UEC is 2027+ Realistically</h4>
+                    <p>No shipping silicon. Spec just released. Use RoCEv2 or InfiniBand today. Plan for UEC in 3+ years if the ecosystem materializes.</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 40px; padding: 30px; background: rgba(251, 191, 36, 0.1); border-radius: 12px; border: 1px solid rgba(251, 191, 36, 0.3);">
+                <h3 style="color: #fbbf24; margin-bottom: 15px;">The Expert's Rule</h3>
+                <p style="font-size: 1.1rem; color: #ccc;">
+                    Don't optimize for technology that doesn't exist yet. Deploy what works today (GDS, DPUs, ZNS, computational storage), 
+                    architect for flexibility, and evaluate emerging tech when silicon ships — not when press releases drop.
+                </p>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="07_solutions.html" class="nav-btn">â† Previous: Solutions Architecture</a>
+            <a href="index.html" class="nav-btn">Back to Overview â†’</a>
+        </div>
+    </div>
+</body>
+</html>
